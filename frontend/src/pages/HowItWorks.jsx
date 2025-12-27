@@ -58,7 +58,7 @@ const HowItWorks = () => {
             className={`text-white text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl flex items-center gap-4`}
           >
             <span className="text-golden-300">⚜</span>
-            Discover How PrimeBid Operates
+            Discover How Nilamee Operates
           </h1>
           <p className="text-golden-100 text-lg md:text-xl mt-4">
             Your complete guide to mastering auctions
@@ -71,7 +71,6 @@ const HowItWorks = () => {
                 key={index}
                 className="bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 backdrop-blur-sm rounded-lg p-4 lg:p-6 flex flex-col gap-3 group hover:bg-burgundy-700 dark:hover:bg-black dark:bg-gray-900 transition-all duration-300 border-2 border-golden-400 hover:border-burgundy-400 dark:hover:border-gray-600 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden"
               >
-                >
                 <div className="absolute top-0 left-0 w-0 h-full bg-gold-gradient transition-all duration-300 group-hover:w-2"></div>
                 <div className="bg-burgundy-900 dark:bg-black text-warm-white p-3 text-xl rounded-full w-fit group-hover:bg-gold-gradient transition-all duration-300">
                   {element.icon}

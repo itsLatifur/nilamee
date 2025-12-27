@@ -28,7 +28,7 @@ export const appConfig = {
   companyName: "Nilamee, LLC.",
 
   // Developer credit in footer
-  developerName: "CodeWithZeeshu",
+  developerName: "LATIFUR",
   developerLink: "/",
 
   // ============================================

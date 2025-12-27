@@ -38,11 +38,10 @@ const About = () => {
             About Us
           </h1>
           <p className="text-xl text-golden-300">
-            Welcome to PrimeBid, the ultimate destination for online auctions
-            and bidding excitement. Founded in 2024, we are dedicated to
-            providing a dynamic and user-friendly platform for buyers and
-            sellers to connect, explore, and transact in a secure and seamless
-            environment.
+            Welcome to Nilamee, the ultimate destination for online auctions and
+            bidding excitement. Founded in 2024, we are dedicated to providing a
+            dynamic and user-friendly platform for buyers and sellers to
+            connect, explore, and transact in a secure and seamless environment.
           </p>
         </div>
         <div>
@@ -52,7 +51,7 @@ const About = () => {
             Our Mission
           </h3>
           <p className="text-xl text-golden-300">
-            At PrimeBid, our mission is to revolutionize the way people buy and
+            At Nilamee, our mission is to revolutionize the way people buy and
             sell items online. We strive to create an engaging and trustworthy
             marketplace that empowers individuals and businesses to discover
             unique products, make informed decisions, and enjoy the thrill of
@@ -85,11 +84,10 @@ const About = () => {
             Our Story
           </h3>
           <p className="text-xl text-golden-300">
-            Founded by CodeWithZeeshu, PrimeBid was born out of a passion for
-            connecting people with unique and valuable items. With years of
-            experience in the auction industry, our team is committed to
-            creating a platform that offers an unparalleled auction experience
-            for users worldwide.
+            Founded by LATIFUR, Nilamee was born out of a passion for connecting
+            people with unique and valuable items. With years of experience in
+            the auction industry, our team is committed to creating a platform
+            that offers an unparalleled auction experience for users worldwide.
           </p>
         </div>
         <div>
@@ -99,7 +97,7 @@ const About = () => {
             Join Us
           </h3>
           <p className="text-xl text-golden-300">
-            Whether you're looking to buy, sell, or simply explore, PrimeBid
+            Whether you're looking to buy, sell, or simply explore, Nilamee
             invites you to join our growing community of auction enthusiasts.
             Discover new opportunities, uncover hidden gems, and experience the
             thrill of winning your next great find.
@@ -107,7 +105,7 @@ const About = () => {
         </div>
         <div>
           <p className="text-golden-500 text-xl font-bold mb-3">
-            Thank you for choosing PrimeBid. We look forward to being a part of
+            Thank you for choosing Nilamee. We look forward to being a part of
             your auction journey!
           </p>
         </div>
