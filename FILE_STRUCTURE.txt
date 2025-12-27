@@ -1,0 +1,256 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         PROJECT FILE STRUCTURE                               ║
+║                         Visual Guide to Files                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+nilamee/                                    Root folder
+│
+├─ 📖 DOCUMENTATION FILES (Start here!)
+│  ├─ SUMMARY.txt ........................ Quick visual overview (READ FIRST)
+│  ├─ QUICKSTART.md ...................... Daily reference card
+│  ├─ HANDOFF.md ......................... Complete intern handoff guide
+│  ├─ README.md .......................... Full project documentation
+│  ├─ SETUP.md ........................... Detailed setup with troubleshooting
+│  ├─ BRANDING.md ........................ How to customize app name
+│  └─ CHECKLIST.md ....................... Progress tracking checklist
+│
+├─ 📁 backend/ ........................... Node.js + Express backend
+│  │
+│  ├─ 📄 server.js ....................... Server entry point (START HERE)
+│  ├─ 📄 app.js .......................... Express app configuration
+│  ├─ 📄 package.json .................... Dependencies & scripts
+│  │
+│  ├─ 📁 config/
+│  │  ├─ config.env ...................... ⚙️ Environment variables (MUST EDIT)
+│  │  └─ appConfig.js .................... ✨ Backend settings (NEW - editable)
+│  │
+│  ├─ 📁 controllers/ .................... API business logic
+│  │  ├─ userController.js ............... User operations (register, login)
+│  │  ├─ auctionItemController.js ........ Auction CRUD operations
+│  │  ├─ bidController.js ................ Bidding logic
+│  │  ├─ commissionController.js ......... Commission handling
+│  │  └─ superAdminController.js ......... Admin operations
+│  │
+│  ├─ 📁 models/ ......................... MongoDB schemas (database structure)
+│  │  ├─ userSchema.js ................... User model
+│  │  ├─ auctionSchema.js ................ Auction model
+│  │  ├─ bidSchema.js .................... Bid model
+│  │  ├─ commissionSchema.js ............. Commission model
+│  │  └─ commissionProofSchema.js ........ Proof model
+│  │
+│  ├─ 📁 router/ ......................... API route definitions
+│  │  ├─ userRoutes.js ................... /api/v1/user/*
+│  │  ├─ auctionItemRoutes.js ............ /api/v1/auctionitem/*
+│  │  ├─ bidRoutes.js .................... /api/v1/bid/*
+│  │  ├─ commissionRouter.js ............. /api/v1/commission/*
+│  │  └─ superAdminRoutes.js ............. /api/v1/superadmin/*
+│  │
+│  ├─ 📁 middlewares/ .................... Express middlewares
+│  │  ├─ auth.js ......................... JWT authentication
+│  │  ├─ error.js ........................ Error handling
+│  │  ├─ catchAsyncErrors.js ............. Async error wrapper
+│  │  ├─ checkAuctionEndTime.js .......... Auction time validator
+│  │  └─ trackCommissionStatus.js ........ Commission tracker
+│  │
+│  ├─ 📁 database/
+│  │  └─ connection.js ................... MongoDB connection setup
+│  │
+│  ├─ 📁 automation/ ..................... Cron jobs (scheduled tasks)
+│  │  ├─ endedAuctionCron.js ............. Auto-end auctions
+│  │  └─ verifyCommissionCron.js ......... Auto-verify commissions
+│  │
+│  └─ 📁 utils/ .......................... Utility functions
+│     ├─ jwtToken.js ..................... JWT token generation
+│     └─ sendEmail.js .................... Email sending (Nodemailer)
+│
+└─ 📁 frontend/ .......................... React + Vite frontend
+   │
+   ├─ 📄 index.html ...................... HTML entry point
+   ├─ 📄 package.json .................... Dependencies & scripts
+   ├─ 📄 vite.config.js .................. Vite configuration
+   ├─ 📄 tailwind.config.js .............. Tailwind CSS config
+   ├─ 📄 components.json ................. shadcn/ui config
+   │
+   ├─ 📁 public/ ......................... Static assets (images, icons)
+   │
+   └─ 📁 src/ ............................ Source code
+      │
+      ├─ 📄 main.jsx ..................... React entry point (START HERE)
+      ├─ 📄 App.jsx ....................... Main app component (routing)
+      ├─ 📄 App.css ....................... App styles
+      ├─ 📄 index.css ..................... Global styles
+      │
+      ├─ 📁 config/
+      │  └─ appConfig.js .................. ✨ Branding config (NEW - editable)
+      │
+      ├─ 📁 pages/ ........................ Page components
+      │  ├─ Home.jsx ....................... Homepage
+      │  ├─ Login.jsx ...................... Login page
+      │  ├─ SignUp.jsx ..................... Registration page
+      │  ├─ Auctions.jsx ................... All auctions listing
+      │  ├─ AuctionItem.jsx ................ Single auction view
+      │  ├─ CreateAuction.jsx .............. Create auction form
+      │  ├─ ViewMyAuctions.jsx ............. User's auctions
+      │  ├─ ViewAuctionDetails.jsx ......... Detailed auction view
+      │  ├─ Leaderboard.jsx ................ Top bidders
+      │  ├─ UserProfile.jsx ................ User profile page
+      │  ├─ SubmitCommission.jsx ........... Commission submission
+      │  ├─ HowItWorks.jsx ................. How it works page
+      │  ├─ About.jsx ...................... About page
+      │  ├─ Contact.jsx .................... Contact page
+      │  │
+      │  ├─ 📁 Dashboard/ .................. Admin dashboard
+      │  │  ├─ Dashboard.jsx ............... Main dashboard
+      │  │  └─ 📁 sub-components/
+      │  │     ├─ AuctionItemDelete.jsx .... Delete auction component
+      │  │     ├─ BiddersAuctioneersGraph.jsx  User stats graph
+      │  │     ├─ PaymentGraph.jsx ......... Payment analytics
+      │  │     └─ PaymentProofs.jsx ........ Proof verification
+      │  │
+      │  └─ 📁 home-sub-components/ ........ Homepage sections
+      │     ├─ FeaturedAuctions.jsx ........ Featured auctions
+      │     ├─ UpcomingAuctions.jsx ........ Upcoming auctions
+      │     └─ Leaderboard.jsx ............. Leaderboard widget
+      │
+      ├─ 📁 store/ ........................ Redux state management
+      │  ├─ store.js ....................... Redux store configuration
+      │  └─ 📁 slices/ ..................... State slices
+      │     ├─ userSlice.js ................ User state & actions
+      │     ├─ auctionSlice.js ............. Auction state & actions
+      │     ├─ bidSlice.js ................. Bid state & actions
+      │     ├─ commissionSlice.js .......... Commission state & actions
+      │     └─ superAdminSlice.js .......... Admin state & actions
+      │
+      ├─ 📁 layout/ ....................... Layout components
+      │  └─ SideDrawer.jsx ................. Navigation sidebar
+      │
+      ├─ 📁 custom-components/ ............ Custom reusable components
+      │  ├─ Card.jsx ....................... Card component
+      │  ├─ CardTwo.jsx .................... Alternative card
+      │  └─ Spinner.jsx .................... Loading spinner
+      │
+      ├─ 📁 components/ ................... shadcn/ui components (auto-generated)
+      │
+      ├─ 📁 lib/ .......................... Utility libraries
+      │  └─ utils.js ....................... Helper functions
+      │
+      └─ 📁 assets/ ....................... Images, icons, media
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 KEY FILES TO EDIT
+═══════════════════════════════════════════════════════════════════════════════
+
+BEFORE RUNNING (REQUIRED):
+✏️  backend/config/config.env ........... Add Cloudinary credentials
+✏️  backend/config/config.env ........... Change JWT secret key
+
+TO CHANGE APP NAME/BRANDING:
+✏️  frontend/src/config/appConfig.js .... Frontend branding
+✏️  backend/config/appConfig.js ......... Backend settings
+
+═══════════════════════════════════════════════════════════════════════════════
+🔥 HOT SPOTS - WHERE YOU'LL WORK MOST
+═══════════════════════════════════════════════════════════════════════════════
+
+ADDING NEW FEATURES:
+📌  frontend/src/pages/ ................. Create new page components
+📌  backend/controllers/ ................ Add new business logic
+📌  backend/models/ ..................... Create new database schemas
+📌  backend/router/ ..................... Define new API endpoints
+📌  frontend/src/store/slices/ .......... Add new Redux state
+
+COMMON MODIFICATIONS:
+📌  frontend/src/App.jsx ................ Add new routes
+📌  frontend/src/layout/SideDrawer.jsx .. Add navigation links
+📌  backend/app.js ...................... Register new routes
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 FILE STATISTICS
+═══════════════════════════════════════════════════════════════════════════════
+
+Documentation Files: 7
+Backend Files: ~30
+Frontend Files: ~40
+Total Lines of Code: ~5000+
+
+Configuration Files: 4 (2 backend, 2 frontend)
+Database Models: 5
+API Controllers: 5
+React Pages: 20+
+Redux Slices: 5
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 EXECUTION FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+BACKEND STARTUP:
+server.js → app.js → database/connection.js → routes → controllers → models
+
+FRONTEND STARTUP:
+main.jsx → App.jsx → store/store.js → pages → components
+
+API REQUEST FLOW:
+Frontend → Axios → API Route → Middleware → Controller → Model → Database
+                                                                      ↓
+Frontend ← Redux State ← Response ← Controller ← Model ← Database ←--┘
+
+═══════════════════════════════════════════════════════════════════════════════
+🎓 LEARNING PATH RECOMMENDATION
+═══════════════════════════════════════════════════════════════════════════════
+
+DAY 1: Setup & Documentation
+- Read SUMMARY.txt, QUICKSTART.md, HANDOFF.md
+- Install and configure environment
+- Get app running
+
+DAY 2: Frontend Exploration
+- Understand App.jsx routing
+- Explore page components (Home, Login, Auctions)
+- Study Redux slices (userSlice, auctionSlice)
+- Examine SideDrawer navigation
+
+DAY 3: Backend Exploration
+- Understand server.js and app.js
+- Study models (userSchema, auctionSchema)
+- Review controllers (userController, auctionController)
+- Trace API routes
+
+DAY 4: Features Testing
+- Test all user roles (Bidder, Auctioneer, Admin)
+- Create auctions, place bids
+- Test commission system
+- Explore admin dashboard
+
+DAY 5: Code Modifications
+- Try changing app name using config files
+- Make small UI changes
+- Add a console.log in a controller
+- Understand data flow
+
+WEEK 2+: Ready for Client Requirements!
+
+═══════════════════════════════════════════════════════════════════════════════
+💡 PRO TIPS
+═══════════════════════════════════════════════════════════════════════════════
+
+• Keep both terminals open while developing
+• Use VS Code's search (Ctrl+Shift+F) to find code
+• Install React Developer Tools browser extension
+• Install Redux DevTools browser extension
+• Use MongoDB Compass to view database visually
+• Comment your code as you understand it
+• Keep a notes file with questions
+• Draw diagrams of how things connect
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Legend:
+📁 = Folder
+📄 = Important file
+✨ = New file created
+⚙️ = Configuration file (must edit)
+✏️ = File you'll edit often
+📌 = Hot spot for development
+📖 = Documentation
+
+═══════════════════════════════════════════════════════════════════════════════

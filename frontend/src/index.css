@@ -1,130 +1,304 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
+/**
+ * Theme CSS Variables
+ * 
+ * IMPORTANT: These are dynamically set by app.config.js
+ * Do NOT hardcode colors here - configure themes in app.config.js instead
+ * 
+ * The initializeTheme() function will set these variables based on the active theme
+ */
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+@layer base {
+  :root {
+    /* Theme colors - managed by app.config.js */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
 }
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
-}
+@layer utilities {
+  /* Luxurious Gold Gradient Background */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #f4c430 0%, #d4af37 50%, #c5a028 100%);
+  }
 
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  /* Luxurious Burgundy Gradient Background */
+  .bg-luxury-gradient {
+    background: linear-gradient(180deg, #8b1538 0%, #a01731 50%, #c8102e 100%);
+  }
+
+  /* Dark mode: replace burgundy with black */
+  .dark .bg-luxury-gradient {
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+  }
+
+  /* Burgundy Red Gradient for Buttons */
+  .bg-burgundy-gradient {
+    background: linear-gradient(135deg, #c8102e 0%, #a01731 50%, #8b1538 100%);
+  }
+
+  /* Dark mode: replace burgundy gradient with black gradient */
+  .dark .bg-burgundy-gradient {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+  }
+
+  /* Luxury Background (dark burgundy) */
+  .bg-luxury-bg {
+    background: linear-gradient(135deg, #6d1028 0%, #8b1538 50%, #a01731 100%);
+  }
+
+  /* Dark mode: replace luxury bg with black */
+  .dark .bg-luxury-bg {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+  }
+
+  /* Gradient text effect for headings */
+  .text-gold-gradient {
+    background: linear-gradient(
+      90deg,
+      #f4c430 0%,
+      #f4c430 15%,
+      #d4af37 35%,
+      #c5a028 50%,
+      #d4af37 65%,
+      #f4c430 85%,
+      #f4c430 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s linear infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  /* Shiny animation for cards */
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 200%;
+    }
+  }
+
+  .shine-effect::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: shine 3s infinite;
+    pointer-events: none;
+  }
+
+  /* Warm white color for better eye comfort */
+  .text-warm-white {
+    color: #fef9f3;
+  }
+
+  /* Professional hover effects */
+  .btn-hover {
+    transition: all 0.3s ease;
+  }
+
+  .btn-hover:hover {
+    transform: scale(1.05);
+  }
+
+  .btn-hover:active {
+    transform: scale(0.98);
+    filter: brightness(0.85);
+  }
+
+  .dark .btn-hover:active {
+    filter: brightness(1.15);
+  }
+
+  /* Hover effect for large buttons - no scale */
+  .btn-hover-no-scale {
+    transition: all 0.3s ease;
+  }
+
+  .btn-hover-no-scale:active {
+    filter: brightness(0.85);
+  }
+
+  .dark .btn-hover-no-scale:active {
+    filter: brightness(1.15);
+  }
+
+  /* Link hover effect */
+  .link-hover {
+    transition: all 0.2s ease;
+  }
+
+  .link-hover:hover {
+    text-shadow: 0 0 8px rgba(244, 196, 48, 0.5);
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(139, 21, 56, 0.3);
+  }
+
+  /* Override text fill on hover to show white text */
+  .group:hover .text-gold-gradient {
+    -webkit-text-fill-color: #fef9f3;
+    color: #fef9f3;
+    background: none;
+  }
+
+  /* Burgundy damask pattern background (like wallpaper) */
+  .bg-luxury-damask {
+    background-color: #8b1538;
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(200, 16, 46, 0.3) 10px,
+        rgba(200, 16, 46, 0.3) 20px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 10px,
+        rgba(160, 23, 49, 0.3) 10px,
+        rgba(160, 23, 49, 0.3) 20px
+      );
+  }
+
+  /* Gold corner accents for luxury containers */
+  .gold-corners::before,
+  .gold-corners::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-style: solid;
+    border-width: 2px;
+  }
+
+  .gold-corners::before {
+    top: -1px;
+    left: -1px;
+    border-color: #f4c430 transparent transparent #f4c430;
+  }
+
+  .gold-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-color: transparent #c5a028 #c5a028 transparent;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    background: linear-gradient(86deg, rgba(246, 244, 240), #f6f4f0);
+    @apply text-foreground;
+    /* Background gradient is set dynamically by theme system */
+    background: linear-gradient(
+      135deg,
+      #c8102e 0%,
+      #a01731 50%,
+      #8b1538 100%
+    ) !important;
     overflow-x: hidden;
     font-family: "Inter", sans-serif;
     font-optical-sizing: auto;
+    transition: background 0.3s ease, color 0.3s ease;
   }
+
+  /* Dark mode body background */
+  .dark body,
+  body.dark-mode {
+    background: linear-gradient(
+      135deg,
+      #0a0a0a 0%,
+      #1a1a1a 50%,
+      #0a0a0a 100%
+    ) !important;
+    color: #f3f4f6;
+  }
+
   #root {
     overflow-x: hidden;
     width: 100%;
-    scroll-behavior: smooth;
   }
 }
