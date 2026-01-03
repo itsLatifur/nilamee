@@ -21,7 +21,7 @@ export const ThemeProvider = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState(() => {
     // Check localStorage for saved theme preference
     const savedTheme = localStorage.getItem("theme");
-    return savedTheme || THEMES.ROYAL_BURGUNDY;
+    return savedTheme || THEMES.WHITESTONE;
   });
 
   useEffect(() => {
