@@ -318,9 +318,6 @@ export const getAllUsers = catchAsyncErrors(async (req, res, next) => {
   // Filter by status
   if (status && status !== "all") {
     query.status = status;
-  } else {
-    // By default, include all statuses including deleted
-    query.status = { $exists: true };
   }
 
   const options = { includeDeleted: true };

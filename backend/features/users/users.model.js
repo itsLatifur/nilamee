@@ -45,7 +45,33 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Auctioneer", "Bidder", "Super Admin"],
+    enum: ["Auctioneer", "Bidder", "Admin", "Super Admin"],
+  },
+  // Administrative status & moderation fields
+  status: {
+    type: String,
+    enum: ["active", "banned", "suspended", "deleted"],
+    default: "active",
+  },
+  bannedReason: {
+    type: String,
+    default: null,
+  },
+  suspendedReason: {
+    type: String,
+    default: null,
+  },
+  suspendedUntil: {
+    type: Date,
+    default: null,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  deletionReason: {
+    type: String,
+    default: null,
   },
   unpaidCommission: {
     type: Number,
