@@ -45,7 +45,12 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Auctioneer", "Bidder", "Super Admin"],
+    enum: ["Auctioneer", "Bidder", "Super Admin", "Admin"],
+  },
+  status: {
+    type: String,
+    enum: ["active", "banned", "suspended", "deleted"],
+    default: "active",
   },
   unpaidCommission: {
     type: Number,
@@ -59,10 +64,39 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  deletionReason: {
+    type: String,
+    default: null,
+  },
+  bannedReason: {
+    type: String,
+    default: null,
+  },
+  suspendedReason: {
+    type: String,
+    default: null,
+  },
+  suspendedUntil: {
+    type: Date,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+});
+
+// Query middleware to exclude soft-deleted users
+userSchema.pre(/^find/, function (next) {
+  // Don't exclude deleted users if explicitly querying for them
+  if (!this.getOptions().includeDeleted) {
+    this.where({ status: { $ne: "deleted" } });
+  }
+  next();
 });
 
 userSchema.pre("save", async function (next) {

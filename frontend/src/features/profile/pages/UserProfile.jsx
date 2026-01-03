@@ -18,7 +18,7 @@ const UserProfile = () => {
           <Spinner />
         ) : (
           <>
-            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 shadow-2xl">
+            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
               <img
                 src={user.profileImage?.url}
                 alt="/imageHolder.jpg"
@@ -29,40 +29,40 @@ const UserProfile = () => {
                 <h3 className="text-xl font-semibold mb-4">Personal Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Username
                     </label>
                     <input
                       type="text"
                       defaultValue={user.userName}
-                      className="w-ful mt-1 p-2 border-golden-400 bg-transparent rounded-md focus:outline-none text-warm-white"
+                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
                       disabled
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Email
                     </label>
                     <input
                       type="text"
                       defaultValue={user.email}
-                      className="w-ful mt-1 p-2 border-golden-400 bg-transparent rounded-md focus:outline-none text-warm-white"
+                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
                       disabled
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Phone
                     </label>
                     <input
                       type="number"
                       defaultValue={user.phone}
-                      className="w-ful mt-1 p-2 border-golden-400 bg-transparent rounded-md focus:outline-none text-warm-white"
+                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
                       disabled
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Address
                     </label>
                     <input

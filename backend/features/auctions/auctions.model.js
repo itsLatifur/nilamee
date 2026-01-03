@@ -12,16 +12,38 @@ const auctionSchema = new mongoose.Schema({
   currentBid: { type: Number, default: 0 },
   startTime: String,
   endTime: String,
-  image: {
-    public_id: {
-      type: String,
-      required: true,
+  images: [
+    {
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
     },
-    url: {
-      type: String,
-      required: true,
-    },
+  ],
+  // Item Details (optional fields for flexibility)
+  location: String,
+  address: String,
+  authenticity: {
+    type: String,
+    enum: ["Verified", "Warranty", "Certificate", "Unverified", ""],
   },
+  // Custom fields - up to 10 dynamic fields
+  customFields: [
+    {
+      label: String,
+      value: String,
+    },
+  ],
+  approvalStatus: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
+  rejectionReason: String,
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -45,6 +67,23 @@ const auctionSchema = new mongoose.Schema({
   commissionCalculated: {
     type: Boolean,
     default: false,
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  deletedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  deletionReason: {
+    type: String,
+    default: null,
   },
   createdAt: {
     type: Date,

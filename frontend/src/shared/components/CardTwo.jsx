@@ -58,8 +58,8 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
 
   return (
     <>
-      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 backdrop-blur-sm rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 dark:border-golden-500 hover:border-burgundy-400 dark:hover:border-gray-600 transition-all duration-300 card-hover relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <img
           src={imgSrc}
@@ -67,36 +67,38 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
           className="w-full aspect-[4/3] m-auto md:p-12"
         />
         <div className="px-2 pt-4 pb-2">
-          <h5 className="font-semibold text-[18px] group-hover:text-golden-300 mb-2 text-warm-white">
+          <h5 className="font-semibold text-[18px] group-hover:text-golden-300 whitestone:hover:text-black whitestone:text-gray-900 mb-2 text-warm-white">
             {title}
           </h5>
           {startingBid && (
-            <p className="text-golden-300 font-light">
+            <p className="text-golden-300 whitestone:text-gray-800 font-light">
               Starting Bid:{" "}
-              <span className="text-golden-300 font-bold ml-1">
+              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">
                 {startingBid}
               </span>
             </p>
           )}
-          <p className="text-golden-300 font-light">
+          <p className="text-golden-300 whitestone:text-gray-800 font-light">
             {timeLeft.type}
             {Object.keys(timeLeft).length > 1 ? (
-              <span className="text-golden-300 font-bold ml-1">
+              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">
                 {formatTimeLeft(timeLeft)}
               </span>
             ) : (
-              <span className="text-golden-300 font-bold ml-1">Time's up!</span>
+              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">
+                Time's up!
+              </span>
             )}
           </p>
           <div className="flex flex-col gap-2 mt-4">
             <Link
-              className="bg-gold-gradient text-center text-warm-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 shadow-lg btn-hover"
+              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover whitestone:text-white"
               to={`/auction/details/${id}`}
             >
               View Auction
             </Link>
             <button
-              className="bg-burgundy-gradient text-center text-warm-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 shadow-lg btn-hover"
+              className="bg-burgundy-gradient whitestone:bg-blue-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-blue-500 shadow-lg btn-hover"
               onClick={handleDeleteAuction}
             >
               Delete Auction
@@ -104,7 +106,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
             <button
               disabled={new Date(endTime) > Date.now()}
               onClick={() => setOpenDrawer(true)}
-              className="bg-gold-gradient text-center text-warm-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 shadow-lg btn-hover disabled:opacity-50"
+              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover disabled:opacity-50 whitestone:text-white"
             >
               Republish Auction
             </button>
@@ -136,18 +138,18 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
         openDrawer && id ? "bottom-0" : "-bottom-full"
       }  left-0 w-full transition-all duration-300 h-full bg-[#00000087] flex items-end`}
     >
-      <div className="bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 backdrop-blur-sm h-fit transition-all duration-300 w-full border-t-4 border-golden-400">
+      <div className="bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 whitestone:bg-white/25 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl h-fit transition-all duration-300 w-full border-t-4 border-golden-400 whitestone:border-white/30">
         <div className="w-full px-5 py-8 sm:max-w-[640px] sm:m-auto">
-          <h3 className="text-golden-300  text-3xl font-semibold text-center mb-1">
+          <h3 className="text-golden-300 whitestone:text-gray-800  text-3xl font-semibold text-center mb-1">
             Republish Auction
           </h3>
-          <p className="text-golden-300">
+          <p className="text-golden-300 whitestone:text-gray-900">
             Let's republish auction with same details but new starting and
             ending time.
           </p>
           <form className="flex flex-col gap-5 my-5">
             <div className="flex flex-col gap-3">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Republish Auction Start Time
               </label>
               <DatePicker
@@ -157,11 +159,11 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none w-full text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
               />
             </div>
             <div className="flex flex-col gap-3">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Republish Auction End Time
               </label>
               <DatePicker
@@ -171,13 +173,13 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none w-full text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
               />
             </div>
             <div>
               <button
                 type="button"
-                className="bg-gold-gradient flex justify-center w-full py-2 rounded-md text-warm-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 shadow-lg btn-hover"
+                className="bg-gold-gradient whitestone:bg-amber-600 flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover"
                 onClick={handleRepbulishAuction}
               >
                 {loading ? "Republishing" : "Republish"}
@@ -186,7 +188,7 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
             <div>
               <button
                 type="button"
-                className="bg-burgundy-gradient flex justify-center w-full py-2 rounded-md text-warm-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 shadow-lg btn-hover"
+                className="bg-burgundy-gradient whitestone:bg-gray-800 flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 whitestone:border-gray-500 shadow-lg btn-hover"
                 onClick={() => setOpenDrawer(false)}
               >
                 Cancel

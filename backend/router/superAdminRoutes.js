@@ -22,14 +22,14 @@ router.delete(
 router.get(
   "/paymentproofs/getall",
   isAuthenticated,
-  isAuthorized("Super Admin"),
+  isAuthorized("Super Admin", "Admin"),
   getAllPaymentProofs
 );
 
 router.get(
   "/paymentproof/:id",
   isAuthenticated,
-  isAuthorized("Super Admin"),
+  isAuthorized("Super Admin", "Admin"),
   getPaymentProofDetail
 );
 
@@ -50,14 +50,14 @@ router.delete(
 router.get(
   "/users/getall",
   isAuthenticated,
-  isAuthorized("Super Admin"),
+  isAuthorized("Super Admin", "Admin"),
   fetchAllUsers
 );
 
 router.get(
   "/monthlyincome",
   isAuthenticated,
-  isAuthorized("Super Admin"),
+  isAuthorized("Super Admin", "Admin"),
   monthlyRevenue
 );
 

@@ -12,7 +12,7 @@ import { PREMIUM_GOLD, PREMIUM_GOLD_DARK } from "@/lib/colors";
 
 export const appConfig = {
   // Application Name (used throughout the app)
-  appName: "Nilamee",
+  appName: "nilamee",
 
   // Application Tagline/Slogan
   tagline: "Transparency Leads to Your Victory",
@@ -54,11 +54,3 @@ export const appConfig = {
 };
 
 export default appConfig;
-
-
-
-
-
-
-
-

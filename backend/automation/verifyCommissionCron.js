@@ -1,4 +1,4 @@
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { PaymentProof } from "../models/commissionProofSchema.js";
 import { Commission } from "../models/commissionSchema.js";
 import cron from "node-cron";

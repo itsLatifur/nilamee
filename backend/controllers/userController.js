@@ -1,6 +1,6 @@
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { generateToken } from "../utils/jwtToken.js";
 
@@ -22,7 +22,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     password,
     phone,
     address,
-    role,
     bankAccountNumber,
     bankAccountName,
     bankName,
@@ -30,23 +29,8 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     paypalEmail,
   } = req.body;
 
-  if (!userName || !email || !phone || !password || !address || !role) {
+  if (!userName || !email || !phone || !password || !address) {
     return next(new ErrorHandler("Please fill full form.", 400));
-  }
-  if (role === "Auctioneer") {
-    if (!bankAccountName || !bankAccountNumber || !bankName) {
-      return next(
-        new ErrorHandler("Please provide your full bank details.", 400)
-      );
-    }
-    if (!easypaisaAccountNumber) {
-      return next(
-        new ErrorHandler("Please provide your easypaisa account number.", 400)
-      );
-    }
-    if (!paypalEmail) {
-      return next(new ErrorHandler("Please provide your paypal email.", 400));
-    }
   }
   const isRegistered = await User.findOne({ email });
   if (isRegistered) {
@@ -73,7 +57,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     password,
     phone,
     address,
-    role,
     profileImage: {
       public_id: cloudinaryResponse.public_id,
       url: cloudinaryResponse.secure_url,
@@ -96,9 +79,9 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const login = catchAsyncErrors(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   if (!email || !password) {
-    return next(new ErrorHandler("Please fill full form."));
+    return next(new ErrorHandler("Please provide email and password.", 400));
   }
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
@@ -108,6 +91,8 @@ export const login = catchAsyncErrors(async (req, res, next) => {
   if (!isPasswordMatch) {
     return next(new ErrorHandler("Invalid credentials.", 400));
   }
+  // Set the role for this session (default to Bidder if not provided)
+  user.role = role || "Bidder";
   generateToken(user, "Login successfully.", 200, res);
 });
 
@@ -139,4 +124,18 @@ export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
     success: true,
     leaderboard,
   });
+});
+
+export const switchRole = catchAsyncErrors(async (req, res, next) => {
+  const { role } = req.body;
+  if (!role || (role !== "Auctioneer" && role !== "Bidder")) {
+    return next(new ErrorHandler("Invalid role specified.", 400));
+  }
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+  // Generate new token with updated role
+  user.role = role;
+  generateToken(user, `Switched to ${role} mode.`, 200, res);
 });

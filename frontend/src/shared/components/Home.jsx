@@ -26,12 +26,12 @@ const Home = () => {
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-center">
         <div>
-          <p className="text-golden-300 font-bold text-xl mb-8 flex items-center gap-2">
-            <span className="text-golden-500">✦</span>
+          <p className="text-golden-300 whitestone:text-gray-800 font-bold text-xl mb-8 flex items-center gap-2">
+            <span className="text-golden-500 whitestone:text-gray-900">?</span>
             {appConfig.tagline}
           </p>
           <h1
-            className={`text-white text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+            className={`text-white whitestone:text-black text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
           >
             {appConfig.mainHeading1}
           </h1>
@@ -40,46 +40,35 @@ const Home = () => {
           >
             {appConfig.mainHeading2}
           </h1>
-          <div className="flex gap-4 my-8">
-            {!isAuthenticated && (
-              <>
-                <Link
-                  to="/sign-up"
-                  className="bg-luxury-gradient font-semibold rounded-md px-8 flex items-center py-2 text-warm-white border-2 border-golden-400 shadow-lg transition-all duration-300 btn-hover"
-                >
-                  Sign Up
-                </Link>
-                <Link
-                  to="/login"
-                  className="bg-gold-gradient font-semibold rounded-md px-8 flex items-center py-2 border-2 border-golden-400 shadow-lg transition-all duration-300 text-warm-white btn-hover"
-                >
-                  Login
-                </Link>
-              </>
-            )}
-          </div>
         </div>
-        <div className="flex flex-col gap-6">
-          <h3 className="text-warm-white text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+        {/* Featured Auctions - show first after hero */}
+        <FeaturedAuctions />
+
+        {/* How it Works - educational context second */}
+        <div className="flex flex-col gap-6 my-12">
+          <h3 className="text-white whitestone:text-gray-900 text-xl font-bold mb-2 min-[480px]:text-2xl md:text-3xl lg:text-4xl flex items-center gap-3">
+            <span className="text-golden-300 whitestone:text-blue-600">?</span>
             How it works
+            <span className="text-golden-300 whitestone:text-blue-600">?</span>
           </h3>
           <div className="flex flex-col gap-4 md:flex-row md:flex-wrap w-full">
             {howItWorks.map((element) => {
               return (
                 <div
                   key={element.title}
-                  className="bg-gradient-to-br from-burgundy-400/60 to-burgundy-500/50 dark:from-gray-800/60 dark:to-black/50 backdrop-blur-sm flex flex-col gap-2 p-4 rounded-md h-[96px] justify-center md:w-[48%] lg:w-[47%] 2xl:w-[24%] hover:shadow-xl transition-all duration-300 hover:from-burgundy-400/70 hover:to-burgundy-500/60 dark:hover:from-gray-800/70 dark:hover:to-black/60 relative overflow-hidden shine-effect"
+                  className="bg-gradient-to-br from-burgundy-400/60 to-burgundy-500/50 dark:from-gray-800/60 dark:to-black/50 whitestone:from-white/60 whitestone:to-blue-50/40 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl flex flex-col gap-2 p-4 rounded-md h-[96px] justify-center md:w-[48%] lg:w-[47%] 2xl:w-[24%] hover:shadow-xl transition-all duration-300 hover:from-burgundy-400/70 hover:to-burgundy-500/60 dark:hover:from-gray-800/70 dark:hover:to-black/60 whitestone:hover:from-white/85 whitestone:hover:to-blue-50/50 relative overflow-hidden shine-effect"
                 >
-                  <h5 className="font-bold text-golden-400 text-lg">
+                  <h5 className="font-bold text-golden-400 whitestone:text-gray-900 text-lg">
                     {element.title}
                   </h5>
-                  <p className="text-warm-white">{element.description}</p>
+                  <p className="text-warm-white whitestone:text-gray-900">
+                    {element.description}
+                  </p>
                 </div>
               );
             })}
           </div>
         </div>
-        <FeaturedAuctions />
         <UpcomingAuctions />
         <Leaderboard />
       </section>

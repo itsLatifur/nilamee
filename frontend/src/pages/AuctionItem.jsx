@@ -39,19 +39,19 @@ const AuctionItem = () => {
         <div className="text-[16px] flex flex-wrap gap-2 items-center">
           <Link
             to="/"
-            className="font-semibold transition-all duration-300 hover:text-golden-500"
+            className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
           >
             Home
           </Link>
-          <FaGreaterThan className="text-golden-300" />
+          <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
           <Link
             to={"/auctions"}
-            className="font-semibold transition-all duration-300 hover:text-golden-500"
+            className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
           >
             Auctions
           </Link>
-          <FaGreaterThan className="text-golden-300" />
-          <p className="text-golden-300">{auctionDetail.title}</p>
+          <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
+          <p className="text-golden-300 whitestone:text-gray-900">{auctionDetail.title}</p>
         </div>
         {loading ? (
           <Spinner />
@@ -71,13 +71,13 @@ const AuctionItem = () => {
                   </h3>
                   <p className="text-xl font-semibold">
                     Condition:{" "}
-                    <span className="text-golden-500">
+                    <span className="text-golden-500 whitestone:text-gray-900">
                       {auctionDetail.condition}
                     </span>
                   </p>
                   <p className="text-xl font-semibold">
                     Minimum Bid:{" "}
-                    <span className="text-golden-500">
+                    <span className="text-golden-500 whitestone:text-gray-900">
                       Rs.{auctionDetail.startingBid}
                     </span>
                   </p>
@@ -142,7 +142,7 @@ const AuctionItem = () => {
                       );
                     })
                   ) : (
-                    <p className="text-center text-golden-300 py-4">
+                    <p className="text-center text-golden-300 whitestone:text-gray-800 py-4">
                       No bids for this auction
                     </p>
                   )
@@ -161,12 +161,12 @@ const AuctionItem = () => {
                 )}
               </div>
 
-              <div className="bg-gold-gradient shadow-lg border-2 border-golden-300 dark:border-golden-400 py-4 text-[16px] md:text-[24px] font-semibold px-4 flex items-center justify-between">
+              <div className="bg-gold-gradient shadow-lg border-2 border-golden-300 dark:border-golden-400 whitestone:border-white/30 py-4 text-[16px] md:text-[24px] font-semibold px-4 flex items-center justify-between whitestone:text-white">
                 {Date.now() >= new Date(auctionDetail.startTime) &&
                 Date.now() <= new Date(auctionDetail.endTime) ? (
                   <>
                     <div className="flex gap-3 flex-col sm:flex-row sm:items-center">
-                      <p className="text-white">Place Bid</p>
+                      <p className="text-white whitestone:text-black">Place Bid</p>
                       <input
                         type="number"
                         className="w-32 focus:outline-none md:text-[20px] p-1"
@@ -175,18 +175,18 @@ const AuctionItem = () => {
                       />
                     </div>
                     <button
-                      className="p-4 text-warm-white bg-burgundy-600 rounded-full transition-all duration-300 hover:bg-burgundy-700 dark:hover:bg-black dark:bg-gray-900 btn-hover"
+                      className="p-4 text-warm-white bg-burgundy-600 rounded-full transition-all duration-300 hover:bg-burgundy-700 dark:hover:bg-black whitestone:hover:bg-blue-50 dark:bg-gray-900 btn-hover"
                       onClick={handleBid}
                     >
                       <RiAuctionFill />
                     </button>
                   </>
                 ) : new Date(auctionDetail.startTime) > Date.now() ? (
-                  <p className="text-white font-semibold text-xl">
+                  <p className="text-white whitestone:text-black font-semibold text-xl">
                     Auction has not started yet!
                   </p>
                 ) : (
-                  <p className="text-white font-semibold text-xl">
+                  <p className="text-white whitestone:text-black font-semibold text-xl">
                     Auction has ended!
                   </p>
                 )}

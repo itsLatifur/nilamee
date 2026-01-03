@@ -29,14 +29,14 @@ const SignUp = () => {
     formData.append("phone", phone);
     formData.append("password", password);
     formData.append("address", address);
-    formData.append("role", role);
     formData.append("profileImage", profileImage);
-    role === "Auctioneer" &&
-      (formData.append("bankAccountName", bankAccountName),
-      formData.append("bankAccountNumber", bankAccountNumber),
-      formData.append("bankName", bankName),
-      formData.append("easypaisaAccountNumber", easypaisaAccountNumber),
-      formData.append("paypalEmail", paypalEmail));
+    if (bankAccountName) formData.append("bankAccountName", bankAccountName);
+    if (bankAccountNumber)
+      formData.append("bankAccountNumber", bankAccountNumber);
+    if (bankName) formData.append("bankName", bankName);
+    if (easypaisaAccountNumber)
+      formData.append("easypaisaAccountNumber", easypaisaAccountNumber);
+    if (paypalEmail) formData.append("paypalEmail", paypalEmail);
     dispatch(register(formData));
   };
 
@@ -59,9 +59,9 @@ const SignUp = () => {
   return (
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-center">
-        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 shadow-2xl">
+        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
           <h1
-            className={`text-golden-500 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+            className={`text-golden-500 whitestone:text-gray-900 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
           >
             Register
           </h1>
@@ -74,69 +74,65 @@ const SignUp = () => {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Full Name</label>
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                  Full Name
+                </label>
                 <input
                   type="text"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
                 />
               </div>
               <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Email</label>
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
                 />
               </div>
             </div>
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Phone</label>
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                  Phone
+                </label>
                 <input
                   type="number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
                 />
               </div>
               <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Address</label>
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                  Address
+                </label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
-                >
-                  <option value="">Select Role</option>
-                  <option value="Auctioneer">Auctioneer</option>
-                  <option value="Bidder">Bidder</option>
-                </select>
-              </div>
-              <div className="flex flex-col sm:flex-1">
-                <label className="text-[16px] text-golden-300">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
-                />
-              </div>
+            <div className="flex flex-col">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white whitestone:text-gray-900 focus:border-b-golden-300 transition-all"
+              />
             </div>
             <div className="flex flex-col sm:flex-1 gap-2">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Profile Image
               </label>
               <div className="flex items-center gap-3">
@@ -155,21 +151,19 @@ const SignUp = () => {
             <div className="flex flex-col gap-4">
               <label className="font-semibold text-xl md:2xl flex flex-col text-warm-white">
                 Payment Method Details{" "}
-                <span className="text-[12px] text-golden-300">
-                  Fill Payment Details Only If you are registering as an
-                  Auctioneer
+                <span className="text-[12px] text-golden-300 whitestone:text-gray-900">
+                  Optional - Add payment details if you plan to create auctions
                 </span>
               </label>
               <div className="flex flex-col gap-2">
-                <label className="text-[16px] text-golden-300">
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                   Bank Details
                 </label>
                 <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
                   <select
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none sm:flex-1 text-warm-white"
-                    disabled={role === "Bidder"}
+                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white whitestone:text-gray-900"
                   >
                     <option value="">Select Your Bank</option>
                     <option value="Meezan Bank">Meezan Bank</option>
@@ -182,21 +176,19 @@ const SignUp = () => {
                     value={bankAccountNumber}
                     placeholder="IBAN / IFSC"
                     onChange={(e) => setBankAccountNumber(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
+                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white whitestone:text-gray-900 placeholder-golden-300 whitestone:placeholder-gray-500"
                   />
                   <input
                     type="text"
                     value={bankAccountName}
                     placeholder="Bank Account UserName"
                     onChange={(e) => setBankAccountName(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
+                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white whitestone:text-gray-900 placeholder-golden-300 whitestone:placeholder-gray-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-[16px] text-golden-300 font-semibold">
+                <label className="text-[16px] text-golden-300 whitestone:text-gray-800 font-semibold">
                   Easypaisa And Paypal Details
                 </label>
                 <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
@@ -205,23 +197,21 @@ const SignUp = () => {
                     value={easypaisaAccountNumber}
                     placeholder="Easypaisa Account Number"
                     onChange={(e) => setEasypaisaAccountNumber(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
+                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white whitestone:text-gray-900 placeholder-golden-300 whitestone:placeholder-gray-500"
                   />
                   <input
                     type="email"
                     value={paypalEmail}
                     placeholder="Paypal Email"
                     onChange={(e) => setPaypalEmail(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
+                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white whitestone:text-gray-900 placeholder-golden-300 whitestone:placeholder-gray-500"
                   />
                 </div>
               </div>
             </div>
 
             <button
-              className="bg-burgundy-gradient w-[420px] font-semibold transition-all duration-300 text-xl py-2 px-4 rounded-md text-warm-white mx-auto lg:w-[640px] my-4 border-2 border-golden-400 shadow-lg btn-hover"
+              className="bg-burgundy-gradient whitestone:bg-blue-600 w-[420px] font-semibold transition-all duration-300 text-xl py-2 px-4 rounded-md text-warm-white whitestone:text-white mx-auto lg:w-[640px] my-4 border-2 border-golden-400 whitestone:border-blue-500 shadow-lg btn-hover"
               type="submit"
               disabled={loading}
             >

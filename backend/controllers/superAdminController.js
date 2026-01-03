@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { Commission } from "../models/commissionSchema.js";
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { Auction } from "../models/auctionSchema.js";
 import { PaymentProof } from "../models/commissionProofSchema.js";
 

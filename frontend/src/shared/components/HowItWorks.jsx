@@ -52,7 +52,7 @@ const HowItWorks = () => {
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-center">
         <h1
-          className={`text-golden-500 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+          className={`text-golden-500 whitestone:text-gray-900 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
         >
           Discover How Nilamee Operates
         </h1>
@@ -61,14 +61,14 @@ const HowItWorks = () => {
             return (
               <div
                 key={index}
-                className="bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 backdrop-blur-sm rounded-lg p-4 lg:p-6 flex flex-col gap-3 group hover:bg-burgundy-700 dark:hover:bg-black dark:bg-gray-900 transition-all duration-300 border-2 border-golden-400 hover:border-burgundy-400 dark:hover:border-gray-600 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden"
+                className="bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl rounded-lg p-4 lg:p-6 flex flex-col gap-3 group hover:bg-burgundy-700 dark:hover:bg-black whitestone:hover:bg-blue-50 dark:bg-gray-900 transition-all duration-300 border-2 border-golden-400 whitestone:border-white/30 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 w-0 h-full bg-gold-gradient transition-all duration-300 group-hover:w-2"></div>
-                <div className="bg-burgundy-900 dark:bg-black text-warm-white p-3 text-xl rounded-full w-fit group-hover:bg-gold-gradient transition-all duration-300">
+                <div className="absolute top-0 left-0 w-0 h-full bg-gold-gradient transition-all duration-300 group-hover:w-2 whitestone:text-white"></div>
+                <div className="bg-burgundy-900 dark:bg-black whitestone:bg-blue-100 text-warm-white p-3 text-xl rounded-full w-fit group-hover:bg-gold-gradient transition-all duration-300 whitestone:text-white">
                   {element.icon}
                 </div>
                 <h3
-                  className={`text-golden-500 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl`}
+                  className={`text-golden-500 whitestone:text-gray-900 whitestone:text-white text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl`}
                 >
                   {element.title}
                 </h3>

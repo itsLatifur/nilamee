@@ -30,19 +30,19 @@ const ViewAuctionDetails = () => {
         <div className="text-[16px] flex flex-wrap gap-2 items-center">
           <Link
             to="/"
-            className="font-semibold transition-all duration-300 hover:text-golden-500"
+            className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
           >
             Home
           </Link>
-          <FaGreaterThan className="text-golden-300" />
+          <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
           <Link
             to={"/view-my-auctions"}
-            className="font-semibold transition-all duration-300 hover:text-golden-500"
+            className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
           >
             My Auctions
           </Link>
-          <FaGreaterThan className="text-golden-300" />
-          <p className="text-golden-300">{auctionDetail.title}</p>
+          <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
+          <p className="text-golden-300 whitestone:text-gray-900">{auctionDetail.title}</p>
         </div>
         {loading ? (
           <Spinner />
@@ -62,13 +62,13 @@ const ViewAuctionDetails = () => {
                   </h3>
                   <p className="text-xl font-semibold">
                     Condition:{" "}
-                    <span className="text-golden-500">
+                    <span className="text-golden-500 whitestone:text-gray-900">
                       {auctionDetail.condition}
                     </span>
                   </p>
                   <p className="text-xl font-semibold">
                     Minimum Bid:{" "}
-                    <span className="text-golden-500">
+                    <span className="text-golden-500 whitestone:text-gray-900">
                       Rs.{auctionDetail.startingBid}
                     </span>
                   </p>

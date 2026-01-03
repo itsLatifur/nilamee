@@ -23,7 +23,7 @@ const ViewMyAuctions = () => {
     <>
       <div className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">
         <h1
-          className={`text-golden-500 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+          className={`text-golden-500 whitestone:text-gray-900 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
         >
           My Auctions
         </h1>
@@ -38,15 +38,26 @@ const ViewMyAuctions = () => {
             {myAuctions.length > 0 ? (
               myAuctions.map((element) => {
                 return (
-                  <CardTwo
-                    title={element.title}
-                    startingBid={element.startingBid}
-                    endTime={element.endTime}
-                    startTime={element.startTime}
-                    imgSrc={element.image?.url}
-                    id={element._id}
-                    key={element._id}
-                  />
+                  <div key={element._id} className="relative">
+                    <CardTwo
+                      title={element.title}
+                      startingBid={element.startingBid}
+                      endTime={element.endTime}
+                      startTime={element.startTime}
+                      imgSrc={element.images?.[0]?.url || element.image?.url}
+                      id={element._id}
+                    />
+                    {element.approvalStatus === "pending" && (
+                      <div className="absolute top-2 right-2 bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
+                        Pending Approval
+                      </div>
+                    )}
+                    {element.approvalStatus === "rejected" && (
+                      <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        Rejected
+                      </div>
+                    )}
+                  </div>
                 );
               })
             ) : (
@@ -63,19 +74,3 @@ const ViewMyAuctions = () => {
 };
 
 export default ViewMyAuctions;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

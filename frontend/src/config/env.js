@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
 
   // Super Admin endpoints
   ADMIN: {
+    BASE: `${API_URL}/superadmin`,
     MONTHLY_REVENUE: `${API_URL}/superadmin/monthlyincome`,
     ALL_USERS: `${API_URL}/superadmin/users/getall`,
     PAYMENT_PROOFS: `${API_URL}/superadmin/paymentproofs/getall`,
@@ -58,6 +59,29 @@ export const API_ENDPOINTS = {
       `${API_URL}/superadmin/paymentproof/status/update/${id}`,
     DELETE_PROOF: (id) => `${API_URL}/superadmin/paymentproof/delete/${id}`,
     DELETE_AUCTION: (id) => `${API_URL}/superadmin/auctionitem/delete/${id}`,
+    // User management
+    USERS: `${API_URL}/superadmin/users`,
+    CREATE_ADMIN: `${API_URL}/superadmin/admin/create`,
+    BAN_USER: (id) => `${API_URL}/superadmin/user/ban/${id}`,
+    SUSPEND_USER: (id) => `${API_URL}/superadmin/user/suspend/${id}`,
+    DELETE_USER: (id) => `${API_URL}/superadmin/user/delete/${id}`,
+    RESTORE_USER: (id) => `${API_URL}/superadmin/user/restore/${id}`,
+    REMOVE_ADMIN: (id) => `${API_URL}/superadmin/admin/remove/${id}`,
+    // Permanent delete (Super Admin only)
+    PERMANENT_DELETE_USER: (id) => `${API_URL}/superadmin/permanent/user/${id}`,
+    PERMANENT_DELETE_AUCTION: (id) =>
+      `${API_URL}/superadmin/permanent/auction/${id}`,
+    PERMANENT_DELETE_PROOF: (id) =>
+      `${API_URL}/superadmin/permanent/paymentproof/${id}`,
+    SOFT_DELETED: `${API_URL}/superadmin/soft-deleted`,
+  },
+
+  // Notification endpoints
+  NOTIFICATION: {
+    ALL: `${API_URL}/notification/getall`,
+    READ: (id) => `${API_URL}/notification/read/${id}`,
+    READ_ALL: `${API_URL}/notification/readall`,
+    DELETE: (id) => `${API_URL}/notification/delete/${id}`,
   },
 };
 
@@ -69,14 +93,3 @@ export default {
   EMAILJS_PUBLIC_KEY,
   API_ENDPOINTS,
 };
-
-
-
-
-
-
-
-
-
-
-

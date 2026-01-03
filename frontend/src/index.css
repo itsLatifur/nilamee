@@ -1,3 +1,15 @@
+/* Whitestone: Go to Leaderboard button color swap */
+.whitestone .go-to-leaderboard-btn {
+  background: #2563eb !important;
+  color: #fff !important;
+  border: 1.5px solid #2563eb !important;
+}
+.whitestone .go-to-leaderboard-btn:hover {
+  background: #fff !important;
+  color: #2563eb !important;
+  border: 1.5px solid #2563eb !important;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @tailwind base;
 @tailwind components;
@@ -76,6 +88,22 @@
     background: linear-gradient(135deg, #f4c430 0%, #d4af37 50%, #c5a028 100%);
   }
 
+  /* Whitestone: Navy Blue gradient for trust and professionalism - with white text */
+  .whitestone .bg-gold-gradient {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #1e40af 100%);
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.3);
+    color: #ffffff !important;
+  }
+
+  .whitestone .bg-gold-gradient *,
+  .whitestone .bg-gold-gradient .text-warm-white,
+  .whitestone .bg-gold-gradient .text-white,
+  .whitestone .bg-gold-gradient a,
+  .whitestone .bg-gold-gradient span,
+  .whitestone .bg-gold-gradient button {
+    color: #ffffff !important;
+  }
+
   /* Luxurious Burgundy Gradient Background */
   .bg-luxury-gradient {
     background: linear-gradient(180deg, #8b1538 0%, #a01731 50%, #c8102e 100%);
@@ -84,6 +112,19 @@
   /* Dark mode: replace burgundy with black */
   .dark .bg-luxury-gradient {
     background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+  }
+
+  /* Whitestone: Professional white with subtle navy accent - glassmorphism */
+  .whitestone .bg-luxury-gradient {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(248, 250, 252, 0.98) 100%
+    );
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 2px solid rgba(37, 99, 235, 0.15);
+    box-shadow: 4px 0 24px rgba(30, 58, 95, 0.08);
   }
 
   /* Burgundy Red Gradient for Buttons */
@@ -96,6 +137,23 @@
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
   }
 
+  /* Whitestone: Navy blue buttons for high contrast and visibility */
+  .whitestone .bg-burgundy-gradient {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: #ffffff !important;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+  }
+
+  .whitestone .bg-burgundy-gradient *,
+  .whitestone .bg-burgundy-gradient .text-warm-white,
+  .whitestone .bg-burgundy-gradient .text-white,
+  .whitestone .bg-burgundy-gradient a,
+  .whitestone .bg-burgundy-gradient span,
+  .whitestone .bg-burgundy-gradient button {
+    color: #ffffff !important;
+  }
+
   /* Luxury Background (dark burgundy) */
   .bg-luxury-bg {
     background: linear-gradient(135deg, #6d1028 0%, #8b1538 50%, #a01731 100%);
@@ -103,7 +161,16 @@
 
   /* Dark mode: replace luxury bg with black */
   .dark .bg-luxury-bg {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #0a0a0a 100%);
+  }
+
+  /* Whitestone: Clean white pearl background with glassmorphism */
+  .whitestone .bg-luxury-bg {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    box-shadow: 0 4px 20px rgba(30, 58, 95, 0.06);
   }
 
   /* Gradient text effect for headings */
@@ -117,6 +184,23 @@
       #d4af37 65%,
       #f4c430 85%,
       #f4c430 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s linear infinite;
+  }
+
+  /* Whitestone: Pure blue gradient (consistent with other themes' colored style) */
+  .whitestone .text-gold-gradient {
+    background: linear-gradient(
+      90deg,
+      #1e40af 0%,
+      #3b82f6 20%,
+      #60a5fa 50%,
+      #3b82f6 80%,
+      #1e40af 100%
     );
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -161,9 +245,110 @@
     pointer-events: none;
   }
 
+  /* Whitestone: Navy blue shimmer effect for modern elegance */
+  .whitestone .shine-effect::before {
+    background: linear-gradient(
+      90deg,
+      rgba(37, 99, 235, 0) 0%,
+      rgba(37, 99, 235, 0.12) 50%,
+      rgba(37, 99, 235, 0) 100%
+    );
+  }
+
   /* Warm white color for better eye comfort */
   .text-warm-white {
     color: #fef9f3;
+  }
+
+  /* Whitestone: Sidebar nav items - blue text when NOT active */
+  .whitestone
+    .text-warm-white:not(.bg-blue-600):not(.bg-blue-600 *):not(
+      .bg-burgundy-600
+    ):not(.bg-burgundy-600 *):not(.bg-gold-gradient):not(
+      .bg-gold-gradient *
+    ):not(.bg-burgundy-gradient):not(.bg-burgundy-gradient *) {
+    color: #2563eb !important;
+  }
+
+  .whitestone
+    .text-white:not(.bg-blue-600):not(.bg-blue-600 *):not(.bg-burgundy-600):not(
+      .bg-burgundy-600 *
+    ):not(.bg-gold-gradient):not(.bg-gold-gradient *):not(
+      .bg-burgundy-gradient
+    ):not(.bg-burgundy-gradient *) {
+    color: #2563eb !important;
+  }
+
+  /* REMOVED - conflicting rule */
+
+  /* OVERRIDE: Force white text on gradient buttons - highest priority */
+  .whitestone a.bg-gold-gradient,
+  .whitestone button.bg-gold-gradient,
+  .whitestone a.bg-burgundy-gradient,
+  .whitestone button.bg-burgundy-gradient {
+    color: #ffffff !important;
+  }
+
+  .whitestone .bg-gold-gradient a,
+  .whitestone .bg-gold-gradient button,
+  .whitestone .bg-burgundy-gradient a,
+  .whitestone .bg-burgundy-gradient button {
+    color: #ffffff !important;
+  }
+
+  /* Additional override for any text classes inside gradient buttons */
+  .whitestone .bg-gold-gradient .text-warm-white,
+  .whitestone .bg-gold-gradient .text-white,
+  .whitestone .bg-burgundy-gradient .text-warm-white,
+  .whitestone .bg-burgundy-gradient .text-white {
+    color: #ffffff !important;
+  }
+
+  /* Super specific override for Link/button elements with gradient backgrounds */
+  .whitestone a.bg-gold-gradient.text-warm-white,
+  .whitestone button.bg-gold-gradient.text-warm-white,
+  .whitestone a.bg-burgundy-gradient.text-warm-white,
+  .whitestone button.bg-burgundy-gradient.text-warm-white {
+    color: #ffffff !important;
+  }
+
+  /* Whitestone: Success/Active bid states with emerald green */
+  .whitestone .text-green-600,
+  .whitestone .text-green-500 {
+    color: #059669 !important;
+  }
+
+  .whitestone .bg-green-500,
+  .whitestone .bg-green-600 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  }
+
+  /* Whitestone: Warning states with warm amber */
+  .whitestone .text-yellow-600,
+  .whitestone .text-amber-600 {
+    color: #d97706 !important;
+  }
+
+  /* Whitestone: Danger/Error states with professional red */
+  .whitestone .text-red-600,
+  .whitestone .text-red-500 {
+    color: #dc2626 !important;
+  }
+
+  /* Whitestone: Link colors with navy blue - EXCEPT active/highlighted links */
+  .whitestone
+    a:not(.btn-hover):not(.btn-hover-no-scale):not(.bg-blue-600):not(
+      .bg-burgundy-600
+    ):not(.bg-gold-gradient):not(.bg-burgundy-gradient) {
+    color: #2563eb !important;
+    transition: color 0.2s ease;
+  }
+
+  .whitestone
+    a:not(.btn-hover):not(.btn-hover-no-scale):not(.bg-blue-600):not(
+      .bg-burgundy-600
+    ):not(.bg-gold-gradient):not(.bg-burgundy-gradient):hover {
+    color: #1e40af !important;
   }
 
   /* Professional hover effects */
@@ -184,6 +369,10 @@
     filter: brightness(1.15);
   }
 
+  .whitestone .btn-hover:active {
+    filter: brightness(0.9);
+  }
+
   /* Hover effect for large buttons - no scale */
   .btn-hover-no-scale {
     transition: all 0.3s ease;
@@ -197,6 +386,21 @@
     filter: brightness(1.15);
   }
 
+  .whitestone .btn-hover-no-scale:active {
+    filter: brightness(0.9);
+  }
+
+  /* Swap colors for Go to Leaderboard button in Whitestone - blue bg/white text becomes white bg/blue text on hover */
+  .whitestone a.bg-burgundy-gradient.btn-hover-no-scale:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    color: #2563eb !important;
+    border-color: rgba(37, 99, 235, 0.5) !important;
+  }
+
+  .whitestone a.bg-burgundy-gradient.btn-hover-no-scale:hover * {
+    color: #2563eb !important;
+  }
+
   /* Link hover effect */
   .link-hover {
     transition: all 0.2s ease;
@@ -204,6 +408,11 @@
 
   .link-hover:hover {
     text-shadow: 0 0 8px rgba(244, 196, 48, 0.5);
+  }
+
+  /* Whitestone: Dark text shadow for links */
+  .whitestone .link-hover:hover {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   }
 
   /* Card hover effect */
@@ -297,8 +506,1062 @@
     color: #f3f4f6;
   }
 
-  #root {
-    overflow-x: hidden;
-    width: 100%;
+  /* Whitestone body background - professional white with subtle navy tint */
+  .whitestone body,
+  body.whitestone-mode {
+    background: linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f8fafc 25%,
+      #f1f5f9 50%,
+      #f8fafc 75%,
+      #ffffff 100%
+    ) !important;
+    color: #1e293b;
+  }
+
+  /* Ensure proper contrast in whitestone theme */
+  .whitestone .bg-gold-gradient,
+  .whitestone .bg-gold-gradient * {
+    color: #ffffff !important;
+  }
+
+  .whitestone .text-gold-gradient {
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  /* Replace golden colors with high-contrast navy blue */
+  .whitestone .text-golden-300,
+  .whitestone .text-golden-400 {
+    color: #1e40af !important;
+  }
+
+  .whitestone .text-golden-500,
+  .whitestone .text-golden-600 {
+    color: #1e3a5f !important;
+  }
+
+  .whitestone .text-golden-100 {
+    color: #0f172a !important;
+  }
+
+  .whitestone .text-golden-200 {
+    color: #1e293b !important;
+  }
+
+  .whitestone .border-golden-400,
+  .whitestone .border-golden-500 {
+    border-color: rgba(37, 99, 235, 0.5) !important;
+  }
+
+  .whitestone .border-b-golden-400 {
+    border-bottom-color: rgba(37, 99, 235, 0.6) !important;
+  }
+
+  .whitestone .border-t-4.border-golden-400 {
+    border-top-color: rgba(37, 99, 235, 0.6) !important;
+  }
+
+  /* Whitestone: Navy borders for cards and elements - more visible */
+  .whitestone .border-2.border-golden-400,
+  .whitestone .border-4.border-golden-400 {
+    border-color: rgba(37, 99, 235, 0.5) !important;
+  }
+
+  /* Whitestone: All border colors should be visible */
+  .whitestone [class*="border-white"] {
+    border-color: rgba(203, 213, 225, 0.7) !important;
+  }
+
+  /* Whitestone: Glassmorphism for all glass elements */
+  .whitestone .backdrop-blur-sm {
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+
+  /* Whitestone: Better contrast for buttons and links */
+  .whitestone button,
+  .whitestone a {
+    text-shadow: none !important;
+  }
+
+  /* Whitestone: Sidebar text colors with navy for professional trust - but not for active/highlighted items */
+  .whitestone
+    .bg-luxury-gradient
+    .text-warm-white:not(.bg-blue-600 *):not(.bg-burgundy-600 *),
+  .whitestone
+    .bg-luxury-gradient
+    .text-white:not(.bg-blue-600 *):not(.bg-burgundy-600 *) {
+    color: #1e3a5f !important;
+  }
+
+  /* Whitestone: Ensure high contrast for all text elements */
+  .whitestone p {
+    color: #334155 !important;
+  }
+
+  .whitestone
+    span:not(.text-gold-gradient):not(.bg-gold-gradient *):not(
+      .bg-burgundy-gradient *
+    ) {
+    color: #475569 !important;
+  }
+
+  .whitestone li {
+    color: #334155 !important;
+  }
+
+  .whitestone label {
+    color: #1e293b !important;
+    font-weight: 500;
+  }
+
+  /* Whitestone: Distinct background shades for clear visual hierarchy */
+  .whitestone .bg-white {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+    box-shadow: 0 2px 8px rgba(30, 58, 95, 0.06);
+  }
+
+  .whitestone .bg-gray-50 {
+    background: rgba(248, 250, 252, 0.98) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(241, 245, 249, 0.5);
+  }
+
+  .whitestone .bg-gray-100 {
+    background: rgba(241, 245, 249, 0.98) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+  }
+
+  .whitestone .bg-gray-200 {
+    background: rgba(226, 232, 240, 0.98) !important;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+  }
+
+  .whitestone .bg-gray-300 {
+    background: rgba(203, 213, 225, 0.98) !important;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+  }
+
+  /* REMOVED - consolidated in main form styling section */
+
+  /* Whitestone: Table styling with navy accents and clean whites */
+  .whitestone table {
+    border-color: rgba(226, 232, 240, 0.6) !important;
+  }
+
+  .whitestone th {
+    background: linear-gradient(
+      180deg,
+      rgba(30, 58, 95, 0.08) 0%,
+      rgba(37, 99, 235, 0.05) 100%
+    ) !important;
+    color: #1e3a5f !important;
+    font-weight: 600;
+    border-color: rgba(37, 99, 235, 0.2) !important;
+  }
+
+  .whitestone td {
+    background: rgba(255, 255, 255, 0.8) !important;
+    color: #1e293b !important;
+    border-color: rgba(226, 232, 240, 0.5) !important;
+  }
+
+  .whitestone tr:hover td {
+    background: rgba(248, 250, 252, 0.95) !important;
+    border-color: rgba(37, 99, 235, 0.15) !important;
+  }
+
+  /* Whitestone: Card backgrounds with distinct contrast levels */
+  .whitestone .bg-burgundy-950\/20 {
+    background: rgba(241, 245, 249, 0.95) !important;
+    border: 1px solid rgba(203, 213, 225, 0.4);
+  }
+
+  .whitestone .bg-burgundy-900 {
+    background: rgba(226, 232, 240, 0.95) !important;
+  }
+
+  .whitestone .bg-burgundy-800 {
+    background: rgba(241, 245, 249, 0.9) !important;
+  }
+
+  .whitestone .bg-burgundy-700 {
+    background: rgba(203, 213, 225, 0.95) !important;
+  }
+
+  /* Whitestone: Hover states with navy blue accent */
+  .whitestone .hover\:bg-burgundy-900:hover {
+    background: rgba(37, 99, 235, 0.08) !important;
+  }
+
+  .whitestone .hover\:bg-gray-50:hover {
+    background: rgba(241, 245, 249, 0.95) !important;
+  }
+
+  /* Whitestone: Text color hierarchy - blue for nav items, gradient for content */
+  .whitestone .text-gray-600,
+  .whitestone .text-gray-700 {
+    background: linear-gradient(
+      135deg,
+      #1e40af 0%,
+      #3b82f6 50%,
+      #1e40af 100%
+    ) !important;
+    background-size: 200% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-weight: 600 !important;
+  }
+
+  /* Whitestone: Sidebar nav text - solid blue (not gradient) */
+  .whitestone .text-gray-800:not(.bg-blue-600 *),
+  .whitestone .text-gray-900:not(.bg-blue-600 *) {
+    color: #2563eb !important;
+    font-weight: 600 !important;
+  }
+
+  /* Whitestone: White text on active/highlighted nav items */
+  .whitestone .bg-blue-600 .text-gray-800,
+  .whitestone .bg-blue-600 .text-gray-900,
+  .whitestone .bg-blue-600.text-gray-800,
+  .whitestone .bg-blue-600.text-gray-900 {
+    color: #ffffff !important;
+    background: none !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  /* Whitestone: Ensure all headings have metallic blue gradient */
+  .whitestone h1,
+  .whitestone h2,
+  .whitestone h3 {
+    background: linear-gradient(
+      135deg,
+      #1e40af 0%,
+      #3b82f6 50%,
+      #1e40af 100%
+    ) !important;
+    background-size: 200% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-weight: 700;
+  }
+
+  .whitestone h4,
+  .whitestone h5,
+  .whitestone h6 {
+    color: #1e293b !important;
+    font-weight: 600;
+  }
+
+  /* Whitestone: Shadow effects with navy blue tint for cohesive design */
+  .whitestone [class*="shadow"] {
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.12) !important;
+  }
+
+  .whitestone .shadow-lg {
+    box-shadow: 0 10px 30px rgba(30, 58, 95, 0.15) !important;
+  }
+
+  .whitestone .shadow-xl {
+    box-shadow: 0 20px 40px rgba(30, 58, 95, 0.18) !important;
+  }
+
+  /* Whitestone: Divider lines with subtle navy blue */
+  .whitestone hr,
+  .whitestone .border-t,
+  .whitestone .border-b {
+    border-color: rgba(226, 232, 240, 0.8) !important;
+  }
+
+  /* REMOVED - will recreate at end */
+
+  .whitestone .bg-burgundy-900 {
+    background: rgba(30, 58, 95, 0.08) !important;
+  }
+
+  .whitestone .text-burgundy-600,
+  .whitestone .text-burgundy-700,
+  .whitestone .text-burgundy-800 {
+    color: #2563eb !important;
+  }
+
+  /* Whitestone: Navy blue accents for professional look with proper visibility */
+  .whitestone .bg-blue-50 {
+    background: rgba(239, 246, 255, 0.98) !important;
+    border: 1px solid rgba(191, 219, 254, 0.5);
+  }
+
+  .whitestone .bg-blue-100 {
+    background: rgba(219, 234, 254, 0.98) !important;
+    border: 1px solid rgba(147, 197, 253, 0.5);
+  }
+
+  /* Removed - was conflicting with button styles */
+
+  .whitestone .border-blue-300 {
+    border-color: rgba(147, 197, 253, 0.5) !important;
+  }
+
+  .whitestone .hover\:border-blue-300:hover {
+    border-color: rgba(147, 197, 253, 0.8) !important;
+  }
+
+  /* Whitestone: Gradient backgrounds with blue tints instead of burgundy */
+  .whitestone .from-white\/60 {
+    --tw-gradient-from: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .whitestone .to-blue-50\/40 {
+    --tw-gradient-to: rgba(239, 246, 255, 0.4) !important;
+  }
+
+  .whitestone .hover\:from-white\/85:hover {
+    --tw-gradient-from: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  .whitestone .hover\:to-blue-50\/50:hover {
+    --tw-gradient-to: rgba(239, 246, 255, 0.5) !important;
+  }
+
+  /* Whitestone: Ensure icons are visible */
+  .whitestone svg {
+    color: inherit;
+  }
+
+  .whitestone .text-warm-white svg,
+  .whitestone .text-white svg {
+    color: #1e293b !important;
+  }
+
+  /* Whitestone: Ensure card text is always visible */
+  .whitestone [class*="bg-gradient"] p,
+  .whitestone
+    [class*="bg-gradient"]
+    span:not(.bg-gold-gradient *):not(.bg-burgundy-gradient *) {
+    color: #334155 !important;
+  }
+
+  /* Whitestone: Price and bid amounts should be highly visible */
+  .whitestone .text-2xl,
+  .whitestone .text-3xl,
+  .whitestone .text-4xl {
+    color: #0f172a !important;
+    font-weight: 700;
+  }
+
+  /* Whitestone: Stat numbers should stand out */
+  .whitestone [class*="font-bold"],
+  .whitestone [class*="font-extrabold"] {
+    color: #0f172a !important;
+  }
+
+  /* Whitestone: Make all links visible */
+  .whitestone a {
+    color: #2563eb !important;
+  }
+
+  .whitestone a:hover {
+    color: #1e40af !important;
+  }
+
+  /* Whitestone: Ensure status badges are visible */
+  .whitestone .bg-green-500,
+  .whitestone .bg-green-600 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(5, 150, 105, 0.4);
+  }
+
+  .whitestone .bg-yellow-500,
+  .whitestone .bg-amber-500 {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(217, 119, 6, 0.4);
+  }
+
+  .whitestone .bg-red-500,
+  .whitestone .bg-red-600 {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(220, 38, 38, 0.4);
+  }
+
+  /* Whitestone: Blue buttons must have white text */
+  /* REMOVED - will recreate at end */
+
+  /* Whitestone: Ensure amber/gold buttons have white text */
+  .whitestone .bg-amber-600 {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+  }
+
+  .whitestone .bg-amber-600 * {
+    color: #ffffff !important;
+  }
+
+  /* FINAL OVERRIDE: Absolutely force white text on ALL gradient buttons */
+  .whitestone .bg-gold-gradient,
+  .whitestone a.bg-gold-gradient,
+  .whitestone button.bg-gold-gradient,
+  .whitestone .bg-burgundy-gradient,
+  .whitestone a.bg-burgundy-gradient,
+  .whitestone button.bg-burgundy-gradient {
+    color: #ffffff !important;
+  }
+
+  .whitestone .bg-gold-gradient *,
+  .whitestone .bg-burgundy-gradient * {
+    color: #ffffff !important;
+  }
+
+  /* Ultimate override with chained classes for maximum specificity */
+  .whitestone a.bg-gold-gradient.text-warm-white,
+  .whitestone button.bg-gold-gradient.text-warm-white,
+  .whitestone a.bg-gold-gradient.text-white,
+  .whitestone button.bg-gold-gradient.text-white,
+  .whitestone a.bg-burgundy-gradient.text-warm-white,
+  .whitestone button.bg-burgundy-gradient.text-warm-white {
+    color: #ffffff !important;
+  }
+
+  /* ULTIMATE OVERRIDE: Force white text on all blue and burgundy solid color backgrounds - HIGHEST PRIORITY */
+  /* REMOVED - will recreate at end */
+
+  /* ===================================================================
+     WHITESTONE: COLOR CONTRAST RULES - Only for active states
+     Active nav items: Blue background with white text
+     Inactive nav items: Transparent/white background with blue text
+     ==================================================================== */
+
+  /* REMOVED - will recreate at end */
+
+  /* Gradient buttons maintain white text */
+  .whitestone .bg-gold-gradient,
+  .whitestone .bg-gold-gradient *,
+  .whitestone .bg-burgundy-gradient,
+  .whitestone .bg-burgundy-gradient * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  /* WHITESTONE: Override Sign Up button (bg-luxury-gradient) to blue gradient */
+  .whitestone a.bg-luxury-gradient.font-semibold,
+  .whitestone a.bg-luxury-gradient,
+  .whitestone button.bg-luxury-gradient.font-semibold,
+  .whitestone button.bg-luxury-gradient {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #2563eb !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .whitestone a.bg-luxury-gradient *,
+  .whitestone button.bg-luxury-gradient * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .whitestone a.bg-luxury-gradient:hover,
+  .whitestone button.bg-luxury-gradient:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+  }
+
+  /* WHITESTONE: Logout button and other bg-burgundy-600 elements get blue background with white text */
+  .whitestone button.bg-burgundy-600.text-warm-white,
+  .whitestone button.bg-burgundy-600.font-semibold,
+  .whitestone button.bg-burgundy-600,
+  .whitestone a.bg-burgundy-600 {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #2563eb !important;
+  }
+
+  .whitestone button.bg-burgundy-600 *,
+  .whitestone a.bg-burgundy-600 * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .whitestone button.bg-burgundy-600:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border-color: #3b82f6 !important;
+  }
+
+  /* WHITESTONE: Theme button and all sidebar nav text - blue when inactive */
+  .whitestone
+    button.text-warm-white:not(.bg-burgundy-600):not(.bg-blue-600):not(
+      .bg-gold-gradient
+    ):not(.bg-burgundy-gradient),
+  .whitestone
+    a.text-warm-white:not(.bg-burgundy-600):not(.bg-blue-600):not(
+      .bg-gold-gradient
+    ):not(.bg-burgundy-gradient) {
+    color: #2563eb !important;
+    -webkit-text-fill-color: #2563eb !important;
+  }
+
+  /* WHITESTONE: Active states - white text on blue background */
+  .whitestone button.text-warm-white.bg-burgundy-600,
+  .whitestone button.text-warm-white.bg-blue-600,
+  .whitestone a.text-warm-white.bg-burgundy-600,
+  .whitestone a.text-warm-white.bg-blue-600 {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .whitestone button.text-warm-white.bg-burgundy-600 *,
+  .whitestone button.text-warm-white.bg-blue-600 *,
+  .whitestone a.text-warm-white.bg-burgundy-600 *,
+  .whitestone a.text-warm-white.bg-blue-600 * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  /* =================================================================
+     WHITESTONE: ACTIVE STATE - Clean simple rules
+     Active nav items and buttons get blue gradient background + white text
+     ================================================================= */
+
+  /* Apply blue gradient to any element with bg-burgundy-600 or bg-blue-600 in whitestone theme */
+  .whitestone .bg-burgundy-600,
+  .whitestone .bg-blue-600 {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+  }
+
+  /* Ensure all children and text elements are white */
+  .whitestone .bg-burgundy-600 *,
+  .whitestone .bg-blue-600 * {
+    color: #ffffff !important;
+  }
+
+  /* =================================================================
+     FORM FIELDS STYLING - Professional design for all themes
+     ================================================================= */
+
+  /* ROYAL BURGUNDY (Default) - Warm burgundy/gold accents */
+  input,
+  textarea,
+  select {
+    background: rgba(139, 21, 56, 0.1) !important;
+    border: 2px solid rgba(212, 175, 55, 0.4) !important;
+    color: #fef9f3 !important;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
+    outline: none;
+    background: rgba(139, 21, 56, 0.15) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(254, 249, 243, 0.5) !important;
+  }
+
+  /* Select dropdown options - Royal Burgundy */
+  select option {
+    background: #2a0a14 !important;
+    color: #fef9f3 !important;
+    padding: 0.5rem !important;
+  }
+
+  select option:hover,
+  select option:checked {
+    background: linear-gradient(135deg, #8b1538 0%, #c8102e 100%) !important;
+    color: #f4c430 !important;
+  }
+
+  /* BLACK GOLD (Dark) - Elegant dark theme with gold accents */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background: rgba(26, 26, 26, 0.9) !important;
+    border: 2px solid rgba(212, 175, 55, 0.3) !important;
+    color: #fef9f3 !important;
+  }
+
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: #f4c430 !important;
+    box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.15) !important;
+    background: rgba(42, 42, 42, 0.95) !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: rgba(254, 249, 243, 0.4) !important;
+  }
+
+  /* WHITESTONE - Clean professional with blue accents */
+  .whitestone input,
+  .whitestone textarea,
+  .whitestone select {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(203, 213, 225, 0.6) !important;
+    color: #1e293b !important;
+  }
+
+  .whitestone input:focus,
+  .whitestone textarea:focus,
+  .whitestone select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    outline: none;
+    background: rgba(255, 255, 255, 1) !important;
+  }
+
+  .whitestone input::placeholder,
+  .whitestone textarea::placeholder {
+    color: rgba(71, 85, 105, 0.6) !important;
+  }
+
+  /* Disabled state for all themes */
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .dark input:disabled,
+  .dark textarea:disabled,
+  .dark select:disabled {
+    background: rgba(26, 26, 26, 0.5) !important;
+  }
+
+  .whitestone input:disabled,
+  .whitestone textarea:disabled,
+  .whitestone select:disabled {
+    background: rgba(226, 232, 240, 0.6) !important;
+  }
+
+  /* =================================================================
+     TEXT COLOR CONSISTENCY & HIERARCHY - All Themes
+     ================================================================= */
+
+  /* ROYAL BURGUNDY - Consistent gold and warm white text */
+  h1,
+  h2,
+  h3 {
+    color: #f4c430 !important;
+    font-weight: 700;
+  }
+
+  h4,
+  h5,
+  h6 {
+    color: #d4af37 !important;
+    font-weight: 600;
+  }
+
+  label {
+    color: #f4c430 !important;
+    font-weight: 500;
+  }
+
+  p,
+  span,
+  div {
+    color: #fef9f3 !important;
+  }
+
+  /* BLACK GOLD - Consistent gold and white text */
+  .dark h1,
+  .dark h2,
+  .dark h3 {
+    color: #f4c430 !important;
+  }
+
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: #d4af37 !important;
+  }
+
+  .dark label {
+    color: #f4c430 !important;
+  }
+
+  .dark p,
+  .dark span,
+  .dark div {
+    color: #fef9f3 !important;
+  }
+
+  /* WHITESTONE - Consistent blue gradients and dark text */
+  .whitestone h1,
+  .whitestone h2,
+  .whitestone h3 {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  .whitestone h4,
+  .whitestone h5,
+  .whitestone h6 {
+    color: #1e40af !important;
+  }
+
+  .whitestone label {
+    color: #1e40af !important;
+  }
+
+  .whitestone p:not(.bg-blue-600 *):not(.bg-burgundy-600 *),
+  .whitestone span:not(.bg-blue-600 *):not(.bg-burgundy-600 *),
+  .whitestone div:not(.bg-blue-600 *):not(.bg-burgundy-600 *) {
+    color: #1e293b !important;
+  }
+
+  /* =================================================================
+     SPACING IMPROVEMENTS - Reduce excessive top padding
+     ================================================================= */
+
+  /* Override pt-20 to pt-8 for better spacing */
+  .pt-20 {
+    padding-top: 2rem !important;
+  }
+
+  /* Maintain proper spacing on mobile */
+  @media (max-width: 1024px) {
+    .pt-20 {
+      padding-top: 5rem !important;
+    }
+  }
+
+  /* =================================================================
+     DANGER BUTTONS - Red styling for delete/destructive actions
+     ================================================================= */
+
+  /* Royal Burgundy - Red danger buttons */
+  button:is([class*="delete" i], [class*="Delete" i]),
+  button:contains("Delete"),
+  button:contains("Remove"),
+  .bg-burgundy-gradient:is([onclick*="delete" i], [onclick*="Delete" i]) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    border-color: #fca5a5 !important;
+    color: #ffffff !important;
+  }
+
+  button:is([class*="delete" i], [class*="Delete" i]):hover,
+  .bg-burgundy-gradient:is([onclick*="delete" i], [onclick*="Delete" i]):hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  }
+
+  /* Black Gold - Red danger buttons */
+  .dark button:is([class*="delete" i], [class*="Delete" i]),
+  .dark .bg-burgundy-gradient:is([onclick*="delete" i], [onclick*="Delete" i]) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    border-color: #fca5a5 !important;
+  }
+
+  /* Whitestone - Red danger buttons */
+  .whitestone button:is([class*="delete" i], [class*="Delete" i]),
+  .whitestone
+    .bg-burgundy-gradient:is([onclick*="delete" i], [onclick*="Delete" i]),
+  .whitestone
+    button.bg-blue-600:is([onclick*="delete" i], [onclick*="Delete" i]) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    border-color: #fca5a5 !important;
+    color: #ffffff !important;
+  }
+
+  /* =================================================================
+     UI/UX SIZE OPTIMIZATIONS - Reduce excessive sizes
+     ================================================================= */
+
+  /* Reduce button padding */
+  button,
+  .btn-hover,
+  .btn-hover-no-scale {
+    padding: 0.5rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* Reduce heading sizes for better hierarchy */
+  h1 {
+    font-size: 2.5rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+  }
+
+  h3 {
+    font-size: 1.5rem !important;
+  }
+
+  h4 {
+    font-size: 1.25rem !important;
+  }
+
+  h5,
+  h6 {
+    font-size: 1rem !important;
+  }
+
+  /* Reduce form container padding */
+  .bg-gradient-to-br {
+    padding: 1.5rem !important;
+  }
+
+  /* Reduce card padding */
+  .bg-luxury-gradient,
+  .bg-burgundy-950\/20 {
+    padding: 1rem !important;
+  }
+
+  /* =================================================================
+     HOW IT WORKS CARDS - Full width cards with proper sizing
+     ================================================================= */
+
+  /* Target How it Works section cards - exclude auction cards */
+  .bg-gradient-to-br:not(.card-hover):not(.card-hover *) {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 1rem 1.5rem !important;
+  }
+
+  @media (min-width: 1024px) {
+    .bg-gradient-to-br:not(.card-hover):not(.card-hover *) {
+      padding: 1.5rem !important;
+    }
+  }
+
+  /* Restore original text-xl size for How it Works descriptions */
+  .bg-gradient-to-br:not(.card-hover):not(.card-hover *) .text-xl {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  /* Restore gap-3 inside How it Works cards */
+  .bg-gradient-to-br:not(.card-hover):not(.card-hover *).gap-3 {
+    gap: 0.75rem !important;
+  }
+
+  /* Optimize input sizing */
+  input,
+  textarea,
+  select {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Reduce excessive gaps */
+  .gap-4 {
+    gap: 0.75rem !important;
+  }
+
+  .gap-5 {
+    gap: 1rem !important;
+  }
+
+  .gap-6 {
+    gap: 1.25rem !important;
+  }
+
+  /* Optimize image sizes */
+  img.w-36 {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+
+  /* Reduce card text sizes */
+  .text-xl {
+    font-size: 1.125rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  /* Responsive optimizations */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem !important;
+    }
+
+    h2 {
+      font-size: 1.5rem !important;
+    }
+
+    h3 {
+      font-size: 1.25rem !important;
+    }
+
+    button {
+      font-size: 0.875rem !important;
+      padding: 0.375rem 1rem !important;
+    }
+  }
+
+  /* =================================================================
+     LOGO STYLING - Increased size for brand recognition
+     ================================================================= */
+
+  /* Increase logo size in sidebar */
+  .text-gold-gradient {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* =================================================================
+     AUCTION GRID LAYOUT - Compact professional display
+     ================================================================= */
+
+  /* Auction cards grid - Mobile: 2 cards, Tablet: 3 cards, Desktop: 5 cards */
+  .flex-wrap {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+
+  /* Ensure cards take full grid cell */
+  .flex-wrap > a,
+  .flex-wrap > div {
+    flex-grow: 1 !important;
+    flex-basis: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Card sizing and proportions - compact */
+  .card-hover {
+    min-height: 320px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Card image proportions */
+  .card-hover img {
+    object-fit: cover !important;
+    padding: 0.5rem !important;
+    aspect-ratio: 4/3 !important;
+    position: relative !important;
+  }
+
+  /* Add shine effect to auction card images */
+  .card-hover {
+    position: relative !important;
+  }
+
+  .card-hover img {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .card-hover::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 60%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: shine 4s infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .whitestone .card-hover::after {
+    background: linear-gradient(
+      90deg,
+      rgba(37, 99, 235, 0) 0%,
+      rgba(37, 99, 235, 0.2) 50%,
+      rgba(37, 99, 235, 0) 100%
+    );
+  }
+
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 200%;
+    }
+  }
+
+  /* Card content spacing - compact */
+  .card-hover .px-2 {
+    padding: 0.75rem !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+
+  /* Card text sizes - smaller for compact layout */
+  .card-hover h5 {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  .card-hover p {
+    font-size: 0.75rem !important;
+  }
+
+  /* Responsive grid adjustments */
+  @media (min-width: 640px) {
+    .flex-wrap {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .card-hover {
+      min-height: 340px !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .flex-wrap {
+      grid-template-columns: repeat(5, 1fr) !important;
+      gap: 1.25rem !important;
+    }
+
+    .card-hover {
+      min-height: 360px !important;
+    }
+
+    .card-hover h5 {
+      font-size: 1rem !important;
+    }
+
+    .card-hover p {
+      font-size: 0.875rem !important;
+    }
+
+    #root {
+      overflow-x: hidden;
+      width: 100%;
+    }
   }
 }

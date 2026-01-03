@@ -21,12 +21,12 @@ const UpcomingAuctions = () => {
           Auctions For Today
         </h3>
         <div className="flex flex-wrap gap-6">
-          <div className="bg-luxury-gradient w-full p-2 gap-10 rounded-md flex flex-col justify-between lg:flex-1 lg:h-auto lg:p-6 2xl:flex-none 2xl:basis-64 2xl:flex-grow 2xl:px-2  2xl:py-6 shadow-xl border-2 border-golden-400 dark:border-golden-500">
-            <span className="rounded-full bg-gold-gradient text-white w-fit p-3 shadow-lg">
+          <div className="bg-luxury-gradient w-full p-2 gap-10 rounded-md flex flex-col justify-between lg:flex-1 lg:h-auto lg:p-6 2xl:flex-none 2xl:basis-64 2xl:flex-grow 2xl:px-2  2xl:py-6 shadow-xl border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40">
+            <span className="rounded-full bg-gold-gradient text-white whitestone:text-black w-fit p-3 shadow-lg whitestone:text-white">
               <RiAuctionFill />
             </span>
             <div>
-              <h3 className="text-golden-100 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+              <h3 className="text-golden-100 whitestone:text-gray-700 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
                 Auctions For
               </h3>
               <div>
@@ -46,7 +46,7 @@ const UpcomingAuctions = () => {
                 >
                   <div className="flex items-center gap-2">
                     <img
-                      src={element.image?.url}
+                      src={element.images?.[0]?.url || element.image?.url}
                       alt={element.title}
                       className="w-16 h-16 2xl:w-10 2xl:h-10"
                     />
@@ -55,15 +55,17 @@ const UpcomingAuctions = () => {
                     </p>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Starting Bid:
                     </p>{" "}
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Rs. {element.startingBid}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-golden-300 font-bold">Starting Time:</p>
+                    <p className="text-golden-300 whitestone:text-gray-800 font-bold">
+                      Starting Time:
+                    </p>
                     <p className="text-warm-white text-[12px]">
                       {element.startTime}
                     </p>
@@ -83,7 +85,7 @@ const UpcomingAuctions = () => {
                 >
                   <div className="flex items-center gap-2">
                     <img
-                      src={element.image?.url}
+                      src={element.images?.[0]?.url || element.image?.url}
                       alt={element.title}
                       className="w-16 h-16 2xl:w-10 2xl:h-10"
                     />
@@ -92,15 +94,17 @@ const UpcomingAuctions = () => {
                     </p>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Starting Bid:
                     </p>{" "}
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Rs. {element.startingBid}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-golden-300 font-bold">Starting Time:</p>
+                    <p className="text-golden-300 whitestone:text-gray-800 font-bold">
+                      Starting Time:
+                    </p>
                     <p className="text-warm-white  text-[12px]">
                       {element.startTime}
                     </p>
@@ -119,7 +123,7 @@ const UpcomingAuctions = () => {
                 >
                   <div className="flex items-center gap-2">
                     <img
-                      src={element.image?.url}
+                      src={element.images?.[0]?.url || element.image?.url}
                       alt={element.title}
                       className="w-16 h-16 2xl:w-10 2xl:h-10"
                     />
@@ -128,15 +132,17 @@ const UpcomingAuctions = () => {
                     </p>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Starting Bid:
                     </p>{" "}
-                    <p className="text-golden-300 font-semibold">
+                    <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
                       Rs. {element.startingBid}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-golden-300 font-bold">Starting Time:</p>
+                    <p className="text-golden-300 whitestone:text-gray-800 font-bold">
+                      Starting Time:
+                    </p>
                     <p className="text-warm-white  text-[12px]">
                       {element.startTime}
                     </p>

@@ -13,16 +13,16 @@ const Leaderboard = () => {
           <>
             <div className="flex flex-col min-[340px]:flex-row min-[340px]:gap-2 mb-5">
               <h1
-                className={`text-golden-500 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+                className={`text-golden-500 whitestone:text-gray-900 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
               >
                 Bidders Leaderboard
               </h1>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm border my-5 border-golden-400 shadow-md rounded-lg">
-                <thead className="bg-luxury-gradient text-white shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient"></div>
+              <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl border my-5 border-golden-400 whitestone:border-white/30 shadow-md rounded-lg">
+                <thead className="bg-luxury-gradient text-white whitestone:text-black shadow-lg relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
                   <tr>
                     <th className="py-2 px-4 text-left">Profile Pic</th>
                     <th className="py-2 px-4 text-left">Username</th>
@@ -38,7 +38,7 @@ const Leaderboard = () => {
                         className="border-b border-gray-300 dark:border-gray-700"
                       >
                         <td className="flex gap-2 items-center py-2 px-4">
-                          <span className="text-golden-300 font-semibold text-xl w-7 hidden sm:block">
+                          <span className="text-golden-300 whitestone:text-gray-800 font-semibold text-xl w-7 hidden sm:block">
                             {index + 1}
                           </span>
                           <span>

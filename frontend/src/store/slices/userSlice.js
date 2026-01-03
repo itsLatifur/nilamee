@@ -116,7 +116,7 @@ export const login = (data) => async (dispatch) => {
       data,
       {
         withCredentials: true,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "multipart/form-data" },
       }
     );
     dispatch(userSlice.actions.loginSuccess(response.data));
@@ -181,14 +181,3 @@ export const fetchLeaderboard = () => async (dispatch) => {
 };
 
 export default userSlice.reducer;
-
-
-
-
-
-
-
-
-
-
-

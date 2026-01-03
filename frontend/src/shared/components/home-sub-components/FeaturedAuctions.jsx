@@ -15,7 +15,7 @@ const FeaturedAuctions = () => {
             return (
               <Card
                 title={element.title}
-                imgSrc={element.image?.url}
+                imgSrc={element.images?.[0]?.url || element.image?.url}
                 startTime={element.startTime}
                 endTime={element.endTime}
                 startingBid={element.startingBid}
@@ -31,19 +31,3 @@ const FeaturedAuctions = () => {
 };
 
 export default FeaturedAuctions;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

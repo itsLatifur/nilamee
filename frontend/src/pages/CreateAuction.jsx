@@ -67,34 +67,34 @@ const CreateAuction = () => {
   return (
     <article className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">
       <h1
-        className={`text-golden-500 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
+        className={`text-golden-500 whitestone:text-gray-900 text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl`}
       >
         Create Auction
       </h1>
-      <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 shadow-2xl">
+      <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
         <form
           className="flex flex-col gap-5 w-full"
           onSubmit={handleCreateAuction}
         >
-          <p className="font-semibold text-xl md:text-2xl text-golden-300">
+          <p className="font-semibold text-xl md:text-2xl text-golden-300 whitestone:text-gray-900">
             Auction Detail
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">Title</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Title</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
               />
             </div>
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">Category</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
               >
                 <option value="">Select Category</option>
                 {auctionCategories.map((element) => {
@@ -109,11 +109,11 @@ const CreateAuction = () => {
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">Condition</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Condition</label>
               <select
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
               >
                 <option value="">Select Condition</option>
                 <option value="New">New</option>
@@ -121,31 +121,31 @@ const CreateAuction = () => {
               </select>
             </div>
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Starting Bid
               </label>
               <input
                 type="number"
                 value={startingBid}
                 onChange={(e) => setStartingBid(e.target.value)}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none text-warm-white focus:border-b-golden-300 transition-all"
               />
             </div>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">Description</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="text-[16px] py-2 bg-transparent border-2 border-golden-400 focus:outline-none px-2 rounded-md text-warm-white focus:border-golden-300 transition-all"
+                className="text-[16px] py-2 bg-transparent border-2 border-golden-400 whitestone:border-white/30 focus:outline-none px-2 rounded-md text-warm-white focus:border-golden-300 transition-all"
                 rows={10}
               />
             </div>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Auction Starting Time
               </label>
               <DatePicker
@@ -155,11 +155,11 @@ const CreateAuction = () => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none w-full"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full"
               />
             </div>
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300">
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Auction End Time
               </label>
               <DatePicker
@@ -169,7 +169,7 @@ const CreateAuction = () => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 focus:outline-none w-full"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full"
               />
             </div>
           </div>
@@ -192,7 +192,7 @@ const CreateAuction = () => {
                   ) : (
                     <>
                       <svg
-                        class="w-8 h-8 mb-4 text-golden-300"
+                        class="w-8 h-8 mb-4 text-golden-300 whitestone:text-gray-900"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -209,11 +209,11 @@ const CreateAuction = () => {
                     </>
                   )}
 
-                  <p class="mb-2 text-sm text-golden-300">
+                  <p class="mb-2 text-sm text-golden-300 whitestone:text-gray-900">
                     <span class="font-semibold">Click to upload</span> or drag
                     and drop
                   </p>
-                  <p class="text-xs text-golden-300">
+                  <p class="text-xs text-golden-300 whitestone:text-gray-900">
                     SVG, PNG, JPG or GIF (MAX. 800x400px)
                   </p>
                 </div>
@@ -226,7 +226,7 @@ const CreateAuction = () => {
               </label>
             </div>
           </div>
-          <button className="bg-burgundy-gradient font-semibold text-xl transition-all duration-300 py-2 px-4 rounded-md text-warm-white w-[280px] mx-auto lg:w-[640px] my-4 border-2 border-golden-400 shadow-lg btn-hover">
+          <button className="bg-burgundy-gradient whitestone:bg-blue-600 font-semibold text-xl transition-all duration-300 py-2 px-4 rounded-md text-warm-white whitestone:text-white w-[280px] mx-auto lg:w-[640px] my-4 border-2 border-golden-400 whitestone:border-blue-500 shadow-lg btn-hover">
             {loading ? "Creating Auction..." : "Create Auction"}
           </button>
         </form>

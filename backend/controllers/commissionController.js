@@ -1,7 +1,7 @@
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { PaymentProof } from "../models/commissionProofSchema.js";
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { Auction } from "../models/auctionSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";

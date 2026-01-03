@@ -1,5 +1,5 @@
 import { Auction } from "../models/auctionSchema.js";
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { Bid } from "../models/bidSchema.js";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";

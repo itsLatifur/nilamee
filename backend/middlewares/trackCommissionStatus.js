@@ -1,4 +1,4 @@
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 

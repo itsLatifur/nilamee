@@ -19,6 +19,13 @@ import CreateAuction from "./features/auctions/pages/CreateAuction";
 import ViewMyAuctions from "./features/auctions/pages/ViewMyAuctions";
 import ViewAuctionDetails from "./features/auctions/pages/ViewAuctionDetails";
 import Dashboard from "./features/admin/pages/Dashboard/Dashboard";
+import ManageUsers from "./features/admin/pages/ManageUsers";
+import ManageAuctions from "./features/admin/pages/ManageAuctions";
+import PendingAuctionsPage from "./features/admin/pages/PendingAuctionsPage";
+import PaymentProofsPage from "./features/admin/pages/PaymentProofsPage";
+import StatsPage from "./features/admin/pages/StatsPage";
+import ManageRoles from "./features/admin/pages/ManageRoles";
+import DatabaseControl from "./features/admin/pages/DatabaseControl";
 import Contact from "./shared/components/Contact";
 import UserProfile from "./features/profile/pages/UserProfile";
 
@@ -46,6 +53,22 @@ const App = () => {
         <Route path="/view-my-auctions" element={<ViewMyAuctions />} />
         <Route path="/auction/details/:id" element={<ViewAuctionDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/manage-users" element={<ManageUsers />} />
+        <Route path="/dashboard/manage-auctions" element={<ManageAuctions />} />
+        <Route
+          path="/dashboard/pending-auctions"
+          element={<PendingAuctionsPage />}
+        />
+        <Route
+          path="/dashboard/payment-proofs"
+          element={<PaymentProofsPage />}
+        />
+        <Route path="/dashboard/stats" element={<StatsPage />} />
+        <Route path="/dashboard/manage-roles" element={<ManageRoles />} />
+        <Route
+          path="/dashboard/database-control"
+          element={<DatabaseControl />}
+        />
         <Route path="/contact" element={<Contact />} />
         <Route path="/me" element={<UserProfile />} />
       </Routes>
@@ -55,19 +78,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

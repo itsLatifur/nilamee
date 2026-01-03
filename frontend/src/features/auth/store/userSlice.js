@@ -100,7 +100,7 @@ export const register = (data) => async (dispatch) => {
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.registerFailed());
-    toast.error(error.response.data.message);
+    toast.error(error.response?.data?.message || "Registration failed");
     dispatch(userSlice.actions.clearAllErrors());
   }
 };
@@ -117,23 +117,22 @@ export const login = (data) => async (dispatch) => {
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.loginFailed());
-    toast.error(error.response.data.message);
+    toast.error(error.response?.data?.message || "Login failed");
     dispatch(userSlice.actions.clearAllErrors());
   }
 };
 
 export const logout = () => async (dispatch) => {
   try {
-    const response = await axios.get(
-      "http://localhost:5000/api/v1/user/logout",
-      { withCredentials: true }
-    );
+    const response = await axios.get(API_ENDPOINTS.USER.LOGOUT, {
+      withCredentials: true,
+    });
     dispatch(userSlice.actions.logoutSuccess());
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.logoutFailed());
-    toast.error(error.response.data.message);
+    toast.error(error.response?.data?.message || "Logout failed");
     dispatch(userSlice.actions.clearAllErrors());
   }
 };
@@ -171,14 +170,3 @@ export const fetchLeaderboard = () => async (dispatch) => {
 };
 
 export default userSlice.reducer;
-
-
-
-
-
-
-
-
-
-
-

@@ -2,7 +2,7 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { Auction } from "../models/auctionSchema.js";
 import { Bid } from "../models/bidSchema.js";
-import { User } from "../models/userSchema.js";
+import { User } from "../features/users/users.model.js";
 
 export const placeBid = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
@@ -10,6 +10,12 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
   if (!auctionItem) {
     return next(new ErrorHandler("Auction Item not found.", 404));
   }
+
+  // Prevent users from bidding on their own auctions
+  if (auctionItem.createdBy.toString() === req.user._id.toString()) {
+    return next(new ErrorHandler("You cannot bid on your own auction.", 403));
+  }
+
   const { amount } = req.body;
   if (!amount) {
     return next(new ErrorHandler("Please place your bid.", 404));

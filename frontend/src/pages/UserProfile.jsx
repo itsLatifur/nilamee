@@ -18,7 +18,7 @@ const UserProfile = () => {
           <Spinner />
         ) : (
           <>
-            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 shadow-2xl">
+            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
               <img
                 src={user.profileImage?.url}
                 alt="/imageHolder.jpg"
@@ -29,7 +29,7 @@ const UserProfile = () => {
                 <h3 className="text-xl font-semibold mb-4">Personal Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Username
                     </label>
                     <input
@@ -40,7 +40,7 @@ const UserProfile = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-golden-300">
+                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                       Email
                     </label>
                     <input

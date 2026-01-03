@@ -10,36 +10,47 @@ export const useTheme = () => {
   return context;
 };
 
+// Available themes
+export const THEMES = {
+  ROYAL_BURGUNDY: "RoyalBurgundy",
+  BLACK_GOLD: "BlackGold",
+  WHITESTONE: "Whitestone",
+};
+
 export const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  const [currentTheme, setCurrentTheme] = useState(() => {
     // Check localStorage for saved theme preference
     const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
+    return savedTheme || THEMES.ROYAL_BURGUNDY;
   });
 
   useEffect(() => {
     // Apply theme to document
-    if (isDarkMode) {
+    document.documentElement.classList.remove("dark", "whitestone");
+    document.body.classList.remove("dark-mode", "whitestone-mode");
+
+    if (currentTheme === THEMES.BLACK_GOLD) {
       document.documentElement.classList.add("dark");
       document.body.classList.add("dark-mode");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.body.classList.remove("dark-mode");
-      localStorage.setItem("theme", "light");
+    } else if (currentTheme === THEMES.WHITESTONE) {
+      document.documentElement.classList.add("whitestone");
+      document.body.classList.add("whitestone-mode");
     }
-  }, [isDarkMode]);
 
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    localStorage.setItem("theme", currentTheme);
+  }, [currentTheme]);
+
+  const setTheme = (themeName) => {
+    setCurrentTheme(themeName);
   };
 
+  const isDarkMode = currentTheme === THEMES.BLACK_GOLD;
+
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+    <ThemeContext.Provider
+      value={{ currentTheme, setTheme, isDarkMode, THEMES }}
+    >
       {children}
     </ThemeContext.Provider>
   );
 };
-
-
-

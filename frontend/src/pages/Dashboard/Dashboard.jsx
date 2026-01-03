@@ -38,36 +38,36 @@ const Dashboard = () => {
       ) : (
         <>
           <div className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col gap-10">
-            <div className="bg-luxury-gradient rounded-lg p-8 shadow-xl border-4 border-golden-400 dark:border-golden-500 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient"></div>
-              <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient"></div>
+            <div className="bg-luxury-gradient rounded-lg p-8 shadow-xl border-4 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
               <h1
-                className={`text-white text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl flex items-center gap-4`}
+                className={`text-white whitestone:text-black whitestone:text-white text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl flex items-center gap-4`}
               >
-                <span className="text-golden-300">♛</span>
+                <span className="text-golden-300 whitestone:text-gray-900">?</span>
                 Dashboard
               </h1>
-              <p className="text-golden-100 text-lg md:text-xl mt-4">
+              <p className="text-golden-100 whitestone:text-gray-700 text-lg md:text-xl mt-4">
                 Super Admin Control Center
               </p>
             </div>
             <div className="flex flex-col gap-10">
               <div>
-                <div className="bg-luxury-gradient rounded-lg p-4 mb-4 shadow-lg border-4 border-golden-400 dark:border-golden-500 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gold-gradient"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold-gradient"></div>
-                  <h3 className="text-white text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl">
-                    💰 Monthly Total Payments Received
+                <div className="bg-luxury-gradient rounded-lg p-4 mb-4 shadow-lg border-4 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
+                  <h3 className="text-white whitestone:text-black text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+                    ?? Monthly Total Payments Received
                   </h3>
                 </div>
                 <PaymentGraph />
               </div>
               <div>
-                <div className="bg-luxury-gradient rounded-lg p-4 mb-4 shadow-lg border-4 border-golden-400 dark:border-golden-500 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gold-gradient"></div>
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold-gradient"></div>
-                  <h3 className="text-white text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl">
-                    👥 Users
+                <div className="bg-luxury-gradient rounded-lg p-4 mb-4 shadow-lg border-4 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
+                  <h3 className="text-white whitestone:text-black text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+                    ?? Users
                   </h3>
                 </div>
                 <BiddersAuctioneersGraph />

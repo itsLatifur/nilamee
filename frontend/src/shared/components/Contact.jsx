@@ -50,18 +50,18 @@ const Contact = () => {
   return (
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-start">
-        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 backdrop-blur-sm mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-4 border-golden-400 shadow-2xl">
+        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-4 border-golden-400 whitestone:border-white/30 shadow-2xl">
           <form
             className="flex flex-col gap-5 w-full"
             onSubmit={handleContactForm}
           >
             <h3
-              className={`text-golden-500 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl`}
+              className={`text-golden-500 whitestone:text-gray-900 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl`}
             >
               Contact Us
             </h3>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300">Your Name</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Name</label>
               <input
                 type="text"
                 value={name}
@@ -71,7 +71,7 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300">Your Email</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Email</label>
               <input
                 type="email"
                 value={email}
@@ -81,7 +81,7 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300">Your Phone</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Phone</label>
               <input
                 type="number"
                 value={phone}
@@ -91,7 +91,7 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300">Subject</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Subject</label>
               <input
                 type="text"
                 value={subject}
@@ -101,7 +101,7 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300">Message</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Message</label>
               <textarea
                 rows={7}
                 value={message}
@@ -112,7 +112,7 @@ const Contact = () => {
             </div>
 
             <button
-              className="bg-gold-gradient shadow-lg border-2 border-golden-400 mx-auto font-semibold text-xl transition-all duration-300 py-2 px-4 rounded-md text-warm-white my-4 btn-hover"
+              className="bg-gold-gradient shadow-lg border-2 border-golden-400 whitestone:border-white/30 mx-auto font-semibold text-xl transition-all duration-300 py-2 px-4 rounded-md text-warm-white my-4 btn-hover whitestone:text-white"
               type="submit"
             >
               {loading ? "Sending Message..." : "Send Message"}
