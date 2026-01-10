@@ -6,11 +6,11 @@ const FeaturedAuctions = () => {
   const { allAuctions, loading } = useSelector((state) => state.auction);
   return (
     <>
-      <section className="my-8">
-        <h3 className="text-warm-white text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+      <section className="my-12">
+        <h3 className="text-warm-white whitestone:text-gray-900 text-2xl font-bold mb-6 md:text-3xl lg:text-4xl">
           Featured Auctions
         </h3>
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-wrap gap-6 justify-center">
           {allAuctions.slice(0, 8).map((element) => {
             return (
               <Card

@@ -5,11 +5,17 @@ import UserManagement from "./Dashboard/sub-components/UserManagement";
 import AdminLayout from "../layout/AdminLayout";
 
 const ManageUsers = () => {
-  const { user, isAuthenticated } = useSelector((state) => state.user);
+  const {
+    user,
+    isAuthenticated,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
 
   useEffect(() => {
     if (
+      hasCheckedAuth &&
       !(
         isAuthenticated &&
         (user?.role === "Super Admin" || user?.role === "Admin")
@@ -17,7 +23,7 @@ const ManageUsers = () => {
     ) {
       navigateTo("/");
     }
-  }, [isAuthenticated, user]);
+  }, [hasCheckedAuth, isAuthenticated, user]);
 
   return (
     <AdminLayout

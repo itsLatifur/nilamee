@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 /* Whitestone: Go to Leaderboard button color swap */
 .whitestone .go-to-leaderboard-btn {
   background: #2563eb !important;
@@ -10,7 +12,21 @@
   border: 1.5px solid #2563eb !important;
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+/* Whitestone: Force white text on all action buttons and badges */
+.whitestone button {
+  color: #ffffff !important;
+}
+
+.whitestone span.bg-green-500,
+.whitestone span.bg-red-500,
+.whitestone span.bg-yellow-500,
+.whitestone span.bg-gray-500,
+.whitestone span.bg-purple-600,
+.whitestone span.bg-blue-600,
+.whitestone span.bg-indigo-600,
+.whitestone span.bg-teal-600 {
+  color: #ffffff !important;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -1303,6 +1319,11 @@
     font-size: 1rem !important;
   }
 
+  /* Reset padding for sidebar menu buttons to align with links */
+  button.bg-transparent {
+    padding: 0 !important;
+  }
+
   /* Reduce heading sizes for better hierarchy */
   h1 {
     font-size: 2.5rem !important;
@@ -1318,6 +1339,11 @@
 
   h4 {
     font-size: 1.25rem !important;
+  }
+
+  /* Override for logo text - force smaller size */
+  h4.logo-text {
+    font-size: 0.875rem !important;
   }
 
   h5,

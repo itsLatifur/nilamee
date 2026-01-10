@@ -14,12 +14,9 @@ export const appConfig = {
   // Application Name (used throughout the app)
   appName: "nilamee",
 
-  // Application Tagline/Slogan
-  tagline: "Transparency Leads to Your Victory",
-
   // Main Heading on Homepage
-  mainHeading1: "Transparent Auctions",
-  mainHeading2: "Be The Winner",
+  mainHeading1: "Discover Exclusive",
+  mainHeading2: "Auctions",
 
   // Company/Copyright Information
   companyName: "Nilamee, LLC.",

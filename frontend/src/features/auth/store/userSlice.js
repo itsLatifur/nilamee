@@ -6,10 +6,11 @@ import { API_ENDPOINTS } from "../../../config/env";
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    loading: false,
+    loading: true,
     isAuthenticated: false,
     user: {},
     leaderboard: [],
+    hasCheckedAuth: false,
   },
   reducers: {
     registerRequest(state, action) {
@@ -44,18 +45,21 @@ const userSlice = createSlice({
     },
     fetchUserRequest(state, action) {
       state.loading = true;
-      state.isAuthenticated = false;
-      state.user = {};
+      // Don't reset authentication state during fetch to prevent premature redirects
+      // state.isAuthenticated = false;
+      // state.user = {};
     },
     fetchUserSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload;
+      state.hasCheckedAuth = true;
     },
     fetchUserFailed(state, action) {
       state.loading = false;
       state.isAuthenticated = false;
       state.user = {};
+      state.hasCheckedAuth = true;
     },
 
     logoutSuccess(state, action) {

@@ -5,11 +5,17 @@ import AuctionManagement from "./Dashboard/sub-components/AuctionManagement";
 import AdminLayout from "../layout/AdminLayout";
 
 const ManageAuctions = () => {
-  const { user, isAuthenticated } = useSelector((state) => state.user);
+  const {
+    user,
+    isAuthenticated,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
 
   useEffect(() => {
     if (
+      hasCheckedAuth &&
       !(
         isAuthenticated &&
         (user?.role === "Super Admin" || user?.role === "Admin")
@@ -17,7 +23,7 @@ const ManageAuctions = () => {
     ) {
       navigateTo("/");
     }
-  }, [isAuthenticated, user]);
+  }, [hasCheckedAuth, isAuthenticated, user]);
 
   return (
     <AdminLayout

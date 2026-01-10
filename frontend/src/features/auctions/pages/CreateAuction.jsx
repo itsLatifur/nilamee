@@ -123,13 +123,18 @@ const CreateAuction = () => {
     dispatch(createAuction(formData));
   };
 
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const {
+    isAuthenticated,
+    user,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
   useEffect(() => {
-    if (!isAuthenticated || user.role !== "Auctioneer") {
+    if (hasCheckedAuth && (!isAuthenticated || user.role !== "Auctioneer")) {
       navigateTo("/");
     }
-  }, [isAuthenticated]);
+  }, [hasCheckedAuth, isAuthenticated]);
 
   return (
     <article className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">

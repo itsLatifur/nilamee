@@ -12,7 +12,7 @@ import { FaFacebook, FaPalette } from "react-icons/fa";
 import { RiInstagramFill } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdCloseCircleOutline, IoIosCreate } from "react-icons/io";
-import { FaUserCircle, FaBell } from "react-icons/fa";
+import { FaUserCircle, FaBell, FaWallet } from "react-icons/fa";
 import { FaFileInvoiceDollar } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,6 +41,7 @@ const SideDrawer = () => {
   };
 
   const handleRoleSwitch = async (newRole) => {
+    console.log("Switching to role:", newRole);
     try {
       const { data } = await axios.post(
         "http://localhost:5000/api/v1/user/switch-role",
@@ -50,10 +51,13 @@ const SideDrawer = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
+      console.log("Role switch response:", data);
       toast.success(data.message);
       // Refresh user data with new role
       dispatch(fetchUser());
     } catch (error) {
+      console.error("Role switch error:", error);
+      console.error("Error response:", error.response);
       toast.error(error.response?.data?.message || "Failed to switch role");
     }
   };
@@ -90,9 +94,9 @@ const SideDrawer = () => {
       <div
         className={`w-[100%] sm:w-[300px] bg-luxury-gradient h-full fixed top-0 ${
           show ? "left-0" : "left-[-100%]"
-        } transition-all duration-100 p-4 flex flex-col justify-between lg:left-0 border-r-[3px] border-r-golden-400 dark:border-r-golden-500 shadow-xl`}
+        } transition-all duration-100 p-3 flex flex-col justify-between lg:left-0 border-r-[3px] border-r-golden-400 dark:border-r-golden-500 shadow-xl overflow-y-auto`}
       >
-        <div className="relative">
+        <div className="relative mb-4">
           <Link
             to={
               isAuthenticated &&
@@ -101,14 +105,27 @@ const SideDrawer = () => {
                 ? "/dashboard"
                 : "/"
             }
+            className="flex items-center gap-1"
           >
-            <h4 className="text-3xl font-bold mb-6 tracking-wide">
-              <span className="text-gold-gradient bg-clip-text text-transparent">
+            <img
+              src={
+                currentTheme === THEMES.WHITESTONE
+                  ? "/nilamee-logo-blue.png"
+                  : "/nilamee-logo-gold.png"
+              }
+              alt="Nilamee Logo"
+              className="w-11 h-11 object-contain"
+            />
+            <h4
+              className="logo-text font-bold tracking-wide leading-none"
+              style={{ fontSize: "0.875rem" }}
+            >
+              <span className="text-gold-gradient bg-clip-text text-transparent whitestone:text-blue-600">
                 {appConfig.appName}
               </span>
             </h4>
           </Link>
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2 mt-4">
             {!(
               isAuthenticated &&
               user &&
@@ -311,7 +328,7 @@ const SideDrawer = () => {
             </>
           )}
           <hr className="mb-4 border-t-golden-500" />
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2">
             {isAuthenticated && (
               <>
                 <li>
@@ -326,24 +343,6 @@ const SideDrawer = () => {
                     <FaUserCircle /> Profile
                   </Link>
                 </li>
-                {!(user.role === "Super Admin" || user.role === "Admin") && (
-                  <li className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/20 p-3 rounded-md border border-golden-400 whitestone:border-gray-400">
-                    <p className="text-sm text-golden-300 whitestone:text-gray-700 mb-2 font-semibold">
-                      Current Mode: {user.role}
-                    </p>
-                    <button
-                      onClick={() =>
-                        handleRoleSwitch(
-                          user.role === "Auctioneer" ? "Bidder" : "Auctioneer"
-                        )
-                      }
-                      className="bg-gold-gradient font-semibold text-sm py-1 px-3 rounded-md text-warm-white whitestone:text-white border border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
-                    >
-                      Switch to{" "}
-                      {user.role === "Auctioneer" ? "Bidder" : "Auctioneer"}
-                    </button>
-                  </li>
-                )}
                 <li>
                   <button
                     onClick={() => setShowNotifications(true)}
@@ -355,15 +354,93 @@ const SideDrawer = () => {
                   >
                     <FaBell /> Notifications
                     {unreadCount > 0 && (
-                      <span className="absolute left-5 top-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-auto">
                         {unreadCount}
                       </span>
                     )}
                   </button>
                 </li>
+                {!(user.role === "Super Admin" || user.role === "Admin") && (
+                  <li>
+                    <button
+                      onClick={() =>
+                        handleRoleSwitch(
+                          user.role === "Auctioneer" ? "Bidder" : "Auctioneer"
+                        )
+                      }
+                      className="bg-burgundy-600 font-semibold text-xl py-1 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
+                    >
+                      Switch to{" "}
+                      {user.role === "Auctioneer" ? "Bidder" : "Auctioneer"}
+                    </button>
+                  </li>
+                )}
+                {user && user.role === "Auctioneer" && (
+                  <li>
+                    <Link
+                      to="/payment-info"
+                      className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                        location.pathname === "/payment-info"
+                          ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                          : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                      }`}
+                    >
+                      <FaWallet /> Payment Info
+                    </Link>
+                  </li>
+                )}
               </>
             )}
-            {isAuthenticated && <li></li>}
+            <li>
+              <button
+                onClick={() => setShowThemes(!showThemes)}
+                className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 w-full text-left bg-transparent border-0 outline-none ${
+                  showThemes
+                    ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                    : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                }`}
+              >
+                <FaPalette /> Theme
+                <span className="ml-auto">
+                  {showThemes ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+                </span>
+              </button>
+
+              {showThemes && (
+                <div className="mt-1 flex flex-col gap-1 pl-9">
+                  <button
+                    onClick={() => setTheme(THEMES.ROYAL_BURGUNDY)}
+                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
+                      currentTheme === THEMES.ROYAL_BURGUNDY
+                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
+                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
+                    }`}
+                  >
+                    Royal Burgundy
+                  </button>
+                  <button
+                    onClick={() => setTheme(THEMES.BLACK_GOLD)}
+                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
+                      currentTheme === THEMES.BLACK_GOLD
+                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
+                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
+                    }`}
+                  >
+                    Black Gold
+                  </button>
+                  <button
+                    onClick={() => setTheme(THEMES.WHITESTONE)}
+                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
+                      currentTheme === THEMES.WHITESTONE
+                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
+                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
+                    }`}
+                  >
+                    Whitestone
+                  </button>
+                </div>
+              )}
+            </li>
             <li>
               <Link
                 to="/how-it-works-info"
@@ -396,63 +473,6 @@ const SideDrawer = () => {
         </div>
 
         <div>
-          {/* Theme Selector */}
-          <ul className="flex flex-col gap-3 mb-4">
-            <li>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => setShowThemes(!showThemes)}
-                  className={`flex text-xl font-semibold gap-2 items-center justify-between hover:transition-all hover:duration-150 w-full text-left bg-transparent border-0 outline-none ${
-                    showThemes
-                      ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
-                      : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <FaPalette />
-                    <span>Theme</span>
-                  </div>
-                  {showThemes ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
-                </button>
-
-                {showThemes && (
-                  <div className="ml-8 flex flex-col gap-2 mt-1">
-                    <button
-                      onClick={() => setTheme(THEMES.ROYAL_BURGUNDY)}
-                      className={`text-left text-lg hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                        currentTheme === THEMES.ROYAL_BURGUNDY
-                          ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                          : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                      }`}
-                    >
-                      Royal Burgundy
-                    </button>
-                    <button
-                      onClick={() => setTheme(THEMES.BLACK_GOLD)}
-                      className={`text-left text-lg hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                        currentTheme === THEMES.BLACK_GOLD
-                          ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                          : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                      }`}
-                    >
-                      Black Gold
-                    </button>
-                    <button
-                      onClick={() => setTheme(THEMES.WHITESTONE)}
-                      className={`text-left text-lg hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                        currentTheme === THEMES.WHITESTONE
-                          ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                          : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                      }`}
-                    >
-                      Whitestone
-                    </button>
-                  </div>
-                )}
-              </div>
-            </li>
-          </ul>
-
           <div className="flex gap-2 items-center mb-2">
             <a
               href={appConfig.socialMedia.facebook}

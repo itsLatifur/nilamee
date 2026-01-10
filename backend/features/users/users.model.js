@@ -30,17 +30,16 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
   },
-  paymentMethods: {
-    bankTransfer: {
-      bankAccountNumber: String,
-      bankAccountName: String,
-      bankName: String,
-    },
-    easypaisa: {
-      easypaisaAccountNumber: Number,
-    },
-    paypal: {
-      paypalEmail: String,
+  paymentInfo: {
+    bankName: String,
+    bankAccountNumber: String,
+    bankAccountName: String,
+    mobileWallet: String,
+    mobileWalletNumber: String,
+    additionalInfo: String,
+    lastUpdated: {
+      type: Date,
+      default: null,
     },
   },
   role: {
@@ -91,9 +90,9 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    next();
+    return;
   }
   this.password = await bcrypt.hash(this.password, 10);
 });

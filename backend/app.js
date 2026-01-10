@@ -10,6 +10,7 @@ import auctionItemRouter from "./features/auctions/auctions.routes.js";
 import bidRouter from "./features/bids/bids.routes.js";
 import commissionRouter from "./features/commissions/commissions.routes.js";
 import superAdminRouter from "./features/admin/admin.routes.js";
+import paymentRouter from "./features/payments/payments.routes.js";
 import notificationRouter from "./router/notificationRoutes.js";
 import { endedAuctionCron } from "./features/auctions/jobs/endedAuction.job.js";
 import { verifyCommissionCron } from "./features/commissions/jobs/verifyCommission.job.js";
@@ -42,6 +43,7 @@ app.use("/api/v1/auctionitem", auctionItemRouter);
 app.use("/api/v1/bid", bidRouter);
 app.use("/api/v1/commission", commissionRouter);
 app.use("/api/v1/superadmin", superAdminRouter);
+app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/notification", notificationRouter);
 
 // Connect to database first, then start cron jobs

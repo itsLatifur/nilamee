@@ -26,6 +26,8 @@ export const API_ENDPOINTS = {
     LOGOUT: `${API_URL}/user/logout`,
     ME: `${API_URL}/user/me`,
     LEADERBOARD: `${API_URL}/user/leaderboard`,
+    UPDATE_PROFILE: `${API_URL}/user/update-profile`,
+    PAYMENT_INFO: `${API_URL}/user/payment-info`,
   },
 
   // Auction endpoints

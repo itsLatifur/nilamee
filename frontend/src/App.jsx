@@ -28,6 +28,10 @@ import ManageRoles from "./features/admin/pages/ManageRoles";
 import DatabaseControl from "./features/admin/pages/DatabaseControl";
 import Contact from "./shared/components/Contact";
 import UserProfile from "./features/profile/pages/UserProfile";
+import PaymentInfo from "./features/profile/pages/PaymentInfo";
+import PaymentSuccess from "./features/payments/pages/PaymentSuccess";
+import PaymentFailed from "./features/payments/pages/PaymentFailed";
+import PaymentCancelled from "./features/payments/pages/PaymentCancelled";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -71,6 +75,10 @@ const App = () => {
         />
         <Route path="/contact" element={<Contact />} />
         <Route path="/me" element={<UserProfile />} />
+        <Route path="/payment-info" element={<PaymentInfo />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failed" element={<PaymentFailed />} />
+        <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       </Routes>
       <ToastContainer position="top-right" />
     </Router>

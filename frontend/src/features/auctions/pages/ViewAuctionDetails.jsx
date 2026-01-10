@@ -10,19 +10,24 @@ const ViewAuctionDetails = () => {
   const { loading, auctionDetail, auctionBidders } = useSelector(
     (state) => state.auction
   );
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const {
+    isAuthenticated,
+    user,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
 
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!isAuthenticated || user.role === "Bidder") {
+    if (hasCheckedAuth && (!isAuthenticated || user.role === "Bidder")) {
       navigateTo("/");
     }
     if (id) {
       dispatch(getAuctionDetail(id));
     }
-  }, [isAuthenticated, id]);
+  }, [hasCheckedAuth, isAuthenticated, id]);
 
   return (
     <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">

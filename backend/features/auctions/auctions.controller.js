@@ -260,6 +260,8 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   data.commissionCalculated = false;
   data.currentBid = 0;
   data.highestBidder = null;
+  data.approvalStatus = "approved"; // Republished auctions bypass admin approval
+  data.rejectionReason = ""; // Clear any previous rejection reason
   auctionItem = await Auction.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,

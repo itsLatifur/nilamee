@@ -132,7 +132,7 @@ const UserManagement = () => {
     };
     return (
       <span
-        className={`px-2 py-1 rounded text-white text-xs ${badges[status]}`}
+        className={`px-2 py-1 rounded !text-white text-xs ${badges[status]}`}
       >
         {status}
       </span>
@@ -147,7 +147,7 @@ const UserManagement = () => {
       Bidder: "bg-teal-600",
     };
     return (
-      <span className={`px-2 py-1 rounded text-white text-xs ${badges[role]}`}>
+      <span className={`px-2 py-1 rounded !text-white text-xs ${badges[role]}`}>
         {role}
       </span>
     );
@@ -162,14 +162,14 @@ const UserManagement = () => {
           placeholder="Search by username or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 border rounded-lg"
+          className="flex-1 min-w-[200px] px-4 py-2 border rounded-lg bg-white whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
         />
 
         {/* Role Filter */}
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className="px-4 py-2 border rounded-lg bg-white whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
         >
           <option value="all">All Roles</option>
           <option value="Super Admin">Super Admin</option>
@@ -182,7 +182,7 @@ const UserManagement = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className="px-4 py-2 border rounded-lg bg-white whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -200,48 +200,69 @@ const UserManagement = () => {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2 text-left">Username</th>
-                  <th className="border p-2 text-left">Email</th>
-                  <th className="border p-2 text-left">Role</th>
-                  <th className="border p-2 text-left">Status</th>
-                  <th className="border p-2 text-left">Created</th>
-                  <th className="border p-2 text-left">Actions</th>
+                <tr className="bg-gray-100 whitestone:bg-gray-200">
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Username
+                  </th>
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Email
+                  </th>
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Role
+                  </th>
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Status
+                  </th>
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Created
+                  </th>
+                  <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50">
-                    <td className="border p-2">{user.userName}</td>
-                    <td className="border p-2">{user.email}</td>
-                    <td className="border p-2">{getRoleBadge(user.role)}</td>
-                    <td className="border p-2">
+                  <tr
+                    key={user._id}
+                    className="hover:bg-gray-50 whitestone:bg-white whitestone:hover:bg-gray-100"
+                  >
+                    <td className="border whitestone:border-gray-400 p-2 whitestone:text-gray-900">
+                      {user.userName}
+                    </td>
+                    <td className="border whitestone:border-gray-400 p-2 whitestone:text-gray-900">
+                      {user.email}
+                    </td>
+                    <td className="border whitestone:border-gray-400 p-2">
+                      {getRoleBadge(user.role)}
+                    </td>
+                    <td className="border whitestone:border-gray-400 p-2">
                       {getStatusBadge(user.status)}
                     </td>
-                    <td className="border p-2">
+                    <td className="border whitestone:border-gray-400 p-2 whitestone:text-gray-900">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="border p-2">
+                    <td className="border whitestone:border-gray-400 p-2">
                       <div className="flex flex-wrap gap-1">
                         {user.status === "active" && (
                           <>
                             <button
                               onClick={() => handleAction(user, "ban")}
-                              className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                              className="px-2 py-1 bg-red-500 !text-white rounded text-xs hover:bg-red-600"
                               disabled={user.role === "Super Admin"}
                             >
                               Ban
                             </button>
                             <button
                               onClick={() => handleAction(user, "suspend")}
-                              className="px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600"
+                              className="px-2 py-1 bg-yellow-500 !text-white rounded text-xs hover:bg-yellow-600"
                               disabled={user.role === "Super Admin"}
                             >
                               Suspend
                             </button>
                             <button
                               onClick={() => handleAction(user, "delete")}
-                              className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+                              className="px-2 py-1 bg-gray-500 !text-white rounded text-xs hover:bg-gray-600"
                               disabled={user.role === "Super Admin"}
                             >
                               Delete
@@ -251,7 +272,7 @@ const UserManagement = () => {
                                 onClick={() =>
                                   handleAction(user, "removeAdmin")
                                 }
-                                className="px-2 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600"
+                                className="px-2 py-1 bg-purple-500 !text-white rounded text-xs hover:bg-purple-600"
                               >
                                 Remove Admin
                               </button>
@@ -264,7 +285,7 @@ const UserManagement = () => {
                           <>
                             <button
                               onClick={() => handleAction(user, "restore")}
-                              className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                              className="px-2 py-1 bg-green-500 !text-white rounded text-xs hover:bg-green-600"
                             >
                               Restore
                             </button>
@@ -274,7 +295,7 @@ const UserManagement = () => {
                                   onClick={() =>
                                     handleAction(user, "permanentDelete")
                                   }
-                                  className="px-2 py-1 bg-black text-white rounded text-xs hover:bg-gray-800"
+                                  className="px-2 py-1 bg-black !text-white rounded text-xs hover:bg-gray-800"
                                   title="Permanently delete from database"
                                 >
                                   Permanent Delete
@@ -292,14 +313,14 @@ const UserManagement = () => {
 
           {/* Pagination */}
           <div className="mt-4 flex justify-between items-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 whitestone:text-gray-900">
               Total Users: {totalUsers} | Page {currentPage} of {totalPages}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                className="px-4 py-2 bg-gray-200 whitestone:bg-gray-300 whitestone:text-gray-900 rounded disabled:opacity-50"
               >
                 Previous
               </button>
@@ -308,7 +329,7 @@ const UserManagement = () => {
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                className="px-4 py-2 bg-gray-200 whitestone:bg-gray-300 whitestone:text-gray-900 rounded disabled:opacity-50"
               >
                 Next
               </button>
@@ -320,11 +341,11 @@ const UserManagement = () => {
       {/* Action Modal */}
       {showActionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4 capitalize">
+          <div className="bg-white whitestone:bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4 capitalize whitestone:text-gray-900">
               {actionType} User
             </h3>
-            <p className="mb-4">
+            <p className="mb-4 whitestone:text-gray-900">
               User: <strong>{selectedUser?.userName}</strong>
             </p>
 
@@ -334,7 +355,7 @@ const UserManagement = () => {
                 <>
                   {actionType === "suspend" && (
                     <div className="mb-4">
-                      <label className="block mb-2">
+                      <label className="block mb-2 whitestone:text-gray-900">
                         Suspend Duration (days)
                       </label>
                       <input
@@ -343,16 +364,18 @@ const UserManagement = () => {
                         onChange={(e) => setSuspendDays(e.target.value)}
                         min="1"
                         max="365"
-                        className="w-full px-4 py-2 border rounded"
+                        className="w-full px-4 py-2 border rounded whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
                       />
                     </div>
                   )}
                   <div className="mb-4">
-                    <label className="block mb-2">Reason</label>
+                    <label className="block mb-2 whitestone:text-gray-900">
+                      Reason
+                    </label>
                     <textarea
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full px-4 py-2 border rounded"
+                      className="w-full px-4 py-2 border rounded whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
                       rows="3"
                       placeholder={`Enter reason for ${actionType}...`}
                     />
@@ -361,7 +384,7 @@ const UserManagement = () => {
               )}
 
             {actionType === "restore" && (
-              <p className="mb-4 text-gray-600">
+              <p className="mb-4 text-gray-600 whitestone:text-gray-700">
                 This will restore the user's account to active status.
               </p>
             )}
@@ -380,7 +403,7 @@ const UserManagement = () => {
             )}
 
             {actionType === "removeAdmin" && (
-              <p className="mb-4 text-gray-600">
+              <p className="mb-4 text-gray-600 whitestone:text-gray-700">
                 This will revoke admin privileges and soft-delete the account.
               </p>
             )}
@@ -388,13 +411,13 @@ const UserManagement = () => {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowActionModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 !text-white rounded hover:bg-gray-400"
               >
                 Cancel
               </button>
               <button
                 onClick={executeAction}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-red-500 !text-white rounded hover:bg-red-600"
                 disabled={loading}
               >
                 {loading ? "Processing..." : "Confirm"}

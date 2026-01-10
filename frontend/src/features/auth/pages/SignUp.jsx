@@ -10,11 +10,6 @@ const SignUp = () => {
   const [address, setAddress] = useState("");
   const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
-  const [bankAccountName, setBankAccountName] = useState("");
-  const [bankAccountNumber, setBankAccountNumber] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [easypaisaAccountNumber, setEasypaisaAccountNumber] = useState("");
-  const [paypalEmail, setPaypalEmail] = useState("");
   const [profileImage, setProfileImage] = useState("");
   const [profileImagePreview, setProfileImagePreview] = useState("");
 
@@ -32,12 +27,6 @@ const SignUp = () => {
     formData.append("address", address);
     formData.append("role", role);
     formData.append("profileImage", profileImage);
-    role === "Auctioneer" &&
-      (formData.append("bankAccountName", bankAccountName),
-      formData.append("bankAccountNumber", bankAccountNumber),
-      formData.append("bankName", bankName),
-      formData.append("easypaisaAccountNumber", easypaisaAccountNumber),
-      formData.append("paypalEmail", paypalEmail));
     dispatch(register(formData));
   };
 
@@ -163,73 +152,6 @@ const SignUp = () => {
                   className="w-14 h-14 rounded-full"
                 />
                 <input type="file" onChange={imageHandler} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-4">
-              <label className="font-semibold text-xl md:2xl flex flex-col text-warm-white">
-                Payment Method Details{" "}
-                <span className="text-[12px] text-golden-300 whitestone:text-gray-900">
-                  Fill Payment Details Only If you are registering as an
-                  Auctioneer
-                </span>
-              </label>
-              <div className="flex flex-col gap-2">
-                <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
-                  Bank Details
-                </label>
-                <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-                  <select
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white"
-                    disabled={role === "Bidder"}
-                  >
-                    <option value="">Select Your Bank</option>
-                    <option value="Meezan Bank">Meezan Bank</option>
-                    <option value="UBL">UBL</option>
-                    <option value="HBL">HBL</option>
-                    <option value="Allied Bank">Allied Bank</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={bankAccountNumber}
-                    placeholder="IBAN / IFSC"
-                    onChange={(e) => setBankAccountNumber(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
-                  />
-                  <input
-                    type="text"
-                    value={bankAccountName}
-                    placeholder="Bank Account UserName"
-                    onChange={(e) => setBankAccountName(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-[16px] text-golden-300 whitestone:text-gray-800 font-semibold">
-                  Easypaisa And Paypal Details
-                </label>
-                <div className="flex flex-col gap-1 sm:flex-row sm:gap-4">
-                  <input
-                    type="number"
-                    value={easypaisaAccountNumber}
-                    placeholder="Easypaisa Account Number"
-                    onChange={(e) => setEasypaisaAccountNumber(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
-                  />
-                  <input
-                    type="email"
-                    value={paypalEmail}
-                    placeholder="Paypal Email"
-                    onChange={(e) => setPaypalEmail(e.target.value)}
-                    className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none sm:flex-1 text-warm-white placeholder-golden-300"
-                    disabled={role === "Bidder"}
-                  />
-                </div>
               </div>
             </div>
 

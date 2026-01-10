@@ -1,16 +1,117 @@
 import Spinner from "../../../shared/components/Spinner";
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { API_ENDPOINTS } from "../../../config/env";
+import { fetchUser } from "../../auth/store/userSlice";
 
 const UserProfile = () => {
-  const { user, isAuthenticated, loading } = useSelector((state) => state.user);
+  const { user, isAuthenticated, loading, hasCheckedAuth } = useSelector(
+    (state) => state.user
+  );
   const navigateTo = useNavigate();
+  const dispatch = useDispatch();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [formData, setFormData] = useState({
+    userName: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (hasCheckedAuth && !isAuthenticated) {
       navigateTo("/");
     }
-  }, [isAuthenticated]);
+  }, [hasCheckedAuth, isAuthenticated, navigateTo]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        userName: user.userName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+      });
+      setImagePreview(user.profileImage?.url || null);
+    }
+  }, [user]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("userName", formData.userName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("address", formData.address);
+      if (profileImage) {
+        formDataToSend.append("profileImage", profileImage);
+      }
+
+      const response = await axios.put(
+        API_ENDPOINTS.USER.UPDATE_PROFILE,
+        formDataToSend,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success(response.data.message);
+      dispatch(fetchUser());
+      setIsEditing(false);
+      setProfileImage(null);
+    } catch (error) {
+      console.error("Profile update error:", error);
+      console.error("Error response:", error.response);
+      const errorMessage =
+        error.response?.data?.message || "Failed to update profile";
+      toast.error(errorMessage);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      userName: user.userName || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      address: user.address || "",
+    });
+    setImagePreview(user.profileImage?.url || null);
+    setProfileImage(null);
+    setIsEditing(false);
+  };
+
   return (
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-start">
@@ -18,171 +119,154 @@ const UserProfile = () => {
           <Spinner />
         ) : (
           <>
-            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
-              <img
-                src={user.profileImage?.url}
-                alt="/imageHolder.jpg"
-                className="w-36 h-36 rounded-full"
-              />
-
-              <div className="mb-6 w-full">
-                <h3 className="text-xl font-semibold mb-4">Personal Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
-                      Username
-                    </label>
+            <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-6 flex flex-col gap-4 items-center py-6 justify-center rounded-md border-2 border-golden-400 whitestone:border-white/30 shadow-2xl">
+              <div className="relative">
+                <img
+                  src={imagePreview || "/imageHolder.jpg"}
+                  alt="Profile"
+                  className="w-36 h-36 rounded-full object-cover border-4 border-golden-400 whitestone:border-white/50"
+                />
+                {isEditing && (
+                  <label className="absolute bottom-0 right-0 bg-golden-500 whitestone:bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-golden-600 whitestone:hover:bg-blue-700 transition text-sm font-bold">
                     <input
-                      type="text"
-                      defaultValue={user.userName}
-                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
-                      disabled
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
-                      Email
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={user.email}
-                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
-                      disabled
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
-                      Phone
-                    </label>
-                    <input
-                      type="number"
-                      defaultValue={user.phone}
-                      className="w-ful mt-1 p-2 border-golden-400 whitestone:border-white/30 bg-transparent rounded-md focus:outline-none text-warm-white"
-                      disabled
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={user.address}
-                      className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                      disabled
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-warm-white">
-                      Role
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={user.role}
-                      className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                      disabled
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-warm-white">
-                      Joined On
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={user.createdAt?.substring(0, 10)}
-                      className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                      disabled
-                    />
-                  </div>
-                </div>
+                    Upload
+                  </label>
+                )}
               </div>
 
-              {user.role === "Auctioneer" && (
+              <form onSubmit={handleSubmit} className="w-full">
                 <div className="mb-6 w-full">
-                  <h3 className="text-xl font-semibold mb-4">
-                    Payment Details
-                  </h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-semibold text-warm-white whitestone:text-gray-900">
+                      Personal Details
+                    </h3>
+                    {!isEditing ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="bg-gold-gradient shadow-lg border-2 border-golden-400 whitestone:border-white/30 font-semibold text-sm transition-all duration-300 py-2 px-4 rounded-md !text-white btn-hover"
+                      >
+                        Edit Profile
+                      </button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={updating}
+                          className="bg-green-600 hover:bg-green-700 shadow-lg border-2 border-green-500 font-semibold text-sm transition-all duration-300 py-2 px-4 rounded-md !text-white disabled:opacity-50"
+                        >
+                          {updating ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          disabled={updating}
+                          className="bg-red-600 hover:bg-red-700 shadow-lg border-2 border-red-500 font-semibold text-sm transition-all duration-300 py-2 px-4 rounded-md !text-white disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-warm-white">
-                        Bank Name
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Username
                       </label>
                       <input
                         type="text"
-                        defaultValue={user.paymentMethods.bankTransfer.bankName}
-                        className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
+                        name="userName"
+                        value={formData.userName}
+                        onChange={handleChange}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none focus:border-golden-300 text-warm-white whitestone:text-gray-900"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none focus:border-golden-300 text-warm-white whitestone:text-gray-900"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none focus:border-golden-300 text-warm-white whitestone:text-gray-900"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Address
+                      </label>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none focus:border-golden-300 text-warm-white whitestone:text-gray-900"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Role
+                      </label>
+                      <input
+                        type="text"
+                        value={user.role}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none text-warm-white whitestone:text-gray-900"
                         disabled
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-warm-white">
-                        Bank Account (IBAN)
+                      <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
+                        Joined On
                       </label>
                       <input
                         type="text"
-                        defaultValue={
-                          user.paymentMethods.bankTransfer.bankAccountNumber
-                        }
-                        className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                        disabled
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-warm-white">
-                        User Name On Bank Account
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={
-                          user.paymentMethods.bankTransfer.bankAccountName
-                        }
-                        className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                        disabled
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-warm-white">
-                        Easypaisa Account Number
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={
-                          user.paymentMethods.easypaisa.easypaisaAccountNumber
-                        }
-                        className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
-                        disabled
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-warm-white">
-                        Paypal Email
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={user.paymentMethods.paypal.paypalEmail}
-                        className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
+                        value={user.createdAt?.substring(0, 10)}
+                        className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none text-warm-white whitestone:text-gray-900"
                         disabled
                       />
                     </div>
                   </div>
                 </div>
-              )}
+              </form>
 
               <div className="mb-6 w-full">
-                <h3 className="text-xl font-semibold mb-4">
+                <h3 className="text-xl font-semibold mb-4 text-warm-white whitestone:text-gray-900">
                   Other User Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {user.role === "Auctioneer" && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-warm-white">
+                        <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                           Unpaid Commissions
                         </label>
                         <input
                           type="text"
-                          defaultValue={user.unpaidCommission}
-                          className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
+                          value={user.unpaidCommission}
+                          className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none text-warm-white whitestone:text-gray-900"
                           disabled
                         />
                       </div>
@@ -191,24 +275,24 @@ const UserProfile = () => {
                   {user.role === "Bidder" && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-warm-white">
+                        <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                           Auctions Won
                         </label>
                         <input
                           type="text"
-                          defaultValue={user.auctionsWon}
-                          className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
+                          value={user.auctionsWon}
+                          className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none text-warm-white whitestone:text-gray-900"
                           disabled
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-warm-white">
+                        <label className="block text-sm font-medium text-golden-300 whitestone:text-gray-900">
                           Money Spent
                         </label>
                         <input
                           type="text"
-                          defaultValue={user.moneySpent}
-                          className="w-ful mt-1 p-2 border-gray-300 dark:border-gray-700 rounded-md focus:outline-none"
+                          value={user.moneySpent}
+                          className="w-full mt-1 p-2 border border-golden-400 whitestone:border-gray-400 bg-transparent rounded-md focus:outline-none text-warm-white whitestone:text-gray-900"
                           disabled
                         />
                       </div>

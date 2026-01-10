@@ -127,15 +127,28 @@ export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const switchRole = catchAsyncErrors(async (req, res, next) => {
+  console.log("Switch role called with:", req.body);
   const { role } = req.body;
+
   if (!role || (role !== "Auctioneer" && role !== "Bidder")) {
+    console.log("Invalid role:", role);
     return next(new ErrorHandler("Invalid role specified.", 400));
   }
+
+  console.log("User ID:", req.user._id);
   const user = await User.findById(req.user._id);
+
   if (!user) {
+    console.log("User not found");
     return next(new ErrorHandler("User not found.", 404));
   }
-  // Generate new token with updated role
+
+  console.log("Old role:", user.role, "New role:", role);
+  // Update role in database for persistence
   user.role = role;
+  await user.save();
+
+  console.log("Role updated successfully");
+  // Generate new token with updated role
   generateToken(user, `Switched to ${role} mode.`, 200, res);
 });

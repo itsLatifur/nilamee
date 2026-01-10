@@ -11,7 +11,8 @@
     "mongodb": "^7.0.0",
     "mongoose": "^9.1.1",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^6.9.14",
+    "sslcommerz-lts": "^1.2.0"
   },
   "name": "backend",
   "version": "1.0.0",

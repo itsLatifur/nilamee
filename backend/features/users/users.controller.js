@@ -16,38 +16,12 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("File format not supported.", 400));
   }
 
-  const {
-    userName,
-    email,
-    password,
-    phone,
-    address,
-    role,
-    bankAccountNumber,
-    bankAccountName,
-    bankName,
-    easypaisaAccountNumber,
-    paypalEmail,
-  } = req.body;
+  const { userName, email, password, phone, address, role } = req.body;
 
   if (!userName || !email || !phone || !password || !address || !role) {
     return next(new ErrorHandler("Please fill full form.", 400));
   }
-  if (role === "Auctioneer") {
-    if (!bankAccountName || !bankAccountNumber || !bankName) {
-      return next(
-        new ErrorHandler("Please provide your full bank details.", 400)
-      );
-    }
-    if (!easypaisaAccountNumber) {
-      return next(
-        new ErrorHandler("Please provide your easypaisa account number.", 400)
-      );
-    }
-    if (!paypalEmail) {
-      return next(new ErrorHandler("Please provide your paypal email.", 400));
-    }
-  }
+
   const isRegistered = await User.findOne({ email });
   if (isRegistered) {
     return next(new ErrorHandler("User already registered.", 400));
@@ -77,19 +51,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     profileImage: {
       public_id: cloudinaryResponse.public_id,
       url: cloudinaryResponse.secure_url,
-    },
-    paymentMethods: {
-      bankTransfer: {
-        bankAccountNumber,
-        bankAccountName,
-        bankName,
-      },
-      easypaisa: {
-        easypaisaAccountNumber,
-      },
-      paypal: {
-        paypalEmail,
-      },
     },
   });
   generateToken(user, "User Registered.", 201, res);
@@ -138,5 +99,169 @@ export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     leaderboard,
+  });
+});
+
+export const switchRole = catchAsyncErrors(async (req, res, next) => {
+  const { role } = req.body;
+
+  if (!role || (role !== "Auctioneer" && role !== "Bidder")) {
+    return next(new ErrorHandler("Invalid role specified.", 400));
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  // Update role in database for persistence
+  user.role = role;
+  await user.save();
+
+  // Generate new token with updated role
+  generateToken(user, `Switched to ${role} mode.`, 200, res);
+});
+
+export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  const { userName, email, phone, address } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  // Update basic fields if provided
+  if (userName) user.userName = userName;
+  if (email) user.email = email;
+  if (phone) user.phone = phone;
+  if (address) user.address = address;
+
+  // Mark fields as modified to ensure they're saved
+  if (userName) user.markModified("userName");
+  if (email) user.markModified("email");
+  if (phone) user.markModified("phone");
+  if (address) user.markModified("address");
+
+  // Handle profile image upload if provided
+  if (req.files && req.files.profileImage) {
+    const profileImage = req.files.profileImage;
+    const allowedFormats = ["image/png", "image/jpeg", "image/webp"];
+
+    if (!allowedFormats.includes(profileImage.mimetype)) {
+      return next(new ErrorHandler("File format not supported.", 400));
+    }
+
+    // Delete old image from cloudinary
+    if (user.profileImage && user.profileImage.public_id) {
+      await cloudinary.uploader.destroy(user.profileImage.public_id);
+    }
+
+    // Upload new image
+    const cloudinaryResponse = await cloudinary.uploader.upload(
+      profileImage.tempFilePath,
+      { folder: "MERN_AUCTION_PLATFORM_USERS" }
+    );
+
+    if (!cloudinaryResponse || cloudinaryResponse.error) {
+      return next(
+        new ErrorHandler("Failed to upload profile image to cloudinary.", 500)
+      );
+    }
+
+    user.profileImage = {
+      public_id: cloudinaryResponse.public_id,
+      url: cloudinaryResponse.secure_url,
+    };
+  }
+
+  try {
+    // Save user without running validators on unmodified fields
+    await user.save({ validateModifiedOnly: true });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return next(
+      new ErrorHandler(error.message || "Failed to update profile.", 500)
+    );
+  }
+});
+
+export const updatePaymentInfo = catchAsyncErrors(async (req, res, next) => {
+  const {
+    bankName,
+    bankAccountNumber,
+    bankAccountName,
+    mobileWallet,
+    mobileWalletNumber,
+    additionalInfo,
+  } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  user.paymentInfo = {
+    bankName: bankName || "",
+    bankAccountNumber: bankAccountNumber || "",
+    bankAccountName: bankAccountName || "",
+    mobileWallet: mobileWallet || "",
+    mobileWalletNumber: mobileWalletNumber || "",
+    additionalInfo: additionalInfo || "",
+    lastUpdated: new Date(),
+  };
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Payment information updated successfully.",
+    paymentInfo: user.paymentInfo,
+  });
+});
+
+export const getPaymentInfo = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    paymentInfo: user.paymentInfo || {},
+  });
+});
+
+export const resetPaymentInfo = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  user.paymentInfo = {
+    bankName: "",
+    bankAccountNumber: "",
+    bankAccountName: "",
+    mobileWallet: "",
+    mobileWalletNumber: "",
+    additionalInfo: "",
+    lastUpdated: new Date(),
+  };
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Payment information reset successfully.",
   });
 });

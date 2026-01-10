@@ -47,7 +47,27 @@ export const endedAuctionCron = () => {
             { new: true }
           );
           const subject = `Congratulations! You won the auction for ${auction.title}`;
-          const message = `Dear ${bidder.userName}, \n\nCongratulations! You have won the auction for ${auction.title}. \n\nBefore proceeding for payment contact your auctioneer via your auctioneer email:${auctioneer.email} \n\nPlease complete your payment using one of the following methods:\n\n1. **Bank Transfer**: \n- Account Name: ${auctioneer.paymentMethods.bankTransfer.bankAccountName} \n- Account Number: ${auctioneer.paymentMethods.bankTransfer.bankAccountNumber} \n- Bank: ${auctioneer.paymentMethods.bankTransfer.bankName}\n\n2. **Easypaise**:\n- You can send payment via Easypaise: ${auctioneer.paymentMethods.easypaisa.easypaisaAccountNumber}\n\n3. **PayPal**:\n- Send payment to: ${auctioneer.paymentMethods.paypal.paypalEmail}\n\n4. **Cash on Delivery (COD)**:\n- If you prefer COD, you must pay 20% of the total amount upfront before delivery.\n- To pay the 20% upfront, use any of the above methods.\n- The remaining 80% will be paid upon delivery.\n- If you want to see the condition of your auction item then send your email on this: ${auctioneer.email}\n\nPlease ensure your payment is completed by [Payment Due Date]. Once we confirm the payment, the item will be shipped to you.\n\nThank you for participating!\n\nBest regards,\nZeeshu Auction Team`;
+          const message = `Dear ${
+            bidder.userName
+          }, \n\nCongratulations! You have won the auction for ${
+            auction.title
+          }. \n\nBefore proceeding with payment, please contact your auctioneer via email: ${
+            auctioneer.email
+          }\n\nTo complete your payment securely, please use our SSLCommerz payment gateway:\n\n**Payment Link:** ${
+            process.env.FRONTEND_URL
+          }/auction/${
+            auction._id
+          }/payment\n\n**Payment Details:**\n- Auction Item: ${
+            auction.title
+          }\n- Final Bid Amount: BDT ${auction.currentBid}\n- Auctioneer: ${
+            auctioneer.userName
+          }\n- Auctioneer Email: ${auctioneer.email}\n- Auctioneer Phone: ${
+            auctioneer.phone || "N/A"
+          }\n\n**Payment Options:**\n- Pay securely online using SSLCommerz (Credit/Debit Card, Mobile Banking, Internet Banking)\n- Cash on Delivery (COD) - requires 20% upfront payment through SSLCommerz\n\nFor COD:\n1. Pay 20% (BDT ${
+            auction.currentBid * 0.2
+          }) upfront using the payment link above\n2. Pay remaining 80% upon delivery\n3. To inspect the item condition, contact the auctioneer at: ${
+            auctioneer.email
+          }\n\nPlease ensure your payment is completed within 7 days. Once we confirm the payment, the item will be shipped to you.\n\nThank you for participating!\n\nBest regards,\nNilamee Auction Team`;
           console.log("SENDING EMAIL TO HIGHEST BIDDER");
           sendEmail({ email: bidder.email, subject, message });
           console.log("SUCCESSFULLY EMAIL SEND TO HIGHEST BIDDER");

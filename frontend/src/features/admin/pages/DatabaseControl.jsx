@@ -5,11 +5,17 @@ import AuctionItemDelete from "./Dashboard/sub-components/AuctionItemDelete";
 import AdminLayout from "../layout/AdminLayout";
 
 const DatabaseControl = () => {
-  const { user, isAuthenticated } = useSelector((state) => state.user);
+  const {
+    user,
+    isAuthenticated,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
 
   useEffect(() => {
     if (
+      hasCheckedAuth &&
       !(
         isAuthenticated &&
         (user?.role === "Super Admin" || user?.role === "Admin")
@@ -17,7 +23,7 @@ const DatabaseControl = () => {
     ) {
       navigateTo("/");
     }
-  }, [isAuthenticated, user]);
+  }, [hasCheckedAuth, isAuthenticated, user]);
 
   return (
     <AdminLayout

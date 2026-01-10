@@ -6,6 +6,11 @@ const paymentProofSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  transactionId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
   proof: {
     public_id: {
       type: String,

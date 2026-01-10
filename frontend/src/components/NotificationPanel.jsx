@@ -101,8 +101,14 @@ const NotificationPanel = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-      <div className="bg-white w-full max-w-md h-full shadow-lg flex flex-col">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-md h-full shadow-lg flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <div>

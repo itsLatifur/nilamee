@@ -16,9 +16,9 @@ const UpcomingAuctions = () => {
 
   return (
     <>
-      <section className="my-8">
-        <h3 className="text-warm-white text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
-          Auctions For Today
+      <section className="my-12">
+        <h3 className="text-warm-white whitestone:text-gray-900 text-2xl font-bold mb-6 md:text-3xl lg:text-4xl">
+          Today's Auctions
         </h3>
         <div className="flex flex-wrap gap-6">
           <div className="bg-luxury-gradient w-full p-2 gap-10 rounded-md flex flex-col justify-between lg:flex-1 lg:h-auto lg:p-6 2xl:flex-none 2xl:basis-64 2xl:flex-grow 2xl:px-2  2xl:py-6 shadow-xl border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40">

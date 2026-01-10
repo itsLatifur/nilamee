@@ -8,21 +8,27 @@ import AdminLayout from "../layout/AdminLayout";
 
 const StatsPage = () => {
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.user);
+  const {
+    user,
+    isAuthenticated,
+    loading: userLoading,
+    hasCheckedAuth,
+  } = useSelector((state) => state.user);
   const navigateTo = useNavigate();
 
   useEffect(() => {
     if (
+      hasCheckedAuth &&
       !(
         isAuthenticated &&
         (user?.role === "Super Admin" || user?.role === "Admin")
       )
     ) {
       navigateTo("/");
-    } else {
+    } else if (isAuthenticated && hasCheckedAuth) {
       dispatch(getMonthlyRevenue());
     }
-  }, [isAuthenticated, user]);
+  }, [hasCheckedAuth, isAuthenticated, user]);
 
   return (
     <AdminLayout
