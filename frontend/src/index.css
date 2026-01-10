@@ -1319,9 +1319,10 @@
     font-size: 1rem !important;
   }
 
-  /* Reset padding for sidebar menu buttons to align with links */
-  button.bg-transparent {
+  /* Exception: Sidebar menu buttons - allow Tailwind padding classes */
+  button.bg-transparent.border-0:not(.bg-burgundy-600) {
     padding: 0 !important;
+    font-size: inherit !important;
   }
 
   /* Reduce heading sizes for better hierarchy */
