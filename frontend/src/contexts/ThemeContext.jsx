@@ -26,8 +26,12 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     // Apply theme to document
-    document.documentElement.classList.remove("dark", "whitestone");
-    document.body.classList.remove("dark-mode", "whitestone-mode");
+    document.documentElement.classList.remove("dark", "whitestone", "royal");
+    document.body.classList.remove(
+      "dark-mode",
+      "whitestone-mode",
+      "royal-mode"
+    );
 
     if (currentTheme === THEMES.BLACK_GOLD) {
       document.documentElement.classList.add("dark");
@@ -35,6 +39,9 @@ export const ThemeProvider = ({ children }) => {
     } else if (currentTheme === THEMES.WHITESTONE) {
       document.documentElement.classList.add("whitestone");
       document.body.classList.add("whitestone-mode");
+    } else if (currentTheme === THEMES.ROYAL_BURGUNDY) {
+      document.documentElement.classList.add("royal");
+      document.body.classList.add("royal-mode");
     }
 
     localStorage.setItem("theme", currentTheme);

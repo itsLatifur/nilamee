@@ -12,6 +12,7 @@ const AuctionView = ({
   onBid,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const nextImage = () => {
     if (
@@ -31,9 +32,10 @@ const AuctionView = ({
   if (loading) return <Spinner />;
 
   return (
-    <div className="flex gap-4 flex-col 2xl:flex-row">
+    <div className="auction-view flex gap-4 flex-col 2xl:flex-row 2xl:items-stretch">
+      {/* LEFT: Image block (unchanged), plus item details below */}
       <div className="flex-1 flex flex-col gap-3">
-        <div className="bg-white dark:bg-gray-900 w-full p-5 rounded-lg">
+        <div className="bg-white dark:bg-gray-900 w-full p-5 rounded-lg mt-3 2xl:self-stretch">
           <div className="relative">
             <img
               src={
@@ -99,40 +101,6 @@ const AuctionView = ({
             </div>
           )}
         </div>
-
-        <div className="flex flex-col justify-around pb-4">
-          <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
-            {auctionDetail?.title}
-          </h3>
-          {auctionDetail?.condition && (
-            <p className="text-xl font-semibold">
-              Condition:{" "}
-              <span className="text-golden-500 whitestone:text-gray-900">
-                {auctionDetail.condition}
-              </span>
-            </p>
-          )}
-          {auctionDetail?.startingBid != null && (
-            <p className="text-xl font-semibold">
-              Minimum Bid:{" "}
-              <span className="text-golden-500 whitestone:text-gray-900">
-                Rs.{auctionDetail.startingBid}
-              </span>
-            </p>
-          )}
-        </div>
-
-        {auctionDetail?.description && (
-          <>
-            <p className="text-xl w-fit font-bold">Auction Item Description</p>
-            <hr className="my-2 border-t-[1px] border-t-stone-700" />
-            {auctionDetail.description.split(". ").map((element, index) => (
-              <li key={index} className="text-[18px] my-2">
-                {element}
-              </li>
-            ))}
-          </>
-        )}
 
         {(auctionDetail?.location ||
           auctionDetail?.address ||
@@ -203,7 +171,54 @@ const AuctionView = ({
         )}
       </div>
 
-      <div className="flex-1">
+      {/* RIGHT: Title + Description (top, equal height to image), then Bids */}
+      <div className="flex-1 flex flex-col gap-4 2xl:items-stretch">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-golden-400 whitestone:border-white/30 mt-3 2xl:self-stretch">
+          <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+            {auctionDetail?.title}
+          </h3>
+          {auctionDetail?.condition && (
+            <p className="text-xl font-semibold">
+              Condition:{" "}
+              <span className="text-golden-500 whitestone:text-gray-900">
+                {auctionDetail.condition}
+              </span>
+            </p>
+          )}
+          {auctionDetail?.startingBid != null && (
+            <p className="text-xl font-semibold">
+              Minimum Bid:{" "}
+              <span className="text-golden-500 whitestone:text-gray-900">
+                Rs.{auctionDetail.startingBid}
+              </span>
+            </p>
+          )}
+          {auctionDetail?.description && (
+            <>
+              <p className="text-xl w-fit font-bold mt-4">
+                Auction Item Description
+              </p>
+              <hr className="my-2 border-t-[1px] border-t-stone-700" />
+              <div>
+                <p
+                  className={`${
+                    descExpanded ? "" : "line-clamp-3"
+                  } text-[18px] my-2 whitestone:text-gray-900`}
+                >
+                  {auctionDetail.description}
+                </p>
+                <button
+                  type="button"
+                  className="text-golden-500 whitestone:text-blue-600 font-semibold hover:underline btn-hover-no-scale"
+                  onClick={() => setDescExpanded((v) => !v)}
+                >
+                  {descExpanded ? "Show less" : "Show more"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="relative bg-luxury-gradient rounded-t-md p-4 shadow-xl border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500">
           <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient"></div>
           <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient"></div>

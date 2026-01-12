@@ -30,8 +30,8 @@ const ViewAuctionDetails = () => {
   }, [hasCheckedAuth, isAuthenticated, id]);
 
   return (
-    <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">
-      <div className="text-[16px] flex flex-wrap gap-2 items-center">
+    <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col auction-view">
+      <div className="text-[16px] inline-flex items-center gap-1 justify-start">
         <Link
           to="/"
           className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"

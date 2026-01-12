@@ -111,6 +111,7 @@ module.exports = {
     require("tailwindcss-animate"),
     function ({ addVariant }) {
       addVariant("whitestone", ".whitestone &");
+      addVariant("royal", ".royal &");
     },
   ],
 };

@@ -398,6 +398,36 @@
     filter: brightness(0.85);
   }
 
+  /* Utility: Clamp text to 3 lines with smooth overflow handling */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  /* Royal Burgundy: soften white card backgrounds within auction views */
+  .royal .auction-view .bg-white {
+    background: linear-gradient(
+      180deg,
+      #6d1028 0%,
+      #8b1538 100%
+    ) !important; /* darker burgundy 800 → 700 */
+    color: #ffffff; /* improve readability without forcing over existing explicit text colors */
+  }
+
+  .royal .auction-view .dark\:bg-gray-900 {
+    /* keep dark fallback untouched */
+  }
+
+  /* Optional subtle border tint for royal cards, preserving existing golden borders */
+  .royal .auction-view .border-golden-400,
+  .royal .auction-view .border-golden-300,
+  .royal .auction-view .dark\:border-golden-500,
+  .royal .auction-view .whitestone\:border-white\/30 {
+    /* no change: respect current border scheme */
+  }
+
   .dark .btn-hover-no-scale:active {
     filter: brightness(1.15);
   }
