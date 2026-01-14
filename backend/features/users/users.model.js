@@ -23,11 +23,14 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     public_id: {
       type: String,
-      required: true,
+      required: false,
+      default: "default-avatar",
     },
     url: {
       type: String,
-      required: true,
+      required: false,
+      default:
+        "https://res.cloudinary.com/default/image/upload/v1/default-avatar.png",
     },
   },
   paymentInfo: {
@@ -44,7 +47,19 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Auctioneer", "Bidder", "Admin", "Super Admin"],
+    // Allow custom roles beyond system roles
+    validate: {
+      validator: function (value) {
+        // System roles are always valid
+        const systemRoles = ["Auctioneer", "Bidder", "Admin", "Super Admin"];
+        if (systemRoles.includes(value)) {
+          return true;
+        }
+        // Custom roles should be non-empty strings
+        return typeof value === "string" && value.trim().length > 0;
+      },
+      message: "Role must be a valid system role or custom role name",
+    },
   },
   // Administrative status & moderation fields
   status: {

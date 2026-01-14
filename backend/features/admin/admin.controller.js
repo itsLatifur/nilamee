@@ -6,7 +6,40 @@ import { User } from "../users/users.model.js";
 import { Auction } from "../auctions/auctions.model.js";
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Notification } from "../../models/notificationSchema.js";
+import { Role } from "./admin.model.js";
+import { AdminActivityLog } from "./activityLog.model.js";
 import bcrypt from "bcrypt";
+
+// Helper function to log admin activities
+const logActivity = async ({
+  action,
+  performedBy,
+  performedByName,
+  performedByRole,
+  targetUser = null,
+  targetUserName = null,
+  targetResource = null,
+  changes = {},
+  reason = null,
+  ipAddress = null,
+}) => {
+  try {
+    await AdminActivityLog.create({
+      action,
+      performedBy,
+      performedByName,
+      performedByRole,
+      targetUser,
+      targetUserName,
+      targetResource,
+      changes,
+      reason,
+      ipAddress,
+    });
+  } catch (error) {
+    console.error("Failed to log activity:", error);
+  }
+};
 
 export const deleteAuctionItem = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
@@ -215,6 +248,20 @@ export const approveAuction = catchAsyncErrors(async (req, res, next) => {
   auction.approvalStatus = "approved";
   await auction.save();
 
+  // Log activity
+  await logActivity({
+    action: "APPROVE_AUCTION",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetResource: {
+      resourceType: "Auction",
+      resourceId: auction._id,
+      resourceName: auction.title,
+    },
+    ipAddress: req.ip,
+  });
+
   res.status(200).json({
     success: true,
     message: "Auction approved successfully.",
@@ -239,6 +286,21 @@ export const rejectAuction = catchAsyncErrors(async (req, res, next) => {
   auction.rejectionReason = reason || "Does not meet platform guidelines";
   await auction.save();
 
+  // Log activity
+  await logActivity({
+    action: "REJECT_AUCTION",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetResource: {
+      resourceType: "Auction",
+      resourceId: auction._id,
+      resourceName: auction.title,
+    },
+    reason: auction.rejectionReason,
+    ipAddress: req.ip,
+  });
+
   res.status(200).json({
     success: true,
     message: "Auction rejected.",
@@ -250,7 +312,7 @@ export const rejectAuction = catchAsyncErrors(async (req, res, next) => {
 
 // Create Admin (Super Admin and Admin can create admins)
 export const createAdmin = catchAsyncErrors(async (req, res, next) => {
-  const { userName, email, password, phone, address } = req.body;
+  const { userName, email, password, phone, address, role } = req.body;
 
   // Check if requester is Super Admin or Admin
   if (req.user.role !== "Super Admin" && req.user.role !== "Admin") {
@@ -260,6 +322,39 @@ export const createAdmin = catchAsyncErrors(async (req, res, next) => {
         403
       )
     );
+  }
+
+  // Validate role assignment based on requester permissions
+  if (req.user.role === "Admin") {
+    // Admin can only create Admin role or custom roles
+    if (role === "Super Admin") {
+      return next(
+        new ErrorHandler("Admins cannot create Super Admin accounts.", 403)
+      );
+    }
+    if (["Bidder", "Auctioneer"].includes(role)) {
+      return next(
+        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400)
+      );
+    }
+  } else if (req.user.role === "Super Admin") {
+    // Super Admin can create any admin role except Bidder/Auctioneer
+    if (["Bidder", "Auctioneer"].includes(role)) {
+      return next(
+        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400)
+      );
+    }
+  }
+
+  // Validate role exists (either system role or custom role)
+  const systemRoles = ["Super Admin", "Admin", "Bidder", "Auctioneer"];
+  const assignedRole = role || "Admin"; // Default to Admin if no role specified
+
+  if (!systemRoles.includes(assignedRole)) {
+    const customRole = await Role.findOne({ name: assignedRole });
+    if (!customRole) {
+      return next(new ErrorHandler("Invalid role. Role does not exist.", 400));
+    }
   }
 
   // Check if user already exists
@@ -277,11 +372,23 @@ export const createAdmin = catchAsyncErrors(async (req, res, next) => {
     password,
     phone,
     address,
-    role: "Admin",
-    profileImage: {
-      public_id: "",
-      url: "",
+    role: assignedRole,
+    // profileImage will use default values from schema
+  });
+
+  // Log activity
+  await logActivity({
+    action: "CREATE_ADMIN",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: admin._id,
+    targetUserName: admin.userName,
+    changes: {
+      role: assignedRole,
+      email: admin.email,
     },
+    ipAddress: req.ip,
   });
 
   res.status(201).json({
@@ -312,7 +419,12 @@ export const getAllUsers = catchAsyncErrors(async (req, res, next) => {
 
   // Filter by role
   if (role && role !== "all") {
-    query.role = role;
+    if (role === "admin-only") {
+      // Only return admin-level roles (exclude Bidder and Auctioneer)
+      query.role = { $nin: ["Bidder", "Auctioneer"] };
+    } else {
+      query.role = role;
+    }
   }
 
   // Filter by status
@@ -371,6 +483,18 @@ export const banUser = catchAsyncErrors(async (req, res, next) => {
   user.bannedReason = reason || "Violated platform policies";
   await user.save();
 
+  // Log activity
+  await logActivity({
+    action: "BAN_USER",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: user._id,
+    targetUserName: user.userName,
+    reason: user.bannedReason,
+    ipAddress: req.ip,
+  });
+
   // Send notification to user
   await Notification.create({
     userId: user._id,
@@ -422,6 +546,22 @@ export const suspendUser = catchAsyncErrors(async (req, res, next) => {
   user.suspendedUntil = suspendUntil;
   await user.save();
 
+  // Log activity
+  await logActivity({
+    action: "SUSPEND_USER",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: user._id,
+    targetUserName: user.userName,
+    changes: {
+      suspendedUntil: suspendUntil,
+      days: suspendDays,
+    },
+    reason: user.suspendedReason,
+    ipAddress: req.ip,
+  });
+
   // Send notification to user
   await Notification.create({
     userId: user._id,
@@ -469,6 +609,18 @@ export const softDeleteUser = catchAsyncErrors(async (req, res, next) => {
   user.deletedAt = new Date();
   user.deletionReason = reason || "Account deleted by administrator";
   await user.save();
+
+  // Log activity
+  await logActivity({
+    action: "DELETE_USER",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: user._id,
+    targetUserName: user.userName,
+    reason: user.deletionReason,
+    ipAddress: req.ip,
+  });
 
   // Send notification to user
   await Notification.create({
@@ -539,8 +691,13 @@ export const removeAdmin = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("User not found.", 404));
   }
 
-  // Can only remove Admin role users
-  if (user.role !== "Admin") {
+  // Cannot remove yourself
+  if (user._id.toString() === req.user._id.toString()) {
+    return next(new ErrorHandler("You cannot remove your own account.", 400));
+  }
+
+  // Cannot remove Bidders or Auctioneers (they're not admin users)
+  if (user.role === "Bidder" || user.role === "Auctioneer") {
     return next(new ErrorHandler("This user is not an admin.", 400));
   }
 
@@ -549,6 +706,22 @@ export const removeAdmin = catchAsyncErrors(async (req, res, next) => {
   user.deletedAt = new Date();
   user.deletionReason = "Admin role removed by Super Admin";
   await user.save();
+
+  // Log activity
+  await logActivity({
+    action: "REMOVE_ADMIN",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: user._id,
+    targetUserName: user.userName,
+    changes: {
+      previousRole: user.role,
+      status: "deleted",
+    },
+    reason: "Admin role removed by Super Admin",
+    ipAddress: req.ip,
+  });
 
   // Send notification to admin
   await Notification.create({
@@ -691,5 +864,302 @@ export const getSoftDeletedItems = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     items,
+  });
+});
+
+// Role Management Functions
+export const getAllRoles = catchAsyncErrors(async (req, res, next) => {
+  // System roles
+  const systemRoles = [
+    {
+      name: "Super Admin",
+      isSystemRole: true,
+      permissions: {
+        canManageAuctions: true,
+        canManageUsers: true,
+        canManagePayments: true,
+        canViewReports: true,
+        canManageRoles: true,
+        canApproveSuspensions: true,
+        canDeleteContent: true,
+      },
+    },
+    {
+      name: "Admin",
+      isSystemRole: true,
+      permissions: {
+        canManageAuctions: true,
+        canManageUsers: true,
+        canManagePayments: true,
+        canViewReports: true,
+        canManageRoles: false,
+        canApproveSuspensions: true,
+        canDeleteContent: false,
+      },
+    },
+  ];
+
+  // Fetch custom roles from database
+  const customRoles = await Role.find();
+
+  // Combine system and custom roles
+  const allRoles = [...systemRoles, ...customRoles];
+
+  res.status(200).json({
+    success: true,
+    roles: allRoles,
+  });
+});
+
+export const createRole = catchAsyncErrors(async (req, res, next) => {
+  const { name, description, permissions } = req.body;
+
+  if (!name || !permissions) {
+    return next(
+      new ErrorHandler("Role name and permissions are required.", 400)
+    );
+  }
+
+  // Only Super Admin can create roles
+  if (req.user.role !== "Super Admin") {
+    return next(
+      new ErrorHandler("Only Super Admin can create custom roles.", 403)
+    );
+  }
+
+  // Prevent creating system role names
+  if (["Super Admin", "Admin", "Bidder", "Auctioneer"].includes(name)) {
+    return next(new ErrorHandler("Cannot create system role.", 400));
+  }
+
+  // Check if role already exists
+  const existingRole = await Role.findOne({ name });
+  if (existingRole) {
+    return next(new ErrorHandler("Role with this name already exists.", 400));
+  }
+
+  // Create new role
+  const role = await Role.create({
+    name,
+    description,
+    permissions,
+    createdBy: req.user._id,
+  });
+
+  // Log activity
+  await logActivity({
+    action: "CREATE_ROLE",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetResource: {
+      resourceType: "Role",
+      resourceId: role._id,
+      resourceName: role.name,
+    },
+    changes: {
+      permissions,
+    },
+    ipAddress: req.ip,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Role created successfully.",
+    role,
+  });
+});
+
+export const deleteRole = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+
+  // Only Super Admin can delete roles
+  if (req.user.role !== "Super Admin") {
+    return next(
+      new ErrorHandler("Only Super Admin can delete custom roles.", 403)
+    );
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid role ID.", 400));
+  }
+
+  const role = await Role.findById(id);
+  if (!role) {
+    return next(new ErrorHandler("Role not found.", 404));
+  }
+
+  // Check if any users have this role
+  const usersWithRole = await User.countDocuments({ role: role.name });
+  if (usersWithRole > 0) {
+    return next(
+      new ErrorHandler(
+        `Cannot delete role. ${usersWithRole} user(s) are assigned this role.`,
+        400
+      )
+    );
+  }
+
+  await Role.findByIdAndDelete(id);
+
+  // Log activity
+  await logActivity({
+    action: "DELETE_ROLE",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetResource: {
+      resourceType: "Role",
+      resourceId: role._id,
+      resourceName: role.name,
+    },
+    ipAddress: req.ip,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Role deleted successfully.",
+  });
+});
+
+export const updateUserRole = catchAsyncErrors(async (req, res, next) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  if (!role) {
+    return next(new ErrorHandler("Role is required.", 400));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new ErrorHandler("Invalid user ID.", 400));
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  // Prevent changing system user roles (Bidder, Auctioneer)
+  if (["Bidder", "Auctioneer"].includes(user.role)) {
+    return next(
+      new ErrorHandler("Cannot change role of Bidders or Auctioneers.", 400)
+    );
+  }
+
+  // Check permissions based on requester role
+  if (req.user.role === "Admin") {
+    // Admin can only assign Admin role or custom roles
+    if (role === "Super Admin") {
+      return next(
+        new ErrorHandler("Admins cannot assign Super Admin role.", 403)
+      );
+    }
+  } else if (req.user.role !== "Super Admin") {
+    return next(
+      new ErrorHandler("Only Admin or Super Admin can update user roles.", 403)
+    );
+  }
+
+  // Validate role exists (either system role or custom role)
+  const systemRoles = ["Super Admin", "Admin", "Bidder", "Auctioneer"];
+  if (!systemRoles.includes(role)) {
+    const customRole = await Role.findOne({ name: role });
+    if (!customRole) {
+      return next(new ErrorHandler("Invalid role. Role does not exist.", 400));
+    }
+  }
+
+  const previousRole = user.role;
+  user.role = role;
+  await user.save();
+
+  // Log activity
+  await logActivity({
+    action: "UPDATE_USER_ROLE",
+    performedBy: req.user._id,
+    performedByName: req.user.userName,
+    performedByRole: req.user.role,
+    targetUser: user._id,
+    targetUserName: user.userName,
+    changes: {
+      previousRole,
+      newRole: role,
+    },
+    ipAddress: req.ip,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "User role updated successfully.",
+    user: {
+      _id: user._id,
+      userName: user.userName,
+      email: user.email,
+      role: user.role,
+    },
+  });
+});
+
+// Get Activity Logs (Super Admin Only)
+export const getActivityLogs = catchAsyncErrors(async (req, res, next) => {
+  // Only Super Admin can view activity logs
+  if (req.user.role !== "Super Admin") {
+    return next(
+      new ErrorHandler("Only Super Admin can view activity logs.", 403)
+    );
+  }
+
+  const {
+    page = 1,
+    limit = 50,
+    action,
+    performedBy,
+    startDate,
+    endDate,
+  } = req.query;
+
+  const query = {};
+
+  // Filter by action type
+  if (action) {
+    query.action = action;
+  }
+
+  // Filter by performer
+  if (performedBy) {
+    query.performedBy = performedBy;
+  }
+
+  // Filter by date range
+  if (startDate || endDate) {
+    query.createdAt = {};
+    if (startDate) {
+      query.createdAt.$gte = new Date(startDate);
+    }
+    if (endDate) {
+      query.createdAt.$lte = new Date(endDate);
+    }
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const logs = await AdminActivityLog.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
+    .populate("performedBy", "userName email role")
+    .populate("targetUser", "userName email role");
+
+  const totalLogs = await AdminActivityLog.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    logs,
+    pagination: {
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalLogs / parseInt(limit)),
+      totalLogs,
+      logsPerPage: parseInt(limit),
+    },
   });
 });

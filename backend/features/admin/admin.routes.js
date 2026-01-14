@@ -25,6 +25,11 @@ import {
   permanentDeleteAuction,
   permanentDeletePaymentProof,
   getSoftDeletedItems,
+  getAllRoles,
+  createRole,
+  deleteRole,
+  updateUserRole,
+  getActivityLogs,
 } from "./admin.controller.js";
 
 const router = express.Router();
@@ -177,6 +182,43 @@ router.get(
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
   getSoftDeletedItems
+);
+
+// Role Management Routes
+router.get(
+  "/roles",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  getAllRoles
+);
+
+router.post(
+  "/role/create",
+  isAuthenticated,
+  isAuthorized("Super Admin"),
+  createRole
+);
+
+router.delete(
+  "/role/delete/:id",
+  isAuthenticated,
+  isAuthorized("Super Admin"),
+  deleteRole
+);
+
+router.put(
+  "/user/role/:userId",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  updateUserRole
+);
+
+// Activity Logs (Super Admin Only)
+router.get(
+  "/activity-logs",
+  isAuthenticated,
+  isAuthorized("Super Admin"),
+  getActivityLogs
 );
 
 export default router;

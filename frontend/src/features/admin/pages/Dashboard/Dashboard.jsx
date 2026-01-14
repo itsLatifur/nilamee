@@ -140,7 +140,7 @@ const Dashboard = () => {
                   Manage Roles
                 </h3>
                 <p className="text-golden-300 whitestone:text-gray-700 mb-3">
-                  Create or revoke admin accounts
+                  Create custom roles and manage permissions
                 </p>
                 <Link
                   to="/dashboard/manage-roles"
@@ -149,20 +149,22 @@ const Dashboard = () => {
                   Open Roles
                 </Link>
               </div>
-              <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/60 rounded-md border border-golden-400 whitestone:border-gray-300 p-4">
-                <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-1">
-                  Database Control
-                </h3>
-                <p className="text-golden-300 whitestone:text-gray-700 mb-3">
-                  Danger zone: irreversible deletions
-                </p>
-                <Link
-                  to="/dashboard/database-control"
-                  className="bg-gold-gradient text-white font-semibold py-1 px-3 rounded-md border border-golden-400 whitestone:border-gray-400"
-                >
-                  Open Control
-                </Link>
-              </div>
+              {user && user.role === "Super Admin" && (
+                <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/60 rounded-md border border-golden-400 whitestone:border-gray-300 p-4">
+                  <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-1">
+                    Admin Activity Log
+                  </h3>
+                  <p className="text-golden-300 whitestone:text-gray-700 mb-3">
+                    Track all administrative actions
+                  </p>
+                  <Link
+                    to="/dashboard/activity-log"
+                    className="bg-gold-gradient text-white font-semibold py-1 px-3 rounded-md border border-golden-400 whitestone:border-gray-400"
+                  >
+                    View Logs
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </>

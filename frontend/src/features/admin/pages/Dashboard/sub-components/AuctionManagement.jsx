@@ -103,7 +103,7 @@ const AuctionManagement = () => {
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 backdrop-blur-sm border-2 border-golden-400 whitestone:border-white/30 rounded-lg">
-            <thead className="bg-burgundy-700 dark:bg-gray-900 whitestone:bg-gray-200 text-white whitestone:text-black">
+            <thead className="whitestone:bg-gray-200 text-white whitestone:text-black">
               <tr>
                 <th className="py-2 px-4 text-left">Image</th>
                 <th className="py-2 px-4 text-left">Title</th>
@@ -125,11 +125,17 @@ const AuctionManagement = () => {
                     <td className="py-2 px-4">{auction.title}</td>
                     <td className="py-2 px-4">
                       {auction.isDeleted ? (
-                        <span className="px-2 py-1 bg-red-500 text-white rounded text-xs">
+                        <span
+                          className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                          style={{ color: "#ffffff" }}
+                        >
                           Deleted
                         </span>
                       ) : (
-                        <span className="px-2 py-1 bg-green-500 text-white rounded text-xs">
+                        <span
+                          className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                          style={{ color: "#ffffff" }}
+                        >
                           Active
                         </span>
                       )}
@@ -137,7 +143,7 @@ const AuctionManagement = () => {
                     <td className="py-2 px-4 flex flex-wrap gap-2">
                       <Link
                         to={`/auction/details/${auction._id}`}
-                        className="bg-gold-gradient whitestone:bg-amber-600 btn-hover text-warm-white whitestone:text-white py-1 px-3 rounded-md border-2 border-golden-400 whitestone:border-amber-500 shadow-lg transition-all duration-300"
+                        className="bg-gold-gradient whitestone:bg-amber-600 btn-hover text-warm-white whitestone:text-white py-1 px-3 rounded-md border-2 border-golden-400 whitestone:border-amber-500 shadow-lg transition-all duration-300 inline-flex items-center justify-center"
                       >
                         View
                       </Link>
@@ -158,7 +164,7 @@ const AuctionManagement = () => {
                               setSelectedAuction(auction);
                               setShowPermanentDeleteModal(true);
                             }}
-                            className="bg-black text-white py-1 px-3 rounded-md hover:bg-gray-800 border-2 border-red-500"
+                            className="bg-black py-1 px-3 rounded-md hover:bg-gray-800 border-2 border-red-500 whitestone:text-white"
                           >
                             Permanent Delete
                           </button>
@@ -203,13 +209,13 @@ const AuctionManagement = () => {
                   setShowDeleteModal(false);
                   setDeleteReason("");
                 }}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 whitestone:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSoftDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-red-500 rounded hover:bg-red-600 whitestone:text-white"
               >
                 Soft Delete
               </button>
@@ -240,13 +246,13 @@ const AuctionManagement = () => {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowPermanentDeleteModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 whitestone:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePermanentDelete}
-                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                className="px-4 py-2 bg-black rounded hover:bg-gray-800 whitestone:text-white"
               >
                 Permanently Delete
               </button>

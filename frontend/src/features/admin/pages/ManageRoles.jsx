@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import CreateAdmin from "./Dashboard/sub-components/CreateAdmin";
+import RoleManagement from "./Dashboard/sub-components/RoleManagement";
 import AdminLayout from "../layout/AdminLayout";
 
 const ManageRoles = () => {
@@ -28,9 +28,9 @@ const ManageRoles = () => {
   return (
     <AdminLayout
       title="Manage Roles"
-      subtitle="Assign and revoke admin privileges"
+      subtitle="Create custom roles and assign permissions"
     >
-      <CreateAdmin />
+      <RoleManagement />
     </AdminLayout>
   );
 };

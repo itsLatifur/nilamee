@@ -250,6 +250,20 @@ const SideDrawer = () => {
                       <MdKeyboardArrowDown /> Manage Roles
                     </Link>
                   </li>
+                  {user && user.role === "Super Admin" && (
+                    <li>
+                      <Link
+                        to="/dashboard/activity-log"
+                        className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                          location.pathname === "/dashboard/activity-log"
+                            ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                            : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                        }`}
+                      >
+                        <MdKeyboardArrowDown /> Activity Log
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <Link
                       to="/dashboard/stats"
@@ -284,18 +298,6 @@ const SideDrawer = () => {
                       }`}
                     >
                       <FaFileInvoiceDollar /> Payment Proofs
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/dashboard/database-control"
-                      className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
-                        location.pathname === "/dashboard/database-control"
-                          ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
-                          : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
-                      }`}
-                    >
-                      <MdKeyboardArrowUp /> Database Control
                     </Link>
                   </li>
                 </>

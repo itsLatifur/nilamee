@@ -260,7 +260,7 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   data.commissionCalculated = false;
   data.currentBid = 0;
   data.highestBidder = null;
-  data.approvalStatus = "approved"; // Republished auctions bypass admin approval
+  data.approvalStatus = "pending"; // Republished auctions require admin approval
   data.rejectionReason = ""; // Clear any previous rejection reason
   auctionItem = await Auction.findByIdAndUpdate(id, data, {
     new: true,
@@ -280,7 +280,7 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     auctionItem,
-    message: `Auction republished and will be active on ${req.body.startTime}`,
+    message: `Auction republished successfully and is pending admin approval.`,
     createdBy,
   });
 });

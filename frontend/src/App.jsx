@@ -26,6 +26,7 @@ import PaymentProofsPage from "./features/admin/pages/PaymentProofsPage";
 import StatsPage from "./features/admin/pages/StatsPage";
 import ManageRoles from "./features/admin/pages/ManageRoles";
 import DatabaseControl from "./features/admin/pages/DatabaseControl";
+import AdminActivityLog from "./features/admin/pages/Dashboard/sub-components/AdminActivityLog";
 import Contact from "./shared/components/Contact";
 import UserProfile from "./features/profile/pages/UserProfile";
 import PaymentInfo from "./features/profile/pages/PaymentInfo";
@@ -69,6 +70,7 @@ const App = () => {
         />
         <Route path="/dashboard/stats" element={<StatsPage />} />
         <Route path="/dashboard/manage-roles" element={<ManageRoles />} />
+        <Route path="/dashboard/activity-log" element={<AdminActivityLog />} />
         <Route
           path="/dashboard/database-control"
           element={<DatabaseControl />}

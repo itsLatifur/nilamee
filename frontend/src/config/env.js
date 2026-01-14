@@ -76,6 +76,13 @@ export const API_ENDPOINTS = {
     PERMANENT_DELETE_PROOF: (id) =>
       `${API_URL}/superadmin/permanent/paymentproof/${id}`,
     SOFT_DELETED: `${API_URL}/superadmin/soft-deleted`,
+    // Role management
+    ROLES: `${API_URL}/superadmin/roles`,
+    CREATE_ROLE: `${API_URL}/superadmin/role/create`,
+    DELETE_ROLE: (id) => `${API_URL}/superadmin/role/delete/${id}`,
+    UPDATE_USER_ROLE: (userId) => `${API_URL}/superadmin/user/role/${userId}`,
+    // Activity logs
+    ACTIVITY_LOGS: `${API_URL}/superadmin/activity-logs`,
   },
 
   // Notification endpoints

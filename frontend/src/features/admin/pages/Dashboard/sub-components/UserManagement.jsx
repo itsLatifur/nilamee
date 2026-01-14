@@ -132,7 +132,8 @@ const UserManagement = () => {
     };
     return (
       <span
-        className={`px-2 py-1 rounded !text-white text-xs ${badges[status]}`}
+        className={`px-2 py-1 rounded text-xs text-white ${badges[status]}`}
+        style={{ color: "#ffffff" }}
       >
         {status}
       </span>
@@ -147,7 +148,10 @@ const UserManagement = () => {
       Bidder: "bg-teal-600",
     };
     return (
-      <span className={`px-2 py-1 rounded !text-white text-xs ${badges[role]}`}>
+      <span
+        className={`px-2 py-1 rounded text-xs text-white ${badges[role]}`}
+        style={{ color: "#ffffff" }}
+      >
         {role}
       </span>
     );
@@ -200,7 +204,7 @@ const UserManagement = () => {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-100 whitestone:bg-gray-200">
+                <tr className="whitestone:bg-gray-200">
                   <th className="border whitestone:border-gray-400 p-2 text-left whitestone:text-gray-900">
                     Username
                   </th>
@@ -248,21 +252,21 @@ const UserManagement = () => {
                           <>
                             <button
                               onClick={() => handleAction(user, "ban")}
-                              className="px-2 py-1 bg-red-500 !text-white rounded text-xs hover:bg-red-600"
+                              className="px-2 py-1 bg-red-500 text-xs rounded hover:bg-red-600 whitestone:text-white"
                               disabled={user.role === "Super Admin"}
                             >
                               Ban
                             </button>
                             <button
                               onClick={() => handleAction(user, "suspend")}
-                              className="px-2 py-1 bg-yellow-500 !text-white rounded text-xs hover:bg-yellow-600"
+                              className="px-2 py-1 bg-yellow-500 text-xs rounded hover:bg-yellow-600 whitestone:text-white"
                               disabled={user.role === "Super Admin"}
                             >
                               Suspend
                             </button>
                             <button
                               onClick={() => handleAction(user, "delete")}
-                              className="px-2 py-1 bg-gray-500 !text-white rounded text-xs hover:bg-gray-600"
+                              className="px-2 py-1 bg-gray-500 text-xs rounded hover:bg-gray-600 whitestone:text-white"
                               disabled={user.role === "Super Admin"}
                             >
                               Delete
@@ -272,7 +276,7 @@ const UserManagement = () => {
                                 onClick={() =>
                                   handleAction(user, "removeAdmin")
                                 }
-                                className="px-2 py-1 bg-purple-500 !text-white rounded text-xs hover:bg-purple-600"
+                                className="px-2 py-1 bg-purple-500 text-xs rounded hover:bg-purple-600 whitestone:text-white"
                               >
                                 Remove Admin
                               </button>
@@ -285,7 +289,7 @@ const UserManagement = () => {
                           <>
                             <button
                               onClick={() => handleAction(user, "restore")}
-                              className="px-2 py-1 bg-green-500 !text-white rounded text-xs hover:bg-green-600"
+                              className="px-2 py-1 bg-green-500 text-xs rounded hover:bg-green-600 whitestone:text-white"
                             >
                               Restore
                             </button>
@@ -295,7 +299,7 @@ const UserManagement = () => {
                                   onClick={() =>
                                     handleAction(user, "permanentDelete")
                                   }
-                                  className="px-2 py-1 bg-black !text-white rounded text-xs hover:bg-gray-800"
+                                  className="px-2 py-1 bg-black text-xs rounded hover:bg-gray-800 whitestone:text-white"
                                   title="Permanently delete from database"
                                 >
                                   Permanent Delete
@@ -411,13 +415,13 @@ const UserManagement = () => {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowActionModal(false)}
-                className="px-4 py-2 bg-gray-300 !text-white rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 whitestone:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={executeAction}
-                className="px-4 py-2 bg-red-500 !text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-red-500 rounded hover:bg-red-600 whitestone:text-white"
                 disabled={loading}
               >
                 {loading ? "Processing..." : "Confirm"}

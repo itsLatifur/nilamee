@@ -649,8 +649,24 @@
   .whitestone
     span:not(.text-gold-gradient):not(.bg-gold-gradient *):not(
       .bg-burgundy-gradient *
+    ):not(.bg-green-500):not(.bg-red-500):not(.bg-yellow-500):not(
+      .bg-gray-500
+    ):not(.bg-purple-600):not(.bg-blue-600):not(.bg-indigo-600):not(
+      .bg-teal-600
     ) {
     color: #475569 !important;
+  }
+
+  /* Whitestone: Force white text on badge spans */
+  .whitestone span.bg-green-500,
+  .whitestone span.bg-red-500,
+  .whitestone span.bg-yellow-500,
+  .whitestone span.bg-gray-500,
+  .whitestone span.bg-purple-600,
+  .whitestone span.bg-blue-600,
+  .whitestone span.bg-indigo-600,
+  .whitestone span.bg-teal-600 {
+    color: #ffffff !important;
   }
 
   .whitestone li {
@@ -725,6 +741,18 @@
     background: rgba(255, 255, 255, 0.8) !important;
     color: #1e293b !important;
     border-color: rgba(226, 232, 240, 0.5) !important;
+  }
+
+  /* Force white text on badge spans inside table cells */
+  .whitestone td span.bg-green-500,
+  .whitestone td span.bg-red-500,
+  .whitestone td span.bg-yellow-500,
+  .whitestone td span.bg-gray-500,
+  .whitestone td span.bg-purple-600,
+  .whitestone td span.bg-blue-600,
+  .whitestone td span.bg-indigo-600,
+  .whitestone td span.bg-teal-600 {
+    color: #ffffff !important;
   }
 
   .whitestone tr:hover td {
@@ -900,7 +928,11 @@
   .whitestone [class*="bg-gradient"]:not(.republish-modal) p,
   .whitestone
     [class*="bg-gradient"]:not(.republish-modal)
-    span:not(.bg-gold-gradient *):not(.bg-burgundy-gradient *) {
+    span:not(.bg-gold-gradient *):not(.bg-burgundy-gradient *):not(
+      .bg-green-500
+    ):not(.bg-red-500):not(.bg-yellow-500):not(.bg-gray-500):not(
+      .bg-purple-600
+    ):not(.bg-blue-600):not(.bg-indigo-600):not(.bg-teal-600) {
     color: #334155 !important;
   }
 
@@ -1287,7 +1319,12 @@
   }
 
   .whitestone p:not(.bg-blue-600 *):not(.bg-burgundy-600 *),
-  .whitestone span:not(.bg-blue-600 *):not(.bg-burgundy-600 *),
+  .whitestone
+    span:not(.bg-blue-600 *):not(.bg-burgundy-600 *):not(.bg-green-500):not(
+      .bg-red-500
+    ):not(.bg-yellow-500):not(.bg-gray-500):not(.bg-purple-600):not(
+      .bg-blue-600
+    ):not(.bg-indigo-600):not(.bg-teal-600),
   .whitestone div:not(.bg-blue-600 *):not(.bg-burgundy-600 *) {
     color: #1e293b !important;
   }
@@ -1629,4 +1666,33 @@
       width: 100%;
     }
   }
+}
+
+/* =================================================================
+   WHITESTONE BADGE TEXT FIX - Highest Specificity Override
+   Must come LAST to override all other span rules
+   ================================================================= */
+.whitestone span.bg-green-500,
+.whitestone span.bg-red-500,
+.whitestone span.bg-yellow-500,
+.whitestone span.bg-gray-500,
+.whitestone span.bg-purple-600,
+.whitestone span.bg-blue-600,
+.whitestone span.bg-indigo-600,
+.whitestone span.bg-teal-600 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Even more specific - for badges inside table cells */
+.whitestone td span.bg-green-500,
+.whitestone td span.bg-red-500,
+.whitestone td span.bg-yellow-500,
+.whitestone td span.bg-gray-500,
+.whitestone td span.bg-purple-600,
+.whitestone td span.bg-blue-600,
+.whitestone td span.bg-indigo-600,
+.whitestone td span.bg-teal-600 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
