@@ -82,7 +82,9 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
                 {formatTimeLeft(timeLeft)}
               </span>
             ) : (
-              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">Time's up!</span>
+              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">
+                Time's up!
+              </span>
             )}
           </p>
           <div className="flex flex-col gap-2 mt-4">
@@ -133,18 +135,18 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
         openDrawer && id ? "bottom-0" : "-bottom-full"
       }  left-0 w-full transition-all duration-300 h-full bg-[#00000087] flex items-end`}
     >
-      <div className="bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 whitestone:bg-white/25 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl h-fit transition-all duration-300 w-full border-t-4 border-golden-400 whitestone:border-white/30">
+      <div className="republish-modal bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 royal:from-burgundy-950/95 royal:to-golden-950/90 whitestone:bg-white backdrop-blur-sm whitestone:backdrop-blur-none h-fit transition-all duration-300 w-full border-t-4 border-golden-400 dark:border-golden-500 royal:border-golden-400 whitestone:border-blue-500 whitestone:shadow-xl">
         <div className="w-full px-5 py-8 sm:max-w-[640px] sm:m-auto">
-          <h3 className="text-golden-500 whitestone:text-gray-900  text-3xl font-semibold text-center mb-1">
+          <h3 className="text-golden-500 whitestone:text-blue-600 text-3xl font-semibold text-center mb-1">
             Republish Auction
           </h3>
-          <p className="text-golden-300 whitestone:text-gray-900">
+          <p className="text-golden-300 whitestone:text-blue-700">
             Let's republish auction with same details but new starting and
             ending time.
           </p>
           <form className="flex flex-col gap-5 my-5">
             <div className="flex flex-col gap-3">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+              <label className="text-[16px] text-golden-300 whitestone:text-blue-700 whitestone:font-semibold">
                 Republish Auction Start Time
               </label>
               <DatePicker
@@ -154,11 +156,11 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full text-warm-white"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-blue-400 focus:outline-none w-full text-warm-white whitestone:text-gray-900"
               />
             </div>
             <div className="flex flex-col gap-3">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+              <label className="text-[16px] text-golden-300 whitestone:text-blue-700 whitestone:font-semibold">
                 Republish Auction End Time
               </label>
               <DatePicker
@@ -168,13 +170,13 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
                 timeFormat="HH:mm"
                 timeIntervals={15}
                 dateFormat={"MMMM d, yyyy h,mm aa"}
-                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-gray-400 focus:outline-none w-full text-warm-white"
+                className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-golden-400 whitestone:border-b-blue-400 focus:outline-none w-full text-warm-white whitestone:text-gray-900"
               />
             </div>
             <div>
               <button
                 type="button"
-                className="bg-gold-gradient whitestone:bg-amber-600 btn-hover flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg whitestone:text-white"
+                className="bg-gold-gradient whitestone:bg-blue-600 btn-hover flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 border-2 border-golden-400 whitestone:border-blue-700 shadow-lg"
                 onClick={handleRepbulishAuction}
               >
                 {loading ? "Republishing" : "Republish"}
