@@ -18,7 +18,14 @@ const AuctionView = ({
 
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const restrictedRoles = ["Auctioneer", "Admin", "Super Admin"];
-  const canPlaceBid = !(user && restrictedRoles.includes(user.role));
+  const isOwner = !!(
+    user &&
+    auctionDetail &&
+    (auctionDetail.createdBy?._id?.toString?.() === user._id?.toString?.() ||
+      auctionDetail.createdBy?.toString?.() === user._id?.toString?.())
+  );
+  const canPlaceBid =
+    !(user && restrictedRoles.includes(user.role)) && !isOwner;
 
   const nextImage = () => {
     if (
