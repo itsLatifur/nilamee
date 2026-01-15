@@ -5,6 +5,8 @@ import {
   getMyAuctionItems,
   removeFromAuction,
   republishItem,
+  markAsShipped,
+  confirmDelivery,
 } from "./auctions.controller.js";
 import {
   isAuthenticated,
@@ -48,5 +50,14 @@ router.put(
   isAuthorized("Auctioneer"),
   republishItem
 );
+
+router.put(
+  "/mark-shipped/:id",
+  isAuthenticated,
+  isAuthorized("Auctioneer"),
+  markAsShipped
+);
+
+router.put("/confirm-delivery/:id", isAuthenticated, confirmDelivery);
 
 export default router;

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { API_ENDPOINTS } from "../../../config/env";
+import { formatBDT } from "@/shared/utils/currency";
 
 const SubmitCommission = () => {
   const [amount, setAmount] = useState("");
@@ -20,7 +21,9 @@ const SubmitCommission = () => {
 
     if (parseFloat(amount) > user.unpaidCommission) {
       toast.error(
-        `Amount cannot exceed your unpaid commission: BDT ${user.unpaidCommission}`
+        `Amount cannot exceed your unpaid commission: ${formatBDT(
+          user.unpaidCommission
+        )}`
       );
       return;
     }
@@ -60,7 +63,7 @@ const SubmitCommission = () => {
               <>
                 <div className="bg-golden-950/30 dark:bg-gray-900/30 whitestone:bg-blue-50 p-4 rounded-md border border-golden-400 whitestone:border-blue-300">
                   <p className="text-golden-300 whitestone:text-gray-900 text-lg font-semibold">
-                    Unpaid Commission: BDT {user.unpaidCommission}
+                    Unpaid Commission: {formatBDT(user.unpaidCommission)}
                   </p>
                   <p className="text-warm-white whitestone:text-gray-700 text-sm mt-2">
                     Pay your commission securely using SSLCommerz payment

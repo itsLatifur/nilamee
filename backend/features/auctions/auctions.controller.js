@@ -1,10 +1,18 @@
 import { Auction } from "./auctions.model.js";
 import { User } from "../users/users.model.js";
 import { Bid } from "../bids/bids.model.js";
+import { Escrow } from "../escrow/escrow.model.js";
+import { TransactionHistory } from "../transactions/transactionHistory.model.js";
 import { catchAsyncErrors } from "../../shared/middlewares/async.middleware.js";
 import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
+import { sendEmail } from "../../utils/sendEmail.js";
+import {
+  calculateBadgeTier,
+  calculateStarRating,
+  calculateTrustPoints,
+} from "../../shared/utils/trustScoreUtils.js";
 
 export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -282,5 +290,196 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
     auctionItem,
     message: `Auction republished successfully and is pending admin approval.`,
     createdBy,
+  });
+});
+
+// Mark auction item as shipped (seller action)
+export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { trackingNumber } = req.body;
+
+  const auction = await Auction.findById(id).populate("highestBidder");
+
+  if (!auction) {
+    return next(new ErrorHandler("Auction not found.", 404));
+  }
+
+  // Verify user is the seller
+  if (auction.createdBy.toString() !== req.user._id.toString()) {
+    return next(
+      new ErrorHandler("You are not authorized to update this auction.", 403)
+    );
+  }
+
+  // Verify payment has been made
+  if (auction.paymentStatus !== "Paid") {
+    return next(new ErrorHandler("Payment has not been received yet.", 400));
+  }
+
+  // Verify not already shipped
+  if (auction.deliveryStatus !== "Not Shipped") {
+    return next(
+      new ErrorHandler("This item has already been marked as shipped.", 400)
+    );
+  }
+
+  auction.deliveryStatus = "Shipped";
+  auction.shippedAt = new Date();
+  auction.trackingNumber = trackingNumber || "";
+  auction.overallStatus = "Shipped - In Transit";
+  await auction.save();
+
+  // Notify buyer
+  const buyer = auction.highestBidder;
+  if (buyer && buyer.email) {
+    const subject = `Your Item Has Been Shipped - ${auction.title}`;
+    const message = `Dear ${buyer.userName},\n\nGood news! Your auction item "${
+      auction.title
+    }" has been shipped!\n\n**Shipping Details:**\n- Item: ${
+      auction.title
+    }\n- Amount Paid: BDT ${auction.currentBid}\n- Tracking Number: ${
+      trackingNumber || "Not provided"
+    }\n- Shipped On: ${new Date().toLocaleDateString(
+      "en-BD"
+    )}\n\n**Next Steps:**\n1. Track your shipment using the tracking number${
+      trackingNumber ? ` (${trackingNumber})` : ""
+    }\n2. Once you receive the item, please confirm delivery on our platform\n3. Your confirmation will release the payment to the seller\n\n**Important:**\nYou have 48 hours after receiving the item to confirm delivery or report any issues.\n\nTrack your order: ${
+      process.env.FRONTEND_URL
+    }/auction/${
+      auction._id
+    }/payment\n\nThank you for your purchase!\n\nBest regards,\nNilamee Auction Team`;
+
+    await sendEmail({
+      email: buyer.email,
+      subject,
+      message,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Item marked as shipped successfully. Buyer has been notified.",
+    auction,
+  });
+});
+
+// Confirm delivery (buyer action)
+export const confirmDelivery = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+
+  const auction = await Auction.findById(id).populate("createdBy");
+
+  if (!auction) {
+    return next(new ErrorHandler("Auction not found.", 404));
+  }
+
+  // Verify user is the buyer
+  if (
+    !auction.highestBidder ||
+    auction.highestBidder.toString() !== req.user._id.toString()
+  ) {
+    return next(
+      new ErrorHandler("You are not authorized to confirm this delivery.", 403)
+    );
+  }
+
+  // Verify item has been shipped
+  if (auction.deliveryStatus !== "Shipped") {
+    return next(new ErrorHandler("This item has not been shipped yet.", 400));
+  }
+
+  // Verify not already delivered
+  if (auction.deliveryStatus === "Delivered") {
+    return next(new ErrorHandler("Delivery has already been confirmed.", 400));
+  }
+
+  auction.deliveryStatus = "Delivered";
+  auction.deliveredAt = new Date();
+  auction.overallStatus = "Completed";
+  await auction.save();
+
+  // Release escrow (mark as released - admin can manually process)
+  const escrow = await Escrow.findOne({ auctionId: auction._id });
+  if (escrow && escrow.status === "Held") {
+    escrow.status = "Released";
+    escrow.releasedAt = new Date();
+    await escrow.save();
+  }
+
+  // UPDATE SELLER TRUST SCORE
+  const seller = await User.findById(auction.createdBy._id);
+  if (seller) {
+    const deliveryTime = Date.now() - new Date(auction.shippedAt).getTime();
+    const deliveryHours = deliveryTime / (1000 * 60 * 60);
+
+    const trustPointsEarned = calculateTrustPoints({
+      role: "Auctioneer",
+      amount: auction.currentBid,
+      timeHours: deliveryHours,
+    });
+
+    seller.trustScore += trustPointsEarned;
+    seller.totalTransactionVolume += auction.currentBid;
+    seller.completedAuctionsCount += 1;
+    seller.stats.totalAuctionsCompleted += 1;
+    seller.stats.averageDeliveryTime =
+      (seller.stats.averageDeliveryTime * (seller.completedAuctionsCount - 1) +
+        deliveryHours) /
+      seller.completedAuctionsCount;
+
+    // First delivery? Award verified badge
+    if (!seller.isVerifiedSeller) {
+      seller.isVerifiedSeller = true;
+      if (!seller.firstSuccessfulAuctionDate) {
+        seller.firstSuccessfulAuctionDate = new Date();
+      }
+    }
+
+    // Recalculate badge tier and star rating
+    seller.badgeTier = calculateBadgeTier(seller.totalTransactionVolume);
+    seller.starRating = calculateStarRating(seller.trustScore);
+    seller.lastActivityDate = new Date();
+    await seller.save();
+
+    // Log transaction history
+    await TransactionHistory.create({
+      userId: seller._id,
+      auctionId: auction._id,
+      role: "Auctioneer",
+      amount: auction.currentBid,
+      trustPointsEarned,
+      deliveryTimeHours: deliveryHours,
+      outcome: "Success",
+      auctionTitle: auction.title,
+    });
+
+    // Notify seller
+    const subject = `Delivery Confirmed - Payment Released for ${auction.title}`;
+    const message = `Dear ${
+      seller.userName
+    },\n\nGreat news! The buyer has confirmed delivery of "${
+      auction.title
+    }".\n\n**Transaction Details:**\n- Item: ${
+      auction.title
+    }\n- Total Amount: BDT ${auction.currentBid}\n- Your Share (93%): BDT ${(
+      auction.currentBid * 0.93
+    ).toFixed(2)}\n- Platform Commission (7%): BDT ${(
+      auction.currentBid * 0.07
+    ).toFixed(
+      2
+    )}\n- Status: Payment Released\n\n**Next Steps:**\nYour payment has been released from escrow. An admin will process the payout shortly.\n\nThe transaction is now complete!\n\nThank you for using Nilamee Auction Platform!\n\nBest regards,\nNilamee Auction Team`;
+
+    await sendEmail({
+      email: seller.email,
+      subject,
+      message,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message:
+      "Delivery confirmed successfully. Payment has been released to seller.",
+    auction,
   });
 });

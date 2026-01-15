@@ -68,6 +68,56 @@ const auctionSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // Payment tracking fields
+  paymentStatus: {
+    type: String,
+    enum: ["Unpaid", "Pending", "Paid", "Failed"],
+    default: "Unpaid",
+  },
+  paymentDeadline: {
+    type: Date,
+    default: null,
+  },
+  paidAt: {
+    type: Date,
+    default: null,
+  },
+  transactionId: {
+    type: String,
+    default: null,
+  },
+  // Delivery tracking fields
+  deliveryStatus: {
+    type: String,
+    enum: ["Not Shipped", "Shipped", "Delivered"],
+    default: "Not Shipped",
+  },
+  shippedAt: {
+    type: Date,
+    default: null,
+  },
+  deliveredAt: {
+    type: Date,
+    default: null,
+  },
+  trackingNumber: {
+    type: String,
+    default: null,
+  },
+  // Overall status for easy tracking
+  overallStatus: {
+    type: String,
+    enum: [
+      "Pending Approval",
+      "Live",
+      "Ended - Awaiting Payment",
+      "Paid - Awaiting Shipment",
+      "Shipped - In Transit",
+      "Completed",
+      "Cancelled",
+    ],
+    default: "Pending Approval",
+  },
   isDeleted: {
     type: Boolean,
     default: false,

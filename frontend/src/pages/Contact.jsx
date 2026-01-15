@@ -45,14 +45,16 @@ const Contact = () => {
   return (
     <>
       <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-start">
-        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-4 border-golden-400 whitestone:border-white/30 shadow-2xl">
-          <div className="bg-luxury-gradient rounded-lg p-4 w-full shadow-lg border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 dark:backdrop-blur-sm whitestone:backdrop-blur-xl mx-auto w-full h-auto px-2 flex flex-col gap-4 items-center py-4 justify-center rounded-md border-4 border-golden-400 whitestone:border-white/30 shadow-2xl">
+          <div className="bg-luxury-gradient rounded-lg p-4 w-full shadow-lg border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
             <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold-gradient whitestone:text-white"></div>
             <h3
-              className={`text-white whitestone:text-black whitestone:text-white text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl flex items-center gap-2`}
+              className={`text-white whitestone:text-black text-xl font-bold mb-1 min-[480px]:text-xl md:text-2xl lg:text-3xl flex items-center gap-2`}
             >
-              <span className="text-golden-300 whitestone:text-gray-900">??</span>
+              <span className="text-golden-300 whitestone:text-gray-900">
+                ??
+              </span>
               Contact Us
             </h3>
             <p className="text-golden-100 whitestone:text-gray-700 text-sm">
@@ -64,7 +66,9 @@ const Contact = () => {
             onSubmit={handleContactForm}
           >
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Name</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Your Name
+              </label>
               <input
                 type="text"
                 value={name}
@@ -74,7 +78,9 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Email</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Your Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -84,7 +90,9 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Your Phone</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Your Phone
+              </label>
               <input
                 type="number"
                 value={phone}
@@ -94,7 +102,9 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Subject</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Subject
+              </label>
               <input
                 type="text"
                 value={subject}
@@ -104,7 +114,9 @@ const Contact = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Message</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Message
+              </label>
               <textarea
                 rows={7}
                 value={message}

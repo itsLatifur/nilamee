@@ -12,8 +12,8 @@ import { FaFacebook, FaPalette } from "react-icons/fa";
 import { RiInstagramFill } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdCloseCircleOutline, IoIosCreate } from "react-icons/io";
-import { FaUserCircle, FaBell, FaWallet } from "react-icons/fa";
-import { FaFileInvoiceDollar } from "react-icons/fa6";
+import { FaUserCircle, FaBell, FaWallet, FaShoppingBag } from "react-icons/fa";
+import { FaFileInvoiceDollar, FaCrown } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, fetchUser } from "../../features/auth/store/userSlice";
@@ -125,6 +125,7 @@ const SideDrawer = () => {
               </span>
             </h4>
           </Link>
+
           <ul className="flex flex-col gap-2 mt-4">
             {!(
               isAuthenticated &&
@@ -156,6 +157,21 @@ const SideDrawer = () => {
                     <MdLeaderboard /> Leaderboard
                   </Link>
                 </li>
+                {/* My Purchases - for bidders */}
+                {user && user.role === "Bidder" && (
+                  <li>
+                    <Link
+                      to="/my-purchases"
+                      className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                        location.pathname === "/my-purchases"
+                          ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                          : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                      }`}
+                    >
+                      <FaShoppingBag /> My Purchases
+                    </Link>
+                  </li>
+                )}
               </>
             )}
             {isAuthenticated && user && user.role === "Auctioneer" && (
@@ -250,6 +266,18 @@ const SideDrawer = () => {
                       <MdKeyboardArrowDown /> Manage Roles
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/dashboard/manage-disputes"
+                      className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                        location.pathname === "/dashboard/manage-disputes"
+                          ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                          : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                      }`}
+                    >
+                      <FaBell /> Manage Disputes
+                    </Link>
+                  </li>
                   {user && user.role === "Super Admin" && (
                     <li>
                       <Link
@@ -303,7 +331,7 @@ const SideDrawer = () => {
                 </>
               )}
           </ul>
-          {!isAuthenticated ? (
+          {!isAuthenticated && (
             <>
               <div className="my-4 flex gap-2">
                 <Link
@@ -320,16 +348,25 @@ const SideDrawer = () => {
                 </Link>
               </div>
             </>
-          ) : (
-            <>
-              <div className="my-4 flex gap-4 w-fit" onClick={handleLogout}>
-                <button className="bg-burgundy-600 font-semibold text-xl py-1 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover">
-                  Logout
-                </button>
-              </div>
-            </>
           )}
           <hr className="mb-4 border-t-golden-500" />
+          {isAuthenticated &&
+            user &&
+            !(user.role === "Super Admin" || user.role === "Admin") && (
+              <div className="mb-3">
+                <button
+                  onClick={() =>
+                    handleRoleSwitch(
+                      user.role === "Auctioneer" ? "Bidder" : "Auctioneer"
+                    )
+                  }
+                  className="bg-burgundy-600 font-semibold text-xl py-2 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
+                >
+                  Switch to{" "}
+                  {user.role === "Auctioneer" ? "Bidder" : "Auctioneer"}
+                </button>
+              </div>
+            )}
           <ul className="flex flex-col gap-2">
             {isAuthenticated && (
               <>
@@ -362,21 +399,6 @@ const SideDrawer = () => {
                     )}
                   </button>
                 </li>
-                {!(user.role === "Super Admin" || user.role === "Admin") && (
-                  <li>
-                    <button
-                      onClick={() =>
-                        handleRoleSwitch(
-                          user.role === "Auctioneer" ? "Bidder" : "Auctioneer"
-                        )
-                      }
-                      className="bg-burgundy-600 font-semibold text-xl py-1 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
-                    >
-                      Switch to{" "}
-                      {user.role === "Auctioneer" ? "Bidder" : "Auctioneer"}
-                    </button>
-                  </li>
-                )}
                 {user && user.role === "Auctioneer" && (
                   <li>
                     <Link
@@ -443,6 +465,22 @@ const SideDrawer = () => {
                 </div>
               )}
             </li>
+            {isAuthenticated &&
+              user &&
+              !(user.role === "Super Admin" || user.role === "Admin") && (
+                <li>
+                  <Link
+                    to="/premium"
+                    className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                      location.pathname === "/premium"
+                        ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                        : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                    }`}
+                  >
+                    <FaCrown /> Premium
+                  </Link>
+                </li>
+              )}
             <li>
               <Link
                 to="/how-it-works-info"
@@ -468,6 +506,16 @@ const SideDrawer = () => {
               </Link>
             </li>
           </ul>
+          {isAuthenticated && (
+            <div className="mt-4">
+              <button
+                onClick={handleLogout}
+                className="bg-burgundy-600 font-semibold text-xl py-2 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
+              >
+                Logout
+              </button>
+            </div>
+          )}
           <IoMdCloseCircleOutline
             onClick={() => setShow(!show)}
             className="absolute top-0 right-4 text-[28px] sm:hidden"

@@ -183,7 +183,7 @@ const SideDrawer = () => {
           </ul>
           <IoMdCloseCircleOutline
             onClick={() => setShow(!show)}
-            className="absolute top-0 right-4 text-[28px] sm:hidden text-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800 whitestone:text-gray-900"
+            className="absolute top-0 right-4 text-[28px] sm:hidden text-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
           />
         </div>
 
@@ -245,7 +245,7 @@ const SideDrawer = () => {
               href={appConfig.socialMedia.facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-900 whitestone:bg-gray-100 text-golden-300 whitestone:text-gray-800 p-2 text-xl rounded-sm hover:text-golden-600 whitestone:hover:text-gray-900 whitestone:text-gray-900"
+              className="bg-white dark:bg-gray-900 whitestone:bg-gray-100 text-golden-300 whitestone:text-gray-800 p-2 text-xl rounded-sm hover:text-golden-600 whitestone:hover:text-gray-900"
             >
               <FaFacebook />
             </a>

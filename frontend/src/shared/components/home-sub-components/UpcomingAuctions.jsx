@@ -2,6 +2,7 @@ import React from "react";
 import { RiAuctionFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { formatBDT } from "@/shared/utils/currency";
 
 const UpcomingAuctions = () => {
   const { allAuctions } = useSelector((state) => state.auction);
@@ -59,7 +60,7 @@ const UpcomingAuctions = () => {
                       Starting Bid:
                     </p>{" "}
                     <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
-                      Rs. {element.startingBid}
+                      {formatBDT(element.startingBid)}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">
@@ -98,7 +99,7 @@ const UpcomingAuctions = () => {
                       Starting Bid:
                     </p>{" "}
                     <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
-                      Rs. {element.startingBid}
+                      {formatBDT(element.startingBid)}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">
@@ -136,7 +137,7 @@ const UpcomingAuctions = () => {
                       Starting Bid:
                     </p>{" "}
                     <p className="text-golden-300 whitestone:text-gray-800 font-semibold">
-                      Rs. {element.startingBid}
+                      {formatBDT(element.startingBid)}
                     </p>{" "}
                   </div>
                   <div className="flex flex-col">

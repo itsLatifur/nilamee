@@ -6,6 +6,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { API_ENDPOINTS } from "../../../config/env";
 import { fetchUser } from "../../auth/store/userSlice";
+import BadgeDisplay from "../../../shared/components/BadgeDisplay";
+import PremiumBadge from "../../../shared/components/PremiumBadge";
+import VerifiedBadge from "../../../shared/components/VerifiedBadge";
+import TrustScoreCard from "../../../shared/components/TrustScoreCard";
+import RankProgressCard from "../../../shared/components/RankProgressCard";
 
 const UserProfile = () => {
   const { user, isAuthenticated, loading, hasCheckedAuth } = useSelector(
@@ -137,6 +142,142 @@ const UserProfile = () => {
                     Upload
                   </label>
                 )}
+              </div>
+
+              {/* User Name and Badges */}
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold text-warm-white whitestone:text-gray-900">
+                    {user?.userName}
+                  </h2>
+                  {/* Premium Badge - 3x size (60px) */}
+                  <div className="inline-flex items-center relative group">
+                    <div className="relative">
+                      {user?.isPremium && (
+                        <>
+                          <img
+                            src="/icons/premium.png"
+                            alt="Premium Member"
+                            style={{ width: 60, height: 60 }}
+                            className="cursor-default transition-transform duration-200 hover:scale-110 object-contain relative z-10"
+                          />
+                          {/* Circular Shiny Effect */}
+                          <div
+                            className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            style={{
+                              background:
+                                "radial-gradient(circle, rgba(234, 179, 8, 0.5) 0%, transparent 70%)",
+                              filter: "blur(12px)",
+                            }}
+                          />
+                          {/* Tooltip */}
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
+                            Premium Member
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                              <div className="border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {/* Rank Badge - 3x size (72px) */}
+                  <div className="inline-flex items-center relative group">
+                    <div className="relative">
+                      <img
+                        src={`/icons/${(
+                          user?.badgeTier || "bronze-i"
+                        ).toLowerCase()}.png`}
+                        alt={user?.badgeTier || "Bronze-I"}
+                        style={{ width: 72, height: 72 }}
+                        className="flex-shrink-0 object-contain cursor-default transition-transform duration-200 hover:scale-110 relative z-10"
+                      />
+                      {/* Circular Shiny Effect */}
+                      <div
+                        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{
+                          background: `radial-gradient(circle, ${
+                            (user?.badgeTier || "bronze-i").startsWith("Bronze")
+                              ? "rgba(217, 119, 6, 0.4)"
+                              : (user?.badgeTier || "bronze-i").startsWith(
+                                  "Silver"
+                                )
+                              ? "rgba(156, 163, 175, 0.4)"
+                              : (user?.badgeTier || "bronze-i").startsWith(
+                                  "Gold"
+                                )
+                              ? "rgba(234, 179, 8, 0.4)"
+                              : (user?.badgeTier || "bronze-i").startsWith(
+                                  "Platinum"
+                                )
+                              ? "rgba(148, 163, 184, 0.4)"
+                              : (user?.badgeTier || "bronze-i").startsWith(
+                                  "Diamond"
+                                )
+                              ? "rgba(34, 211, 238, 0.4)"
+                              : "rgba(168, 85, 247, 0.4)"
+                          } 0%, transparent 70%)`,
+                          filter: "blur(12px)",
+                        }}
+                      />
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
+                        {user?.badgeTier || "Bronze-I"}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                          <div className="border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Verified Badge - 3x size (78px) */}
+                  {(user?.isVerifiedSeller || user?.isVerifiedBuyer) && (
+                    <div className="inline-flex items-center relative group">
+                      <div className="relative">
+                        <img
+                          src="/icons/verified.png"
+                          alt="Verified"
+                          style={{ width: 78, height: 78 }}
+                          className="flex-shrink-0 object-contain cursor-default transition-transform duration-200 hover:scale-110 relative z-10"
+                        />
+                        {/* Circular Shiny Effect */}
+                        <div
+                          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{
+                            background:
+                              "radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%)",
+                            filter: "blur(12px)",
+                          }}
+                        />
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
+                          {user?.isVerifiedSeller
+                            ? "Verified Seller"
+                            : "Verified Buyer"}
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {user?.trustScore !== undefined && (
+                  <TrustScoreCard
+                    trustScore={user.trustScore}
+                    starRating={user.starRating}
+                    size="lg"
+                  />
+                )}
+              </div>
+
+              {/* Rank Progress Card */}
+              <div className="w-full max-w-2xl mb-6">
+                <RankProgressCard
+                  totalTransactionVolume={user?.totalTransactionVolume || 0}
+                  currentTier={user?.badgeTier || "Bronze-I"}
+                />
               </div>
 
               <form onSubmit={handleSubmit} className="w-full">

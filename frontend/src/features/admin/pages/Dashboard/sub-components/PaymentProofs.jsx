@@ -31,7 +31,7 @@ const PaymentProofs = () => {
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl mt-5 border-2 border-golden-400 whitestone:border-white/30 rounded-lg">
+        <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 dark:backdrop-blur-sm whitestone:backdrop-blur-xl mt-5 border-2 border-golden-400 whitestone:border-white/30 rounded-lg">
           <thead className="bg-burgundy-700 dark:bg-gray-900 whitestone:bg-gray-200 text-white whitestone:text-black relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
@@ -50,7 +50,7 @@ const PaymentProofs = () => {
                     <td className="py-2 px-4 text-center">{element.status}</td>
                     <td className="flex items-center py-4 justify-center gap-3">
                       <button
-                        className="bg-gold-gradient text-warm-white whitestone:text-gray-900 py-1 px-3 rounded border-2 border-golden-400 whitestone:border-gray-600 shadow-lg transition-all duration-300 btn-hover whitestone:text-white"
+                        className="bg-gold-gradient text-warm-white whitestone:text-white py-1 px-3 rounded border-2 border-golden-400 whitestone:border-gray-600 shadow-lg transition-all duration-300 btn-hover"
                         onClick={() => openUpdateModal(element._id)}
                       >
                         Update
@@ -99,7 +99,7 @@ export const Drawer = ({ setOpenDrawer, openDrawer }) => {
           openDrawer && singlePaymentProof.userId ? "bottom-0" : "-bottom-full"
         }  left-0 w-full transition-all duration-300 h-full bg-[#00000087] flex items-end`}
       >
-        <div className="bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 whitestone:bg-white/25 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl h-fit transition-all duration-300 w-full border-t-4 border-golden-400 whitestone:border-white/30">
+        <div className="bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 whitestone:bg-white/25 dark:backdrop-blur-sm whitestone:backdrop-blur-xl h-fit transition-all duration-300 w-full border-t-4 border-golden-400 whitestone:border-white/30">
           <div className="w-full px-5 py-8 sm:max-w-[640px] sm:m-auto">
             <h3 className="text-golden-300 whitestone:text-gray-800  text-3xl font-semibold text-center mb-1">
               Update Payment Proof
@@ -170,7 +170,7 @@ export const Drawer = ({ setOpenDrawer, openDrawer }) => {
               <div>
                 <button
                   type="button"
-                  className="bg-gold-gradient whitestone:bg-amber-600 flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 shadow-lg border-2 border-golden-400 whitestone:border-amber-500 btn-hover whitestone:text-white"
+                  className="bg-gold-gradient whitestone:bg-amber-600 flex justify-center w-full py-2 rounded-md text-warm-white whitestone:text-white font-semibold text-xl transition-all duration-300 shadow-lg border-2 border-golden-400 whitestone:border-amber-500 btn-hover"
                   onClick={handlePaymentProofUpdate}
                 >
                   {loading ? "Updating Payment Proof" : "Update Payment Proof"}

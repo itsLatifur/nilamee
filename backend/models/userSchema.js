@@ -88,6 +88,94 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  // TRUST & RATING SYSTEM FIELDS
+  trustScore: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+
+  totalTransactionVolume: {
+    type: Number,
+    default: 0,
+    comment: "Sum of all completed auction amounts (BDT)",
+  },
+
+  completedAuctionsCount: {
+    type: Number,
+    default: 0,
+  },
+
+  badgeTier: {
+    type: String,
+    enum: [
+      "Bronze-I",
+      "Bronze-II",
+      "Bronze-III",
+      "Silver-I",
+      "Silver-II",
+      "Silver-III",
+      "Gold-I",
+      "Gold-II",
+      "Gold-III",
+      "Platinum-I",
+      "Platinum-II",
+      "Platinum-III",
+      "Diamond-I",
+      "Diamond-II",
+      "Diamond-III",
+      "Royal",
+    ],
+    default: "Bronze-I",
+  },
+
+  isVerifiedSeller: {
+    type: Boolean,
+    default: false,
+  },
+
+  isVerifiedBuyer: {
+    type: Boolean,
+    default: false,
+  },
+
+  starRating: {
+    type: Number,
+    default: 1,
+    min: 1,
+    max: 5,
+  },
+
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+
+  premiumExpiresAt: {
+    type: Date,
+    default: null,
+  },
+
+  firstSuccessfulAuctionDate: {
+    type: Date,
+    default: null,
+  },
+
+  lastActivityDate: {
+    type: Date,
+    default: null,
+  },
+
+  stats: {
+    totalAuctionsCreated: { type: Number, default: 0 },
+    totalAuctionsWon: { type: Number, default: 0 },
+    totalAuctionsCompleted: { type: Number, default: 0 },
+    disputesRaised: { type: Number, default: 0 },
+    disputesLost: { type: Number, default: 0 },
+    averageDeliveryTime: { type: Number, default: 0 }, // in hours
+    averagePaymentTime: { type: Number, default: 0 }, // in hours
+  },
 });
 
 // Query middleware to exclude soft-deleted users

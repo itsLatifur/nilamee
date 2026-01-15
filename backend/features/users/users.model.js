@@ -99,6 +99,23 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+  premiumActivatedAt: {
+    type: Date,
+    default: null,
+  },
+  premiumExpiresAt: {
+    type: Date,
+    default: null,
+  },
+  pendingPremiumTransaction: {
+    transactionId: String,
+    amount: Number,
+    initiatedAt: Date,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

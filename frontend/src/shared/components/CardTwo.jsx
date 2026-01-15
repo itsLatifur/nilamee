@@ -58,7 +58,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
 
   return (
     <>
-      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden">
+      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 dark:backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden">
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <img
@@ -92,7 +92,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
           </p>
           <div className="flex flex-col gap-2 mt-4">
             <Link
-              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover whitestone:text-white"
+              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover"
               to={`/auction/details/${id}`}
             >
               View Auction
@@ -106,7 +106,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
             <button
               disabled={new Date(endTime) > Date.now()}
               onClick={() => setOpenDrawer(true)}
-              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover disabled:opacity-50 whitestone:text-white"
+              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover disabled:opacity-50"
             >
               Republish Auction
             </button>
@@ -138,7 +138,7 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
         openDrawer && id ? "bottom-0" : "-bottom-full"
       }  left-0 w-full transition-all duration-300 h-full bg-[#00000087] flex items-end`}
     >
-      <div className="republish-modal bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 royal:from-burgundy-950/95 royal:to-golden-950/90 whitestone:bg-white whitestone:border-blue-500 whitestone:shadow-xl backdrop-blur-sm whitestone:backdrop-blur-none h-fit transition-all duration-300 w-full border-t-4 border-golden-400 whitestone:border-blue-500">
+      <div className="republish-modal bg-gradient-to-br from-burgundy-950/95 to-golden-950/90 dark:from-black/95 dark:to-gray-950/90 royal:from-burgundy-950/95 royal:to-golden-950/90 whitestone:bg-white whitestone:border-blue-500 whitestone:shadow-xl backdrop-blur-sm whitestone:backdrop-blur-none h-fit transition-all duration-300 w-full border-t-4 border-golden-400">
         <div className="w-full px-5 py-8 sm:max-w-[640px] sm:m-auto">
           <h3 className="text-golden-300 whitestone:text-blue-600 text-3xl font-semibold text-center mb-1">
             Republish Auction

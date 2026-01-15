@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Spinner from "./Spinner";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { formatBDT } from "@/shared/utils/currency";
 
 const AuctionView = ({
   loading,
@@ -189,7 +190,7 @@ const AuctionView = ({
             <p className="text-xl font-semibold">
               Minimum Bid:{" "}
               <span className="text-golden-500 whitestone:text-gray-900">
-                Rs.{auctionDetail.startingBid}
+                {formatBDT(auctionDetail.startingBid)}
               </span>
             </p>
           )}
@@ -240,7 +241,7 @@ const AuctionView = ({
                   {element.userName}
                 </p>
                 <p className="flex-1 text-center whitestone:text-gray-900">
-                  {element.amount}
+                  {formatBDT(element.amount)}
                 </p>
                 {index === 0 ? (
                   <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">

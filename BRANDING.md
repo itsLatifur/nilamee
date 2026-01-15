@@ -88,7 +88,7 @@ export const appConfig = {
   // Application business rules
   settings: {
     commissionPercentage: 5, // Fee charged to auctioneers (%)
-    defaultCurrency: "USD",
+    defaultCurrency: "BDT",
     auctionMinDuration: 1, // Minimum auction duration in days
   },
 };
@@ -160,7 +160,7 @@ export const appConfig = {
 
   settings: {
     commissionPercentage: 5,
-    defaultCurrency: "USD",
+    defaultCurrency: "BDT",
     auctionMinDuration: 1,
   },
 };

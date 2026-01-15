@@ -55,7 +55,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
 
   return (
     <>
-      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 relative overflow-hidden card-hover">
+      <div className="basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 dark:backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 relative overflow-hidden card-hover">
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <img
@@ -89,7 +89,7 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
           </p>
           <div className="flex flex-col gap-2 mt-4">
             <Link
-              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover whitestone:text-white"
+              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover"
               to={`/auction/details/${id}`}
             >
               View Auction

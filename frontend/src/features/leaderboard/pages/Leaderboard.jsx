@@ -19,7 +19,7 @@ const Leaderboard = () => {
               </h1>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl border my-5 border-golden-400 whitestone:border-white/30 shadow-md rounded-lg">
+              <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 dark:backdrop-blur-sm whitestone:backdrop-blur-xl border my-5 border-golden-400 whitestone:border-white/30 shadow-md rounded-lg">
                 <thead className="bg-luxury-gradient text-white whitestone:text-black shadow-lg relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>
                   <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient whitestone:text-white"></div>

@@ -21,8 +21,8 @@ export const appConfig = {
 
   // Application Settings
   settings: {
-    commissionPercentage: 5, // Percentage fee charged to auctioneers
-    defaultCurrency: "USD",
+    commissionPercentage: 7, // Percentage fee charged to auctioneers
+    defaultCurrency: "BDT",
     auctionMinDuration: 1, // Minimum auction duration in days
   },
 };

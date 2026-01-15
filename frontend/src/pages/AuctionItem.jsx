@@ -6,6 +6,7 @@ import { FaGreaterThan } from "react-icons/fa";
 import { RiAuctionFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { formatBDT } from "@/shared/utils/currency";
 
 const AuctionItem = () => {
   const { id } = useParams();
@@ -52,7 +53,7 @@ const AuctionItem = () => {
                 <p className="text-xl font-semibold">
                   Minimum Bid:{" "}
                   <span className="text-golden-500 whitestone:text-gray-900">
-                    Rs.{auctionDetail.startingBid}
+                    {formatBDT(auctionDetail.startingBid)}
                   </span>
                 </p>
                 {auctionDetail.description && (
@@ -80,7 +81,7 @@ const AuctionItem = () => {
                   <p className="text-xl font-semibold">
                     Minimum Bid:{" "}
                     <span className="text-golden-500 whitestone:text-gray-900">
-                      Rs.{auctionDetail.startingBid}
+                      {formatBDT(auctionDetail.startingBid)}
                     </span>
                   </p>
                 </div>

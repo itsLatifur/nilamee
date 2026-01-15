@@ -46,7 +46,7 @@ const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
     <>
       <Link
         to={`/auction/item/${id}`}
-        className="flex-grow basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 whitestone:backdrop-blur-xl backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-56 lg:basis-60 2xl:basis-80 border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500 whitestone:border-white/40 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden"
+        className="flex-grow basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 dark:backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-60 lg:basis-60 2xl:basis-80 border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -74,7 +74,9 @@ const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
                 {formatTimeLeft(timeLeft)}
               </span>
             ) : (
-              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">Time's up!</span>
+              <span className="text-golden-300 whitestone:text-gray-800 font-bold ml-1">
+                Time's up!
+              </span>
             )}
           </p>
         </div>

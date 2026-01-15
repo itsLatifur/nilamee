@@ -4,6 +4,7 @@ import { FaCheck, FaTimes, FaEye } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { API_ENDPOINTS } from "../../../../../config/env";
+import { formatBDT } from "@/shared/utils/currency";
 
 const PendingAuctions = () => {
   const [pendingAuctions, setPendingAuctions] = useState([]);
@@ -110,7 +111,7 @@ const PendingAuctions = () => {
                   {auction.category}
                 </td>
                 <td className="py-3 px-4 text-warm-white">
-                  Rs. {auction.startingBid}
+                  {formatBDT(auction.startingBid)}
                 </td>
                 <td className="py-3 px-4 text-warm-white">
                   {auction.createdBy?.userName || "N/A"}

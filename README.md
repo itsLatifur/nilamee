@@ -199,7 +199,7 @@ export const appConfig = {
 
   settings: {
     commissionPercentage: 5, // Auctioneer fee percentage
-    defaultCurrency: "USD",
+    defaultCurrency: "BDT",
     auctionMinDuration: 1,
   },
 };
