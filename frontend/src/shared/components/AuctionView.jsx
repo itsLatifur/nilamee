@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Spinner from "./Spinner";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { formatBDT } from "@/shared/utils/currency";
+import { useSelector } from "react-redux";
 
 const AuctionView = ({
   loading,
@@ -14,6 +15,10 @@ const AuctionView = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [descExpanded, setDescExpanded] = useState(false);
+
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const restrictedRoles = ["Auctioneer", "Admin", "Super Admin"];
+  const canPlaceBid = !(user && restrictedRoles.includes(user.role));
 
   const nextImage = () => {
     if (
@@ -283,7 +288,7 @@ const AuctionView = ({
           )}
         </div>
 
-        {showActionBar && (
+        {showActionBar && canPlaceBid && (
           <div className="bg-gold-gradient shadow-lg border-2 border-golden-300 dark:border-golden-400 whitestone:border-white/30 py-4 text-[16px] md:text-[24px] font-semibold px-4 flex items-center justify-between whitestone:text-white rounded-md mt-4">
             {Date.now() >= new Date(auctionDetail?.startTime) &&
             Date.now() <= new Date(auctionDetail?.endTime) ? (

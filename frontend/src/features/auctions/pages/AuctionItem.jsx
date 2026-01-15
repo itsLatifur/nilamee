@@ -26,9 +26,7 @@ const AuctionItem = () => {
       toast.error("Please enter a valid bid amount");
       return;
     }
-    const formData = new FormData();
-    formData.append("amount", amount);
-    dispatch(placeBid(id, formData));
+    dispatch(placeBid(id, { amount: Number(amount) }));
     // Refresh auction details after short delay to show updated bids
     setTimeout(() => {
       dispatch(getAuctionDetail(id));

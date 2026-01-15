@@ -2,6 +2,7 @@ import Spinner from "@/custom-components/Spinner";
 import { getAuctionDetail } from "@/store/slices/auctionSlice";
 import { placeBid } from "@/store/slices/bidSlice";
 import React, { useEffect, useState } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { FaGreaterThan } from "react-icons/fa";
 import { RiAuctionFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,15 +21,14 @@ const AuctionItem = () => {
   const dispatch = useDispatch();
 
   const [amount, setAmount] = useState(0);
+  const { currentTheme } = useTheme();
   const [descExpanded, setDescExpanded] = useState(false);
   const handleBid = () => {
     if (!amount || amount <= 0) {
       toast.error("Please enter a valid bid amount");
       return;
     }
-    const formData = new FormData();
-    formData.append("amount", amount);
-    dispatch(placeBid(id, formData));
+    dispatch(placeBid(id, { amount: Number(amount) }));
     // Refresh auction details after short delay to show updated bids
     setTimeout(() => {
       dispatch(getAuctionDetail(id));
@@ -187,9 +187,21 @@ const AuctionItem = () => {
                       <p className="text-white whitestone:text-black">Place Bid</p>
                       <input
                         type="number"
-                        className="w-32 focus:outline-none md:text-[20px] p-1 text-gray-900 rounded"
+                        className="w-32 focus:outline-none md:text-[20px] p-1 rounded font-bold text-lg"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
+                        style={
+                          currentTheme === "Whitestone"
+                            ? {
+                                color: "#2563eb",
+                                background: "#fff",
+                                WebkitTextFillColor: "#2563eb",
+                                caretColor: "#2563eb",
+                                border: "2px solid #2563eb",
+                                fontWeight: 700,
+                              }
+                            : {}
+                        }
                       />
                     </div>
                     <button

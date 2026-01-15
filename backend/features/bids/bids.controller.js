@@ -5,8 +5,11 @@ import { Bid } from "./bids.model.js";
 import { User } from "../users/users.model.js";
 
 export const placeBid = catchAsyncErrors(async (req, res, next) => {
+  console.log("DEBUG placeBid req.body:", req.body);
+  console.log("DEBUG placeBid typeof next:", typeof next);
   const { id } = req.params;
   const auctionItem = await Auction.findById(id);
+
   if (!auctionItem) {
     return next(new ErrorHandler("Auction Item not found.", 404));
   }
@@ -38,6 +41,7 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
   }
 
   try {
+    console.log("DEBUG req.user:", req.user);
     const existingBid = await Bid.findOne({
       "bidder.id": req.user._id,
       auctionItem: auctionItem._id,
@@ -51,19 +55,20 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
       await existingBid.save();
     } else {
       const bidderDetail = await User.findById(req.user._id);
+      console.log("DEBUG bidderDetail:", bidderDetail);
       const bid = await Bid.create({
         amount: numericAmount,
         bidder: {
-          id: bidderDetail._id,
-          userName: bidderDetail.userName,
-          profileImage: bidderDetail.profileImage?.url,
+          id: bidderDetail?._id,
+          userName: bidderDetail?.userName,
+          profileImage: bidderDetail?.profileImage?.url,
         },
         auctionItem: auctionItem._id,
       });
       auctionItem.bids.push({
         userId: req.user._id,
-        userName: bidderDetail.userName,
-        profileImage: bidderDetail.profileImage?.url,
+        userName: bidderDetail?.userName,
+        profileImage: bidderDetail?.profileImage?.url,
         amount: numericAmount,
       });
     }
@@ -76,13 +81,15 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
 
     await auctionItem.save();
 
+    console.log("DEBUG auctionItem.bids[0]:", auctionItem.bids[0]);
     res.status(201).json({
       success: true,
       message: "Bid placed successfully!",
       currentBid: auctionItem.currentBid,
-      highestBidder: auctionItem.bids[0].userName,
+      highestBidder: auctionItem.bids[0]?.userName,
     });
   } catch (error) {
+    console.error("ERROR in placeBid:", error);
     return next(new ErrorHandler(error.message || "Failed to place bid.", 500));
   }
 });

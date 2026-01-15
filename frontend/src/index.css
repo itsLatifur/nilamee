@@ -1,3 +1,42 @@
+body.whitestone-mode .bg-gold-gradient input[type="number"] {
+  background: #fff !important;
+  color: #2563eb !important;
+  -webkit-text-fill-color: #2563eb !important;
+  caret-color: #2563eb !important;
+  border: 2px solid #2563eb !important;
+  font-weight: 700 !important;
+}
+body.whitestone-mode .bg-gold-gradient input[type="number"]::placeholder {
+  color: #2563eb !important;
+  opacity: 0.8 !important;
+}
+/* Super-specific override for bid input in Whitestone theme */
+.whitestone .bg-gold-gradient input[type="number"].bid-input-black {
+  background: #fff !important;
+  color: #2563eb !important;
+  -webkit-text-fill-color: #2563eb !important;
+  caret-color: #2563eb !important;
+  border: 2px solid #2563eb !important;
+  font-weight: 700 !important;
+}
+.whitestone
+  .bg-gold-gradient
+  input[type="number"].bid-input-black::placeholder {
+  color: #2563eb !important;
+  opacity: 0.8 !important;
+}
+.whitestone .bid-input-black,
+.whitestone input.bid-input-black {
+  background: #fff !important;
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  caret-color: #000 !important;
+  border: 2px solid #000 !important;
+}
+.whitestone .bid-input-black::placeholder {
+  color: #000 !important;
+  opacity: 0.8 !important;
+}
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 /* Whitestone: Go to Leaderboard button color swap */
@@ -1696,7 +1735,6 @@
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
-
 
 /* =================================================================
    MODAL AND TOAST Z-INDEX FIX - Ensure they appear above all content

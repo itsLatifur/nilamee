@@ -41,10 +41,10 @@ const bidSchema = new mongoose.Schema({
 
 // Query middleware to exclude soft-deleted bids by default
 bidSchema.pre(/^find/, function (next) {
-  if (!this.getOptions().includeDeleted) {
+  if (!this.getOptions || !this.getOptions().includeDeleted) {
     this.where({ isDeleted: false });
   }
-  next();
+  if (typeof next === "function") next();
 });
 
 export const Bid = mongoose.model("Bid", bidSchema);
