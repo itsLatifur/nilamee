@@ -5,6 +5,7 @@ import { FaGreaterThan } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AuctionView from "../../../shared/components/AuctionView";
+import { toast } from "react-toastify";
 
 const AuctionItem = () => {
   const { id } = useParams();
@@ -21,10 +22,17 @@ const AuctionItem = () => {
 
   const [amount, setAmount] = useState(0);
   const handleBid = () => {
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid bid amount");
+      return;
+    }
     const formData = new FormData();
     formData.append("amount", amount);
     dispatch(placeBid(id, formData));
-    dispatch(getAuctionDetail(id));
+    // Refresh auction details after short delay to show updated bids
+    setTimeout(() => {
+      dispatch(getAuctionDetail(id));
+    }, 500);
   };
 
   useEffect(() => {
@@ -34,7 +42,16 @@ const AuctionItem = () => {
     if (id) {
       dispatch(getAuctionDetail(id));
     }
-  }, [hasCheckedAuth, isAuthenticated, id]);
+
+    // Auto-refresh auction details every 5 seconds for real-time bid updates
+    const interval = setInterval(() => {
+      if (id && auctionDetail && new Date(auctionDetail.endTime) > Date.now()) {
+        dispatch(getAuctionDetail(id));
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [hasCheckedAuth, isAuthenticated, id, dispatch, navigateTo]);
 
   return (
     <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">

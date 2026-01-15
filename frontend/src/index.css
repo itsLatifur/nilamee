@@ -1696,3 +1696,25 @@
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+
+/* =================================================================
+   MODAL AND TOAST Z-INDEX FIX - Ensure they appear above all content
+   ================================================================= */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
+/* All modals and drawers */
+.fixed.z-50,
+[class*="modal"],
+[class*="drawer"],
+[class*="Modal"],
+[class*="Drawer"] {
+  z-index: 9999 !important;
+}
+
+/* Republish modal specific */
+.republish-modal {
+  z-index: 9999 !important;
+}

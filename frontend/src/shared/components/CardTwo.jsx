@@ -67,7 +67,10 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
           className="w-full aspect-[4/3] m-auto md:p-12"
         />
         <div className="px-2 pt-4 pb-2">
-          <h5 className="font-semibold text-[18px] group-hover:text-golden-300 whitestone:hover:text-black whitestone:text-gray-900 mb-2 text-warm-white">
+          <h5
+            className="font-semibold text-[18px] group-hover:text-golden-300 whitestone:hover:text-black whitestone:text-gray-900 mb-2 text-warm-white line-clamp-2 min-h-[3.5rem]"
+            title={title}
+          >
             {title}
           </h5>
           {startingBid && (
@@ -134,7 +137,7 @@ const Drawer = ({ setOpenDrawer, openDrawer, id }) => {
 
   return (
     <section
-      className={`fixed ${
+      className={`fixed z-50 ${
         openDrawer && id ? "bottom-0" : "-bottom-full"
       }  left-0 w-full transition-all duration-300 h-full bg-[#00000087] flex items-end`}
     >

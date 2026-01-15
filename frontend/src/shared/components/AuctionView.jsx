@@ -228,40 +228,46 @@ const AuctionView = ({
           </h3>
         </div>
         <div className="bg-white dark:bg-gray-900 px-4 py-2 min-h-fit lg:min-h-[650px] border-x-2 border-b-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 rounded-b-md">
-          {auctionBidders &&
-          auctionBidders.length > 0 &&
-          new Date(auctionDetail?.startTime) < Date.now() &&
-          new Date(auctionDetail?.endTime) > Date.now() ? (
-            auctionBidders.map((element, index) => (
-              <div
-                key={index}
-                className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
-              >
-                <p className="text-[18px] font-semibold whitestone:text-gray-900">
-                  {element.userName}
+          {new Date(auctionDetail?.startTime) <= Date.now() &&
+          new Date(auctionDetail?.endTime) >= Date.now() ? (
+            auctionBidders && auctionBidders.length > 0 ? (
+              auctionBidders.map((element, index) => (
+                <div
+                  key={index}
+                  className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
+                >
+                  <p className="text-[18px] font-semibold whitestone:text-gray-900 flex-1">
+                    {element.userName}
+                  </p>
+                  <p className="text-[18px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
+                    {formatBDT(element.amount)}
+                  </p>
+                  {index === 0 ? (
+                    <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
+                      1st
+                    </p>
+                  ) : index === 1 ? (
+                    <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
+                      2nd
+                    </p>
+                  ) : index === 2 ? (
+                    <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
+                      3rd
+                    </p>
+                  ) : (
+                    <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
+                      {index + 1}th
+                    </p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
+                <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
+                  No bids yet. Be the first to bid!
                 </p>
-                <p className="flex-1 text-center whitestone:text-gray-900">
-                  {formatBDT(element.amount)}
-                </p>
-                {index === 0 ? (
-                  <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
-                    1st
-                  </p>
-                ) : index === 1 ? (
-                  <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
-                    2nd
-                  </p>
-                ) : index === 2 ? (
-                  <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
-                    3rd
-                  </p>
-                ) : (
-                  <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
-                    {index + 1}th
-                  </p>
-                )}
               </div>
-            ))
+            )
           ) : Date.now() < new Date(auctionDetail?.startTime) ? (
             <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
               <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
@@ -286,7 +292,7 @@ const AuctionView = ({
                   <p className="text-white whitestone:text-black">Place Bid</p>
                   <input
                     type="number"
-                    className="w-32 focus:outline-none md:text-[20px] p-1 whitestone:text-gray-900"
+                    className="w-32 focus:outline-none md:text-[20px] p-1 text-gray-900 whitestone:text-gray-900 rounded"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />

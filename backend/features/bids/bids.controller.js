@@ -12,16 +12,28 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
   }
   const { amount } = req.body;
   if (!amount) {
-    return next(new ErrorHandler("Please place your bid.", 404));
+    return next(new ErrorHandler("Please place your bid.", 400));
   }
-  if (amount <= auctionItem.currentBid) {
-    return next(
-      new ErrorHandler("Bid amount must be greater than the current bid.", 404)
-    );
+
+  const numericAmount = parseFloat(amount);
+  if (isNaN(numericAmount) || numericAmount <= 0) {
+    return next(new ErrorHandler("Please enter a valid bid amount.", 400));
   }
-  if (amount < auctionItem.startingBid) {
+
+  // Get highest bid from all bids
+  const highestBid =
+    auctionItem.bids.length > 0
+      ? Math.max(...auctionItem.bids.map((b) => b.amount))
+      : auctionItem.currentBid || 0;
+
+  const minimumBid = Math.max(highestBid, auctionItem.startingBid);
+
+  if (numericAmount <= minimumBid) {
     return next(
-      new ErrorHandler("Bid amount must be greater than starting bid.", 404)
+      new ErrorHandler(
+        `Bid must be greater than current highest bid of ${minimumBid} BDT.`,
+        400
+      )
     );
   }
 
@@ -34,15 +46,13 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
       (bid) => bid.userId.toString() == req.user._id.toString()
     );
     if (existingBid && existingBidInAuction) {
-      existingBidInAuction.amount = amount;
-      existingBid.amount = amount;
-      await existingBidInAuction.save();
+      existingBidInAuction.amount = numericAmount;
+      existingBid.amount = numericAmount;
       await existingBid.save();
-      auctionItem.currentBid = amount;
     } else {
       const bidderDetail = await User.findById(req.user._id);
       const bid = await Bid.create({
-        amount,
+        amount: numericAmount,
         bidder: {
           id: bidderDetail._id,
           userName: bidderDetail.userName,
@@ -54,16 +64,23 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
         userId: req.user._id,
         userName: bidderDetail.userName,
         profileImage: bidderDetail.profileImage?.url,
-        amount,
+        amount: numericAmount,
       });
-      auctionItem.currentBid = amount;
     }
+
+    // Sort bids by amount (highest first)
+    auctionItem.bids.sort((a, b) => b.amount - a.amount);
+
+    // Update current bid to highest
+    auctionItem.currentBid = Math.max(...auctionItem.bids.map((b) => b.amount));
+
     await auctionItem.save();
 
     res.status(201).json({
       success: true,
-      message: "Bid placed.",
+      message: "Bid placed successfully!",
       currentBid: auctionItem.currentBid,
+      highestBidder: auctionItem.bids[0].userName,
     });
   } catch (error) {
     return next(new ErrorHandler(error.message || "Failed to place bid.", 500));

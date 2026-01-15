@@ -135,6 +135,7 @@ const App = () => {
         toastClassName={toastClassName}
         bodyClassName="!text-gray-900"
         progressClassName="!bg-blue-600"
+        style={{ zIndex: 99999 }}
       />
       <PremiumModal
         isOpen={showPremiumModal}

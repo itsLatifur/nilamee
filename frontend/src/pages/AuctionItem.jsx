@@ -7,6 +7,7 @@ import { RiAuctionFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatBDT } from "@/shared/utils/currency";
+import { toast } from "react-toastify";
 
 const AuctionItem = () => {
   const { id } = useParams();
@@ -21,10 +22,18 @@ const AuctionItem = () => {
   const [amount, setAmount] = useState(0);
   const [descExpanded, setDescExpanded] = useState(false);
   const handleBid = () => {
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid bid amount");
+      return;
+    }
     const formData = new FormData();
     formData.append("amount", amount);
     dispatch(placeBid(id, formData));
-    dispatch(getAuctionDetail(id));
+    // Refresh auction details after short delay to show updated bids
+    setTimeout(() => {
+      dispatch(getAuctionDetail(id));
+    }, 500);
+  };
         {loading ? (
           <Spinner />
         ) : (
@@ -106,40 +115,42 @@ const AuctionItem = () => {
                 BIDS
               </header>
               <div className="bg-white dark:bg-gray-900 px-4 min-h-fit lg:min-h-[650px]">
-                {auctionBidders &&
-                new Date(auctionDetail.startTime) < Date.now() &&
-                new Date(auctionDetail.endTime) > Date.now() ? (
-                  auctionBidders.length > 0 ? (
+                {new Date(auctionDetail.startTime) <= Date.now() &&
+                new Date(auctionDetail.endTime) >= Date.now() ? (
+                  auctionBidders && auctionBidders.length > 0 ? (
                     auctionBidders.map((element, index) => {
                       return (
                         <div
                           key={index}
-                          className="py-2 flex items-center justify-between"
+                          className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 flex-1">
                             <img
                               src={element.profileImage}
                               alt={element.userName}
-                              className="w-12 h-12 rounded-full my-2 hidden md:block"
+                              className="w-10 h-10 rounded-full hidden md:block"
                             />
-                            <p className="text-[18px] font-semibold">
+                            <p className="text-[17px] font-semibold whitestone:text-gray-900">
                               {element.userName}
                             </p>
                           </div>
+                          <p className="text-[17px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
+                            {formatBDT(element.amount)}
+                          </p>
                           {index === 0 ? (
-                            <p className="text-[20px] font-semibold text-green-600">
+                            <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
                               1st
                             </p>
                           ) : index === 1 ? (
-                            <p className="text-[20px] font-semibold text-blue-600">
+                            <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
                               2nd
                             </p>
                           ) : index === 2 ? (
-                            <p className="text-[20px] font-semibold text-yellow-600">
+                            <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
                               3rd
                             </p>
                           ) : (
-                            <p className="text-[20px] font-semibold text-warm-white">
+                            <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
                               {index + 1}th
                             </p>
                           )}
@@ -147,9 +158,11 @@ const AuctionItem = () => {
                       );
                     })
                   ) : (
-                    <p className="text-center text-golden-300 whitestone:text-gray-800 py-4">
-                      No bids for this auction
-                    </p>
+                    <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
+                      <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
+                        No bids yet. Be the first to bid!
+                      </p>
+                    </div>
                   )
                 ) : Date.now() < new Date(auctionDetail.startTime) ? (
                   <img
@@ -174,7 +187,7 @@ const AuctionItem = () => {
                       <p className="text-white whitestone:text-black">Place Bid</p>
                       <input
                         type="number"
-                        className="w-32 focus:outline-none md:text-[20px] p-1"
+                        className="w-32 focus:outline-none md:text-[20px] p-1 text-gray-900 rounded"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                       />
