@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { getAuctionDetail } from "../../auctions/store/auctionSlice";
+import {
+  getAuctionDetail,
+  getAuctionBidders,
+} from "../../auctions/store/auctionSlice";
 import { API_ENDPOINTS } from "../../../config/env";
 
 const bidSlice = createSlice({
@@ -31,7 +34,8 @@ export const placeBid = (id, data) => async (dispatch) => {
     });
     dispatch(bidSlice.actions.bidSuccess());
     toast.success(response.data.message);
-    dispatch(getAuctionDetail(id));
+    // Refresh only bidders to avoid full page reload and preserve input focus
+    dispatch(getAuctionBidders(id));
   } catch (error) {
     dispatch(bidSlice.actions.bidFailed());
     toast.error(error.response.data.message);
@@ -39,14 +43,3 @@ export const placeBid = (id, data) => async (dispatch) => {
 };
 
 export default bidSlice.reducer;
-
-
-
-
-
-
-
-
-
-
-

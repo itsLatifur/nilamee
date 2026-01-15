@@ -1,4 +1,4 @@
-import { getAuctionDetail } from "../store/auctionSlice";
+import { getAuctionDetail, getAuctionBidders } from "../store/auctionSlice";
 import { placeBid } from "../../bids/store/bidSlice";
 import React, { useEffect, useState } from "react";
 import { FaGreaterThan } from "react-icons/fa";
@@ -27,9 +27,9 @@ const AuctionItem = () => {
       return;
     }
     dispatch(placeBid(id, { amount: Number(amount) }));
-    // Refresh auction details after short delay to show updated bids
+    // Refresh bidders after short delay to show updated bids without reloading full detail
     setTimeout(() => {
-      dispatch(getAuctionDetail(id));
+      dispatch(getAuctionBidders(id));
     }, 500);
   };
 
@@ -41,10 +41,10 @@ const AuctionItem = () => {
       dispatch(getAuctionDetail(id));
     }
 
-    // Auto-refresh auction details every 5 seconds for real-time bid updates
+    // Auto-refresh auction bidders every 5 seconds for real-time bid updates
     const interval = setInterval(() => {
       if (id && auctionDetail && new Date(auctionDetail.endTime) > Date.now()) {
-        dispatch(getAuctionDetail(id));
+        dispatch(getAuctionBidders(id));
       }
     }, 5000);
 
