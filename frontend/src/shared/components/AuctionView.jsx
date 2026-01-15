@@ -292,7 +292,8 @@ const AuctionView = ({
                   <p className="text-white whitestone:text-black">Place Bid</p>
                   <input
                     type="number"
-                    className="w-32 focus:outline-none md:text-[20px] p-1 text-gray-900 whitestone:text-gray-900 rounded"
+                    className="w-32 focus:outline-none md:text-[20px] p-1 rounded bg-white"
+                    style={{ color: "#000000" }}
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
