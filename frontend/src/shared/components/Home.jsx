@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Card from "./Card";
 import Spinner from "./Spinner";
 import appConfig from "../../config/appConfig";
 import {
-  FiSearch,
   FiArrowRight,
   FiShield,
   FiLock,
@@ -16,26 +15,20 @@ import { RiAuctionFill } from "react-icons/ri";
 import { HiTrendingUp } from "react-icons/hi";
 import { formatBDT } from "@/shared/utils/currency";
 import { reviews } from "@/shared/data/reviews";
+import auctionCategories from "@/config/auctionCategories";
 
 const Home = () => {
   const { allAuctions, loading } = useSelector((state) => state.auction);
   const { leaderboard } = useSelector((state) => state.user);
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
 
-  // Auction categories with dynamic images from latest auctions
-  const categories = [
-    { name: "Electronics", icon: "📱" },
-    { name: "Antiques", icon: "🏺" },
-    { name: "Art & Collectibles", icon: "🎨" },
-    { name: "Jewelry", icon: "💎" },
-    { name: "Vehicles", icon: "🚗" },
-    { name: "Real Estate", icon: "🏠" },
-    { name: "Fashion", icon: "👗" },
-    { name: "Sports & Memorabilia", icon: "⚽" },
-  ];
+  // Use canonical categories from shared config
+  const categories = auctionCategories.map((name, idx) => ({
+    name,
+    icon:
+      ["📱", "🛋️", "🎨", "💎", "🚗", "🏠", "🗃️", "👗", "🏆", "📚"][idx] || "📦",
+  }));
 
   // Auto-rotate reviews every 3 seconds
   useEffect(() => {
@@ -100,12 +93,7 @@ const Home = () => {
     return categoryAuction?.image?.url || null;
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/auctions?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
+  // search removed — homepage uses direct navigation links
 
   return (
     <>
@@ -114,29 +102,17 @@ const Home = () => {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
             {/* Discover Exclusive Auctions - Top Left */}
-            <h1 className="text-gold-gradient text-3xl md:text-4xl xl:text-5xl font-bold whitespace-nowrap">
+            <h1 className="text-gold-gradient text-3xl md:text-4xl xl:text-5xl font-bold">
               Discover Exclusive Auctions
             </h1>
-
-            {/* Search Panel - Top Right */}
-            <form
-              onSubmit={handleSearch}
-              className="w-full lg:w-auto lg:min-w-[500px] flex gap-0"
-            >
-              <input
-                type="text"
-                placeholder="Search for anything..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-4 py-3.5 rounded-l-xl bg-white border-2 border-r-0 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 whitestone:focus:border-blue-500 transition-all duration-300 shadow-sm"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3.5 bg-gold-gradient whitestone:bg-blue-600 whitestone:hover:bg-blue-700 text-white rounded-r-xl transition-all duration-200 shadow-sm flex items-center justify-center border-2 border-transparent"
+            <div className="w-full lg:w-auto flex justify-start lg:justify-end">
+              <Link
+                to="/auctions"
+                className="px-6 py-3.5 bg-gold-gradient text-white rounded-xl shadow-sm font-semibold hover:opacity-95 transition"
               >
-                <FiSearch className="text-lg" />
-              </button>
-            </form>
+                Browse Auctions
+              </Link>
+            </div>
           </div>
 
           {/* Live Bidding Activity Ticker */}
@@ -231,32 +207,32 @@ const Home = () => {
                     Recently added items ready for bidding
                   </p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {latestAuctions.map((auction) => (
-                  <Card
-                    key={auction._id}
-                    title={auction.title}
-                    imgSrc={auction.images?.[0]?.url || auction.image?.url}
-                    startTime={auction.startTime}
-                    endTime={auction.endTime}
-                    startingBid={auction.startingBid}
-                    id={auction._id}
-                  />
-                ))}
-              </div>
-
-              {/* View All Auctions Button */}
-              <div className="flex justify-center">
                 <Link
                   to="/auctions"
-                  className="px-12 py-4 bg-luxury-gradient border-2 border-golden-400 whitestone:border-blue-600 text-white whitestone:text-white font-bold text-lg rounded-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-3 btn-hover"
+                  className="hidden md:flex items-center gap-2 text-golden-400 whitestone:text-blue-600 hover:text-golden-300 whitestone:hover:text-blue-700 font-semibold transition-colors"
                 >
-                  <RiAuctionFill className="text-2xl" />
-                  View All Auctions
-                  <FiArrowRight className="text-xl" />
+                  View All <FiArrowRight />
                 </Link>
+              </div>
+
+              <div className="relative">
+                <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                  {latestAuctions.map((auction) => (
+                    <div
+                      key={auction._id}
+                      className="flex-shrink-0 w-[300px] snap-start"
+                    >
+                      <Card
+                        title={auction.title}
+                        imgSrc={auction.images?.[0]?.url || auction.image?.url}
+                        startTime={auction.startTime}
+                        endTime={auction.endTime}
+                        startingBid={auction.startingBid}
+                        id={auction._id}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
 

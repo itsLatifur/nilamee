@@ -1,5 +1,6 @@
 import { createAuction } from "@/store/slices/auctionSlice";
 import React, { useEffect, useState } from "react";
+import auctionCategories from "@/config/auctionCategories";
 import DatePicker from "react-datepicker";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -16,18 +17,7 @@ const CreateAuction = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
-  const auctionCategories = [
-    "Electronics",
-    "Furniture",
-    "Art & Antiques",
-    "Jewelry & Watches",
-    "Automobiles",
-    "Real Estate",
-    "Collectibles",
-    "Fashion & Accessories",
-    "Sports Memorabilia",
-    "Books & Manuscripts",
-  ];
+  // use shared auctionCategories
 
   const imageHandler = (e) => {
     const file = e.target.files[0];
@@ -81,7 +71,9 @@ const CreateAuction = () => {
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Title</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Title
+              </label>
               <input
                 type="text"
                 value={title}
@@ -90,7 +82,9 @@ const CreateAuction = () => {
               />
             </div>
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Category</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Category
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -109,7 +103,9 @@ const CreateAuction = () => {
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Condition</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Condition
+              </label>
               <select
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
@@ -134,7 +130,9 @@ const CreateAuction = () => {
           </div>
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex flex-col sm:flex-1">
-              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">Description</label>
+              <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
+                Description
+              </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

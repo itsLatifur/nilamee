@@ -118,7 +118,11 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
-  const users = await User.find({ moneySpent: { $gt: 0 } });
+  // Exclude soft-deleted users from leaderboard
+  const users = await User.find({
+    moneySpent: { $gt: 0 },
+    status: { $ne: "deleted" },
+  });
   const leaderboard = users.sort((a, b) => b.moneySpent - a.moneySpent);
   res.status(200).json({
     success: true,

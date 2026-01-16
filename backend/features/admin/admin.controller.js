@@ -4,40 +4,133 @@ import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { Commission } from "../commissions/commissions.model.js";
 import { User } from "../users/users.model.js";
 import { Auction } from "../auctions/auctions.model.js";
+import { Bid } from "../bids/bids.model.js";
+import { Escrow } from "../escrow/escrow.model.js";
+import { TransactionHistory } from "../transactions/transactionHistory.model.js";
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Notification } from "../../models/notificationSchema.js";
-import { Role } from "./admin.model.js";
-import { AdminActivityLog } from "./activityLog.model.js";
-import bcrypt from "bcrypt";
 
-// Helper function to log admin activities
-const logActivity = async ({
-  action,
-  performedBy,
-  performedByName,
-  performedByRole,
-  targetUser = null,
-  targetUserName = null,
-  targetResource = null,
-  changes = {},
-  reason = null,
-  ipAddress = null,
-}) => {
+// Helper to perform cascade cleanup when a user is removed/banned
+const performRemovalCascade = async (user, performedById, req) => {
   try {
-    await AdminActivityLog.create({
-      action,
-      performedBy,
-      performedByName,
-      performedByRole,
-      targetUser,
-      targetUserName,
-      targetResource,
-      changes,
-      reason,
-      ipAddress,
+    // 1) Auctions created by the user
+    const createdAuctions = await Auction.find({
+      createdBy: user._id,
+      isDeleted: false,
+    }).lean();
+    for (const auc of createdAuctions) {
+      if (
+        auc.approvalStatus === "pending" ||
+        auc.overallStatus === "Pending Approval"
+      ) {
+        await Auction.findByIdAndUpdate(auc._id, {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: performedById,
+          deletionReason: "Owner account removed",
+          overallStatus: "Cancelled",
+        });
+      } else {
+        await Auction.findByIdAndUpdate(auc._id, {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: performedById,
+          deletionReason: "Owner account removed - auction cancelled",
+          overallStatus: "Cancelled",
+        });
+        if (Array.isArray(auc.bids)) {
+          for (const b of auc.bids) {
+            if (b.userId) {
+              await Notification.create({
+                userId: b.userId,
+                title: "Auction Cancelled",
+                message: `The auction "${auc.title}" has been cancelled because the seller's account was removed.`,
+                type: "warning",
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // 2) Auctions where removed user was highestBidder and not paid -> clear highestBidder and cancel payment
+    const affectedWinnerAuctions = await Auction.find({
+      highestBidder: user._id,
+      paymentStatus: { $ne: "Paid" },
     });
-  } catch (error) {
-    console.error("Failed to log activity:", error);
+    for (const auc of affectedWinnerAuctions) {
+      auc.highestBidder = null;
+      auc.paymentStatus = "Cancelled";
+      auc.overallStatus = "Cancelled";
+      await auc.save();
+      if (auc.createdBy) {
+        await Notification.create({
+          userId: auc.createdBy,
+          title: "Auction Winner Removed",
+          message: `The winner for your auction "${auc.title}" was removed because that account was removed. Please review and take action.`,
+          type: "info",
+        });
+      }
+    }
+
+    // 3) Anonymize bids placed by removed user and recalc
+    const auctionsWithUserBids = await Auction.find({
+      "bids.userId": user._id,
+    });
+    for (const auc of auctionsWithUserBids) {
+      let modified = false;
+      for (const bidEntry of auc.bids) {
+        if (
+          bidEntry.userId &&
+          bidEntry.userId.toString() === user._id.toString()
+        ) {
+          bidEntry.userId = null;
+          bidEntry.userName = "Deleted user";
+          bidEntry.profileImage = null;
+          modified = true;
+        }
+      }
+      if (modified) {
+        auc.bids.sort((a, b) => b.amount - a.amount);
+        auc.currentBid =
+          auc.bids.length > 0 ? Math.max(...auc.bids.map((b) => b.amount)) : 0;
+        const highest = auc.bids.find((b) => b.userId);
+        auc.highestBidder = highest ? highest.userId : null;
+        await auc.save();
+      }
+    }
+
+    // 4) Refund or mark escrows as refunded if not released
+    const escrowsAsBuyer = await Escrow.find({ buyerId: user._id });
+    for (const esc of escrowsAsBuyer) {
+      if (esc.status !== "Released") {
+        esc.status = "Refunded";
+        esc.refundedAt = new Date();
+        await esc.save();
+        await Notification.create({
+          userId: esc.sellerId,
+          title: "Escrow Updated",
+          message: `Escrow for auction ${esc.auctionId} was refunded because the buyer's account was removed.`,
+          type: "warning",
+        });
+      }
+    }
+    const escrowsAsSeller = await Escrow.find({ sellerId: user._id });
+    for (const esc of escrowsAsSeller) {
+      if (esc.status !== "Released") {
+        esc.status = "Refunded";
+        esc.refundedAt = new Date();
+        await esc.save();
+        await Notification.create({
+          userId: esc.buyerId,
+          title: "Escrow Updated",
+          message: `Escrow for auction ${esc.auctionId} was refunded because the seller's account was removed.`,
+          type: "warning",
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Error during removal cascade:", err);
   }
 };
 
@@ -483,6 +576,13 @@ export const banUser = catchAsyncErrors(async (req, res, next) => {
   user.bannedReason = reason || "Violated platform policies";
   await user.save();
 
+  // Apply same cascade cleanup as soft-delete for banned users
+  try {
+    await performRemovalCascade(user, req.user._id, req);
+  } catch (cascadeErr) {
+    console.error("Error during ban cascade:", cascadeErr);
+  }
+
   // Log activity
   await logActivity({
     action: "BAN_USER",
@@ -609,6 +709,12 @@ export const softDeleteUser = catchAsyncErrors(async (req, res, next) => {
   user.deletedAt = new Date();
   user.deletionReason = reason || "Account deleted by administrator";
   await user.save();
+  // Cascade cleanup for auctions, bids, escrows and transaction state
+  try {
+    await performRemovalCascade(user, req.user._id, req);
+  } catch (cascadeError) {
+    console.error("Error during soft-delete cascade:", cascadeError);
+  }
 
   // Log activity
   await logActivity({

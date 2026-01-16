@@ -2,9 +2,18 @@ import Card from "../../../shared/components/Card";
 import Spinner from "../../../shared/components/Spinner";
 import React from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 const Auctions = () => {
   const { allAuctions, loading } = useSelector((state) => state.auction);
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const categoryFilter = params.get("category");
+
+  const filtered = categoryFilter
+    ? allAuctions.filter((a) => a.category === categoryFilter)
+    : allAuctions;
+
   return (
     <>
       {loading ? (
@@ -18,7 +27,7 @@ const Auctions = () => {
               Auctions
             </h1>
             <div className="flex flex-wrap gap-6">
-              {allAuctions.map((element) => (
+              {filtered.map((element) => (
                 <Card
                   title={element.title}
                   startTime={element.startTime}

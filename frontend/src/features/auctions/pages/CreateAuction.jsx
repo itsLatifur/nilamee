@@ -1,5 +1,6 @@
 import { createAuction } from "../store/auctionSlice";
 import React, { useEffect, useState } from "react";
+import auctionCategories from "@/config/auctionCategories";
 import DatePicker from "react-datepicker";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -21,18 +22,7 @@ const CreateAuction = () => {
   const [authenticity, setAuthenticity] = useState("");
   const [customFields, setCustomFields] = useState([]);
 
-  const auctionCategories = [
-    "Electronics",
-    "Furniture",
-    "Art & Antiques",
-    "Jewelry & Watches",
-    "Automobiles",
-    "Real Estate",
-    "Collectibles",
-    "Fashion & Accessories",
-    "Sports Memorabilia",
-    "Books & Manuscripts",
-  ];
+  // categories imported from shared config
 
   const authenticityOptions = [
     { value: "", label: "Select Authenticity" },
