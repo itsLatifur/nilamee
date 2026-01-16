@@ -140,7 +140,6 @@ const SignUp = () => {
             <div className="flex flex-col sm:flex-1 gap-2">
               <label className="text-[16px] text-golden-300 whitestone:text-gray-900">
                 Profile Image{" "}
-                <span className="text-sm text-gray-500">(Optional)</span>
               </label>
               <div className="flex items-center gap-3">
                 <img
