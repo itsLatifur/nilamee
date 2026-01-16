@@ -87,10 +87,19 @@ const Home = () => {
 
   // Auction categories with dynamic images from latest auctions
   const getCategoryImage = (categoryName) => {
-    const categoryAuction = allAuctions.find(
-      (auction) => auction.category === categoryName && auction.image?.url
-    );
-    return categoryAuction?.image?.url || null;
+    // find latest auction in this category that has an image
+    const auctionsInCategory = allAuctions
+      .filter((a) => a.category === categoryName)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt || b.startTime) -
+          new Date(a.createdAt || a.startTime)
+      );
+    for (const auc of auctionsInCategory) {
+      const url = auc.images?.[0]?.url || auc.image?.url || null;
+      if (url) return url;
+    }
+    return null;
   };
 
   // search removed — homepage uses direct navigation links
@@ -250,29 +259,23 @@ const Home = () => {
               </div>
 
               <div className="max-w-7xl mx-auto relative">
-                {categories.length > 6 && (
-                  <>
-                    {/* Previous Arrow */}
-                    <button
-                      onClick={() =>
-                        setCurrentCategoryIndex((prev) =>
-                          prev === 0
-                            ? Math.max(0, categories.length - 6)
-                            : prev - 1
-                        )
-                      }
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
-                      aria-label="Previous categories"
-                    >
-                      <span className="text-2xl text-gray-700">‹</span>
-                    </button>
-                  </>
-                )}
+                {/* Prev/Next arrows only shown on small screens where horizontal scroll is used */}
+                <button
+                  onClick={() =>
+                    setCurrentCategoryIndex((prev) =>
+                      prev === 0 ? Math.max(0, categories.length - 6) : prev - 1
+                    )
+                  }
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 lg:hidden"
+                  aria-label="Previous categories"
+                >
+                  <span className="text-2xl text-gray-700">‹</span>
+                </button>
 
-                {/* Categories Grid - 6 Visible */}
+                {/* Large screens: fixed grid. Small screens: horizontal scroll. */}
                 <div className="overflow-hidden">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {categories.slice(0, 6).map((category, index) => {
+                  <div className="hidden lg:grid grid-cols-5 gap-4">
+                    {categories.map((category, index) => {
                       const categoryImage = getCategoryImage(category.name);
                       return (
                         <Link
@@ -280,9 +283,8 @@ const Home = () => {
                           to={`/auctions?category=${encodeURIComponent(
                             category.name
                           )}`}
-                          className="group relative bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border-2 border-white/20 hover:border-white/60 transition-all duration-300 h-48 hover:scale-105 hover:shadow-2xl"
+                          className="category-card group relative bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border-2 border-white/20 hover:border-white/60 transition-all duration-300 h-48 w-full"
                         >
-                          {/* Category Image */}
                           {categoryImage ? (
                             <img
                               src={categoryImage}
@@ -290,24 +292,96 @@ const Home = () => {
                               className="absolute inset-0 w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/50 to-blue-800/50 flex items-center justify-center">
-                              <span className="text-6xl opacity-40">
-                                {category.icon}
-                              </span>
-                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800"></div>
                           )}
 
-                          {/* Dark overlay */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
 
-                          {/* Category Name */}
                           <div className="absolute inset-0 flex flex-col justify-end p-4">
-                            <h3 className="text-white font-bold text-sm md:text-base text-center transition-colors drop-shadow-lg">
-                              {category.name.toUpperCase()}
-                            </h3>
-                            <p className="text-white/70 text-xs text-center mt-1">
-                              AUCTIONS
-                            </p>
+                            <div className="mx-auto w-full max-w-full text-center">
+                              <div className="inline-block bg-black/70 backdrop-blur-sm px-3 py-1 rounded-md">
+                                <h3
+                                  style={{
+                                    color: "#ffffff",
+                                    WebkitTextFillColor: "#ffffff",
+                                    mixBlendMode: "normal",
+                                    textShadow: "0 0 0.6px rgba(0,0,0,0.6)",
+                                  }}
+                                  className="text-white !text-white font-semibold text-sm md:text-sm leading-tight"
+                                >
+                                  {category.name}
+                                </h3>
+                              </div>
+                              <div className="mt-2">
+                                <p
+                                  style={{
+                                    color: "#ffffff",
+                                    WebkitTextFillColor: "#ffffff",
+                                    mixBlendMode: "normal",
+                                  }}
+                                  className="text-white !text-white text-xs"
+                                >
+                                  AUCTIONS
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide lg:hidden">
+                    {categories.map((category, index) => {
+                      const categoryImage = getCategoryImage(category.name);
+                      return (
+                        <Link
+                          key={index}
+                          to={`/auctions?category=${encodeURIComponent(
+                            category.name
+                          )}`}
+                          className="category-card flex-shrink-0 w-[240px] h-48 group relative bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border-2 border-white/20 hover:border-white/60 transition-all duration-300"
+                        >
+                          {categoryImage ? (
+                            <img
+                              src={categoryImage}
+                              alt={category.name}
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800"></div>
+                          )}
+
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                          <div className="absolute inset-0 flex flex-col justify-end p-4">
+                            <div className="mx-auto w-full max-w-full text-center">
+                              <div className="inline-block bg-black/70 backdrop-blur-sm px-3 py-1 rounded-md">
+                                <h3
+                                  style={{
+                                    color: "#ffffff",
+                                    WebkitTextFillColor: "#ffffff",
+                                    mixBlendMode: "normal",
+                                    textShadow: "0 0 0.6px rgba(0,0,0,0.6)",
+                                  }}
+                                  className="text-white !text-white font-semibold text-sm leading-tight"
+                                >
+                                  {category.name}
+                                </h3>
+                              </div>
+                              <div className="mt-2">
+                                <p
+                                  style={{
+                                    color: "#ffffff",
+                                    WebkitTextFillColor: "#ffffff",
+                                    mixBlendMode: "normal",
+                                  }}
+                                  className="text-white !text-white text-xs"
+                                >
+                                  AUCTIONS
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </Link>
                       );
@@ -315,43 +389,20 @@ const Home = () => {
                   </div>
                 </div>
 
-                {categories.length > 6 && (
-                  <>
-                    {/* Next Arrow */}
-                    <button
-                      onClick={() =>
-                        setCurrentCategoryIndex((prev) =>
-                          prev >= categories.length - 6 ? 0 : prev + 1
-                        )
-                      }
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
-                      aria-label="Next categories"
-                    >
-                      <span className="text-2xl text-gray-700">›</span>
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={() =>
+                    setCurrentCategoryIndex((prev) =>
+                      prev >= categories.length - 6 ? 0 : prev + 1
+                    )
+                  }
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 lg:hidden"
+                  aria-label="Next categories"
+                >
+                  <span className="text-2xl text-gray-700">›</span>
+                </button>
               </div>
 
-              {/* Navigation Dots */}
-              {categories.length > 6 && (
-                <div className="flex justify-center gap-2 mt-8">
-                  {Array.from({
-                    length: Math.max(1, categories.length - 5),
-                  }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentCategoryIndex(index)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        currentCategoryIndex === index
-                          ? "bg-golden-400 whitestone:bg-blue-600 w-8"
-                          : "bg-golden-400/40 whitestone:bg-blue-300 hover:bg-golden-400/60 whitestone:hover:bg-blue-400 w-2"
-                      }`}
-                      aria-label={`Go to category set ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
+              {/* Navigation dots removed per design */}
             </section>
 
             {/* About Us Section */}

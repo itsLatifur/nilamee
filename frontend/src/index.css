@@ -399,6 +399,24 @@ body.whitestone-mode .bg-gold-gradient input[type="number"]::placeholder {
     transition: color 0.2s ease;
   }
 
+  /* Force category card text white even if Whitestone sets link color globally */
+  a.category-card h3,
+  a.category-card p {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    mix-blend-mode: normal !important;
+    text-shadow: 0 0 0.8px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Whitestone-specific override to be extra-specific */
+  .whitestone a.category-card h3,
+  .whitestone a.category-card p {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    mix-blend-mode: normal !important;
+    text-shadow: 0 0 0.8px rgba(0, 0, 0, 0.6) !important;
+  }
+
   .whitestone
     a:not(.btn-hover):not(.btn-hover-no-scale):not(.bg-blue-600):not(
       .bg-burgundy-600

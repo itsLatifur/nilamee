@@ -2,7 +2,8 @@ import Card from "../../../shared/components/Card";
 import Spinner from "../../../shared/components/Spinner";
 import React from "react";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
+import auctionCategories from "@/config/auctionCategories";
 
 const Auctions = () => {
   const { allAuctions, loading } = useSelector((state) => state.auction);
@@ -26,6 +27,35 @@ const Auctions = () => {
             >
               Auctions
             </h1>
+            {/* Category filter bar */}
+            <div className="mb-6">
+              <nav className="flex gap-3 flex-wrap items-center">
+                <Link
+                  to="/auctions"
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition border ${
+                    !categoryFilter
+                      ? "bg-golden-400 text-white"
+                      : "bg-transparent text-warm-white border-white/20"
+                  }`}
+                >
+                  All
+                </Link>
+                {auctionCategories.map((cat) => (
+                  <Link
+                    key={cat}
+                    to={`/auctions?category=${encodeURIComponent(cat)}`}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition border ${
+                      categoryFilter === cat
+                        ? "bg-golden-400 text-white"
+                        : "bg-transparent text-warm-white border-white/20"
+                    }`}
+                  >
+                    {cat}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
             <div className="flex flex-wrap gap-6">
               {filtered.map((element) => (
                 <Card
