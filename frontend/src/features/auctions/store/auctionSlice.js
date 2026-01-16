@@ -170,10 +170,12 @@ export const createAuction = (data) => async (dispatch) => {
     toast.success(response.data.message);
     dispatch(getAllAuctionItems());
     dispatch(auctionSlice.actions.resetSlice());
+    return response.data;
   } catch (error) {
     dispatch(auctionSlice.actions.createAuctionFailed());
     toast.error(error.response.data.message);
     dispatch(auctionSlice.actions.resetSlice());
+    throw error;
   }
 };
 

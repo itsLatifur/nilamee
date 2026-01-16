@@ -120,7 +120,14 @@ const CreateAuction = () => {
       "customFields",
       JSON.stringify(customFields.filter((f) => f.label && f.value))
     );
-    dispatch(createAuction(formData));
+    (async () => {
+      try {
+        await dispatch(createAuction(formData));
+        navigateTo("/view-my-auctions");
+      } catch (error) {
+        // error toast already handled in thunk
+      }
+    })();
   };
 
   const {
