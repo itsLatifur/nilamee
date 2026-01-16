@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
+const Card = ({ imgSrc, title, startingBid, startTime, endTime, id, sold }) => {
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -50,6 +50,11 @@ const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
       >
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        {sold && (
+          <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+            SOLD
+          </div>
+        )}
         <img
           src={imgSrc}
           alt={title}

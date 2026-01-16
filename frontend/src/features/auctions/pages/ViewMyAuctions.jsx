@@ -51,6 +51,10 @@ const ViewMyAuctions = () => {
                       startTime={element.startTime}
                       imgSrc={element.images?.[0]?.url || element.image?.url}
                       id={element._id}
+                      sold={
+                        !!element.highestBidder &&
+                        new Date(element.endTime) < Date.now()
+                      }
                     />
                     {element.approvalStatus === "pending" && (
                       <div className="absolute top-2 right-2 bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">

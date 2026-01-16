@@ -5,7 +5,15 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { deleteAuction, republishAuction } from "@/store/slices/auctionSlice";
 
-const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
+const CardTwo = ({
+  imgSrc,
+  title,
+  startingBid,
+  startTime,
+  endTime,
+  id,
+  sold,
+}) => {
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -100,13 +108,28 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
             >
               Delete Auction
             </button>
-            <button
-              disabled={new Date(endTime) > Date.now()}
-              onClick={() => setOpenDrawer(true)}
-              className="bg-sky-400 text-center text-white whitestone:text-black text-xl px-4 py-2 rounded-md transition-all duration-300 hover:bg-sky-700"
-            >
-              Republish Auction
-            </button>
+            {!sold ? (
+              <button
+                disabled={new Date(endTime) > Date.now()}
+                onClick={() => setOpenDrawer(true)}
+                className="bg-sky-400 text-center text-white whitestone:text-black text-xl px-4 py-2 rounded-md transition-all duration-300 hover:bg-sky-700 disabled:opacity-50"
+              >
+                Republish Auction
+              </button>
+            ) : (
+              <button
+                disabled
+                aria-disabled
+                className="bg-gray-500 text-center text-white text-xl px-4 py-2 rounded-md opacity-60 cursor-not-allowed"
+              >
+                Republish Disabled
+              </button>
+            )}
+            {sold && (
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                SOLD
+              </div>
+            )}
           </div>
         </div>
       </div>

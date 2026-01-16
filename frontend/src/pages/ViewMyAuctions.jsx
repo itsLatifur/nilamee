@@ -36,7 +36,7 @@ const ViewMyAuctions = () => {
                     id={element._id}
                     key={element._id}
                     sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
-            {myAuctions.length > 0 ? (
+              {myAuctions.length > 0 ? (
               myAuctions.map((element) => {
                 return (
                   <CardTwo
@@ -47,6 +47,7 @@ const ViewMyAuctions = () => {
                     imgSrc={element.image?.url}
                     id={element._id}
                     key={element._id}
+                    sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
                   />
                 );
               })
