@@ -8,7 +8,7 @@ const auctionSlice = createSlice({
     loading: false,
     itemDetail: {},
     auctionDetail: {},
-    auctionBidders: {},
+    auctionBidders: [],
     myAuctions: [],
     allAuctions: [],
   },
@@ -205,14 +205,3 @@ export const deleteAuction = (id) => async (dispatch) => {
 };
 
 export default auctionSlice.reducer;
-
-
-
-
-
-
-
-
-
-
-

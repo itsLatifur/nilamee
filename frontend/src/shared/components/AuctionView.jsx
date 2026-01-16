@@ -240,10 +240,12 @@ const AuctionView = ({
           </h3>
         </div>
         <div className="bg-white dark:bg-gray-900 px-4 py-2 min-h-fit lg:min-h-[650px] border-x-2 border-b-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 rounded-b-md">
-          {new Date(auctionDetail?.startTime) <= Date.now() &&
-          new Date(auctionDetail?.endTime) >= Date.now() ? (
-            auctionBidders && auctionBidders.length > 0 ? (
-              auctionBidders.map((element, index) => (
+          {auctionBidders && auctionBidders.length > 0 ? (
+            // Always show bidders if present (active or past auctions)
+            auctionBidders.map((element, index) => {
+              const isEnded =
+                Date.now() > new Date(auctionDetail?.endTime).getTime();
+              return (
                 <div
                   key={index}
                   className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
@@ -254,7 +256,11 @@ const AuctionView = ({
                   <p className="text-[18px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
                     {formatBDT(element.amount)}
                   </p>
-                  {index === 0 ? (
+                  {isEnded && index === 0 ? (
+                    <div className="text-[14px] font-semibold text-white bg-gold-gradient px-3 py-1 rounded-full flex-1 text-end ml-2">
+                      Winner
+                    </div>
+                  ) : index === 0 ? (
                     <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
                       1st
                     </p>
@@ -272,14 +278,8 @@ const AuctionView = ({
                     </p>
                   )}
                 </div>
-              ))
-            ) : (
-              <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
-                <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
-                  No bids yet. Be the first to bid!
-                </p>
-              </div>
-            )
+              );
+            })
           ) : Date.now() < new Date(auctionDetail?.startTime) ? (
             <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
               <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">

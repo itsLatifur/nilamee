@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Card from "./Card";
@@ -20,6 +21,7 @@ import auctionCategories from "@/config/auctionCategories";
 const Home = () => {
   const { allAuctions, loading } = useSelector((state) => state.auction);
   const { leaderboard } = useSelector((state) => state.user);
+  const [siteStats, setSiteStats] = useState({});
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
 
@@ -40,6 +42,28 @@ const Home = () => {
     }, 3000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Fetch public site stats (users, auctions, transaction volume)
+  useEffect(() => {
+    let mounted = true;
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/v1/public/stats",
+          { withCredentials: false }
+        );
+        if (mounted && res.data && res.data.stats) setSiteStats(res.data.stats);
+      } catch (err) {
+        console.error("Failed to fetch site stats:", err?.response || err);
+      }
+    };
+
+    fetchStats();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Get featured auctions (first 6)
@@ -198,6 +222,10 @@ const Home = () => {
                         endTime={auction.endTime}
                         startingBid={auction.startingBid}
                         id={auction._id}
+                        sold={
+                          !!auction.highestBidder &&
+                          new Date(auction.endTime) < Date.now()
+                        }
                       />
                     </div>
                   ))}
@@ -238,6 +266,10 @@ const Home = () => {
                         endTime={auction.endTime}
                         startingBid={auction.startingBid}
                         id={auction._id}
+                        sold={
+                          !!auction.highestBidder &&
+                          new Date(auction.endTime) < Date.now()
+                        }
                       />
                     </div>
                   ))}
@@ -450,69 +482,68 @@ const Home = () => {
               </div>
             </section>
 
-            {/* Trust Statistics Section */}
+            {/* Trust & Safety Section - focused on guarantees rather than raw user counts */}
             <section className="mb-20">
               <div className="text-center mb-10">
                 <h2 className="text-warm-white whitestone:text-gray-900 text-2xl md:text-3xl font-bold mb-2">
-                  Trusted by Thousands
+                  Why You Can Trust Nilamee
                 </h2>
                 <p className="text-golden-300 whitestone:text-gray-600 text-sm">
-                  Join our growing community of satisfied buyers and sellers
+                  We protect buyers and sellers with verified auctions,
+                  escrow-backed payments, and secure support.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-                {/* Active Users */}
+                {/* Escrow Protected */}
                 <div className="text-center p-6 rounded-xl bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 whitestone:from-blue-50 whitestone:to-purple-50 border border-golden-400/20 whitestone:border-gray-200 hover:border-golden-400/40 whitestone:hover:border-blue-300 transition-all duration-300 hover:shadow-lg group">
-                  <div className="text-3xl md:text-4xl font-bold text-gold-gradient mb-2 group-hover:scale-110 transition-transform">
-                    {leaderboard.length > 0
-                      ? `${Math.max(leaderboard.length, 500)}+`
-                      : "5,000+"}
+                  <div className="mb-2">
+                    <FiShield className="mx-auto text-4xl text-gold-gradient" />
                   </div>
                   <div className="text-golden-300 whitestone:text-gray-600 text-sm font-medium">
-                    Active Users
+                    Escrow Protected
+                  </div>
+                  <div className="text-xs text-golden-200 whitestone:text-gray-500 mt-1">
+                    Payments held safely until delivery
                   </div>
                 </div>
 
-                {/* Successful Auctions */}
+                {/* Auctions Verified */}
                 <div className="text-center p-6 rounded-xl bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 whitestone:from-blue-50 whitestone:to-purple-50 border border-golden-400/20 whitestone:border-gray-200 hover:border-golden-400/40 whitestone:hover:border-blue-300 transition-all duration-300 hover:shadow-lg group">
-                  <div className="text-3xl md:text-4xl font-bold text-gold-gradient mb-2 group-hover:scale-110 transition-transform">
-                    {allAuctions.length > 0
-                      ? `${Math.max(allAuctions.length, 1200)}+`
-                      : "10,000+"}
+                  <div className="mb-2">
+                    <RiAuctionFill className="mx-auto text-4xl text-gold-gradient" />
                   </div>
                   <div className="text-golden-300 whitestone:text-gray-600 text-sm font-medium">
-                    Total Auctions
+                    Auctions Verified
+                  </div>
+                  <div className="text-xs text-golden-200 whitestone:text-gray-500 mt-1">
+                    Verified sellers & inspected listings
                   </div>
                 </div>
 
-                {/* Total Transaction Value */}
+                {/* Secure Payments (icon + short text) */}
                 <div className="text-center p-6 rounded-xl bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 whitestone:from-blue-50 whitestone:to-purple-50 border border-golden-400/20 whitestone:border-gray-200 hover:border-golden-400/40 whitestone:hover:border-blue-300 transition-all duration-300 hover:shadow-lg group">
-                  <div className="text-3xl md:text-4xl font-bold text-gold-gradient mb-2 group-hover:scale-110 transition-transform">
-                    {leaderboard.length > 0
-                      ? `${Math.max(
-                          Math.floor(
-                            leaderboard.reduce(
-                              (sum, user) => sum + (user.moneySpent || 0),
-                              0
-                            ) / 100000
-                          ),
-                          50
-                        )}M+`
-                      : "100M+"}
+                  <div className="mb-2">
+                    <FiLock className="mx-auto text-4xl text-gold-gradient" />
                   </div>
                   <div className="text-golden-300 whitestone:text-gray-600 text-sm font-medium">
-                    BDT Transacted
+                    Secure Payments
+                  </div>
+                  <div className="text-xs text-golden-200 whitestone:text-gray-500 mt-1">
+                    Escrow-backed & SSL-secured
                   </div>
                 </div>
 
                 {/* Customer Satisfaction */}
                 <div className="text-center p-6 rounded-xl bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 whitestone:from-blue-50 whitestone:to-purple-50 border border-golden-400/20 whitestone:border-gray-200 hover:border-golden-400/40 whitestone:hover:border-blue-300 transition-all duration-300 hover:shadow-lg group">
-                  <div className="text-3xl md:text-4xl font-bold text-gold-gradient mb-2 group-hover:scale-110 transition-transform">
-                    99.8%
+                  <div className="mb-2">
+                    <FiCheckCircle className="mx-auto text-4xl text-gold-gradient" />
                   </div>
                   <div className="text-golden-300 whitestone:text-gray-600 text-sm font-medium">
-                    Satisfaction Rate
+                    Trusted Service
+                  </div>
+                  <div className="text-xs text-golden-200 whitestone:text-gray-500 mt-1">
+                    Highly rated by our customers
                   </div>
                 </div>
               </div>

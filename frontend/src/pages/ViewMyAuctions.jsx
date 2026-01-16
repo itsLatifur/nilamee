@@ -27,14 +27,15 @@ const ViewMyAuctions = () => {
         >
           My Auctions
         </h1>
-        {loading ? (
-          <Spinner />
-        ) : (
-          <div
-            className={`${
-              myAuctions.length > 2 && "flex-grow"
-            } flex flex-wrap gap-6`}
-          >
+                  <CardTwo
+                    title={element.title}
+                    startingBid={element.startingBid}
+                    endTime={element.endTime}
+                    startTime={element.startTime}
+                    imgSrc={element.image?.url}
+                    id={element._id}
+                    key={element._id}
+                    sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
             {myAuctions.length > 0 ? (
               myAuctions.map((element) => {
                 return (

@@ -65,6 +65,10 @@ const Auctions = () => {
                   imgSrc={element.images?.[0]?.url || element.image?.url}
                   startingBid={element.startingBid}
                   id={element._id}
+                  sold={
+                    !!element.highestBidder &&
+                    new Date(element.endTime) < Date.now()
+                  }
                   key={element._id}
                 />
               ))}

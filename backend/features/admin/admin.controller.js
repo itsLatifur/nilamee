@@ -4,6 +4,7 @@ import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { Commission } from "../commissions/commissions.model.js";
 import { User } from "../users/users.model.js";
 import { Auction } from "../auctions/auctions.model.js";
+import { incrementMetric } from "../public/metrics.model.js";
 import { Bid } from "../bids/bids.model.js";
 import { Escrow } from "../escrow/escrow.model.js";
 import { TransactionHistory } from "../transactions/transactionHistory.model.js";
@@ -340,6 +341,13 @@ export const approveAuction = catchAsyncErrors(async (req, res, next) => {
 
   auction.approvalStatus = "approved";
   await auction.save();
+
+  // Increment persistent total approved auctions counter
+  try {
+    await incrementMetric("totalAuctionsApproved", 1);
+  } catch (err) {
+    console.error("Failed to increment totalAuctionsApproved:", err);
+  }
 
   // Log activity
   await logActivity({

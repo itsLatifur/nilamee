@@ -8,7 +8,15 @@ import {
   republishAuction,
 } from "../../features/auctions/store/auctionSlice";
 
-const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
+const CardTwo = ({
+  imgSrc,
+  title,
+  startingBid,
+  startTime,
+  endTime,
+  id,
+  sold,
+}) => {
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -106,13 +114,20 @@ const CardTwo = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
             >
               Delete Auction
             </button>
-            <button
-              disabled={new Date(endTime) > Date.now()}
-              onClick={() => setOpenDrawer(true)}
-              className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover disabled:opacity-50"
-            >
-              Republish Auction
-            </button>
+            {!sold && (
+              <button
+                disabled={new Date(endTime) > Date.now()}
+                onClick={() => setOpenDrawer(true)}
+                className="bg-gold-gradient whitestone:bg-amber-600 text-center text-warm-white whitestone:text-white text-xl px-4 py-2 rounded-md transition-all duration-300 border-2 border-golden-400 whitestone:border-amber-500 shadow-lg btn-hover disabled:opacity-50"
+              >
+                Republish Auction
+              </button>
+            )}
+            {sold && (
+              <div className="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                SOLD
+              </div>
+            )}
           </div>
         </div>
       </div>

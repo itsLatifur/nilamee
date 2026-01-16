@@ -22,7 +22,8 @@ router.post(
 
 router.get("/allitems", getAllItems);
 
-router.get("/auction/:id", isAuthenticated, getAuctionDetails);
+// Allow public access to auction details so bidders list and winner are visible to everyone
+router.get("/auction/:id", getAuctionDetails);
 
 router.get(
   "/myitems",

@@ -4,6 +4,7 @@ import { User } from "../users/users.model.js";
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Auction } from "../auctions/auctions.model.js";
 import { Escrow } from "../escrow/escrow.model.js";
+import { incrementMetric } from "../public/metrics.model.js";
 import { TransactionHistory } from "../transactions/transactionHistory.model.js";
 import SSLCommerzPayment from "sslcommerz-lts";
 import { sendEmail } from "../../utils/sendEmail.js";
@@ -124,6 +125,16 @@ export const paymentSuccess = catchAsyncErrors(async (req, res, next) => {
   user.unpaidCommission = Math.max(0, user.unpaidCommission - amount);
   await user.save();
 
+  // Increment transaction count for commission payment
+  try {
+    await incrementMetric("totalTransactionsCount", 1);
+  } catch (err) {
+    console.error(
+      "Failed to increment totalTransactionsCount for commission:",
+      err
+    );
+  }
+
   res.redirect(
     `${process.env.FRONTEND_URL}/payment-success?tran_id=${tran_id}`
   );
@@ -171,6 +182,15 @@ export const paymentIPN = catchAsyncErrors(async (req, res, next) => {
 
       user.unpaidCommission = Math.max(0, user.unpaidCommission - amount);
       await user.save();
+      // Increment transaction count for commission payment via IPN
+      try {
+        await incrementMetric("totalTransactionsCount", 1);
+      } catch (err) {
+        console.error(
+          "Failed to increment totalTransactionsCount for commission IPN:",
+          err
+        );
+      }
     }
   }
 
@@ -336,6 +356,13 @@ export const auctionPaymentSuccess = catchAsyncErrors(
       transactionId: tran_id,
       createdAt: new Date(),
     });
+
+    // Increment transaction count (one successful auction payment)
+    try {
+      await incrementMetric("totalTransactionsCount", 1);
+    } catch (err) {
+      console.error("Failed to increment totalTransactionsCount:", err);
+    }
 
     // UPDATE BUYER TRUST SCORE
     const paymentTime = Date.now() - new Date(auction.endTime).getTime();
@@ -515,6 +542,13 @@ export const auctionPaymentIPN = catchAsyncErrors(async (req, res, next) => {
           transactionId: tran_id,
           createdAt: new Date(),
         });
+
+        // Increment transaction count for IPN-created escrow
+        try {
+          await incrementMetric("totalTransactionsCount", 1);
+        } catch (err) {
+          console.error("Failed to increment totalTransactionsCount:", err);
+        }
       }
     }
   }

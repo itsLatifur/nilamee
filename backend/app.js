@@ -29,6 +29,7 @@ import disputeRouter from "./features/disputes/dispute.routes.js";
 import feedbackRouter from "./features/feedback/feedback.routes.js";
 import profileRouter from "./features/profile/profile.routes.js";
 import notificationRouter from "./router/notificationRoutes.js";
+import publicRouter from "./features/public/public.routes.js";
 import { endedAuctionCron } from "./features/auctions/jobs/endedAuction.job.js";
 import { paymentDeadlineCron } from "./features/auctions/jobs/paymentDeadline.job.js";
 import { verifyCommissionCron } from "./features/commissions/jobs/verifyCommission.job.js";
@@ -63,6 +64,7 @@ app.use("/api/v1/dispute", disputeRouter);
 app.use("/api/v1/feedback", feedbackRouter);
 app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/notification", notificationRouter);
+app.use("/api/v1/public", publicRouter);
 
 // Connect to database first, then start cron jobs
 connection()

@@ -23,6 +23,50 @@ const AuctionItem = () => {
   const [amount, setAmount] = useState(0);
   const { currentTheme } = useTheme();
   const [descExpanded, setDescExpanded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({});
+
+  // Live countdown for auction start/end
+  useEffect(() => {
+    // fetch auction detail on mount (and when id changes)
+    if (id) dispatch(getAuctionDetail(id));
+
+    let mounted = true;
+    const update = () => {
+      if (!auctionDetail || !auctionDetail.startTime || !auctionDetail.endTime) return;
+      const now = Date.now();
+      const start = new Date(auctionDetail.startTime).getTime();
+      const end = new Date(auctionDetail.endTime).getTime();
+      let label = "";
+      let diff = 0;
+      if (now < start) {
+        label = "Starts in";
+        diff = start - now;
+      } else if (now >= start && now <= end) {
+        label = "Time left";
+        diff = end - now;
+      } else {
+        label = "Auction ended";
+        diff = 0;
+      }
+
+      const seconds = Math.max(0, Math.floor(diff / 1000));
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      if (mounted) {
+        setTimeLeft({ label, days, hours, minutes, seconds: secs, remaining: diff });
+      }
+    };
+
+    update();
+    const t = setInterval(update, 1000);
+    return () => {
+      mounted = false;
+      clearInterval(t);
+    };
+  }, [auctionDetail?.startTime, auctionDetail?.endTime]);
   const handleBid = () => {
     if (!amount || amount <= 0) {
       toast.error("Please enter a valid bid amount");
@@ -111,59 +155,76 @@ const AuctionItem = () => {
               )}
             </div>
             <div className="flex-1">
+              {/* Countdown banner placed above bids for better bidder experience */}
+              <div className="mb-3">
+                {timeLeft && timeLeft.label && (
+                  <div className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-white whitestone:from-blue-50 whitestone:to-blue-100 rounded-md p-3 border border-gray-200 whitestone:border-white/30">
+                    <div className="text-sm font-semibold text-gray-700 whitestone:text-gray-900">
+                      {timeLeft.label}
+                    </div>
+                    {timeLeft.label !== "Auction ended" ? (
+                      <div className="text-sm font-mono text-gray-900 whitestone:text-gray-900">
+                        {timeLeft.days > 0 && <span className="mr-2">{timeLeft.days}d</span>}
+                        <span className="mr-2">{String(timeLeft.hours).padStart(2, "0")}h</span>
+                        <span className="mr-2">{String(timeLeft.minutes).padStart(2, "0")}m</span>
+                        <span>{String(timeLeft.seconds).padStart(2, "0")}s</span>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-600 whitestone:text-gray-600">This auction has ended</div>
+                    )}
+                  </div>
+                )}
+              </div>
               <header className="bg-golden-50 py-4 text-[24px] font-semibold px-4">
                 BIDS
               </header>
               <div className="bg-white dark:bg-gray-900 px-4 min-h-fit lg:min-h-[650px]">
-                {new Date(auctionDetail.startTime) <= Date.now() &&
-                new Date(auctionDetail.endTime) >= Date.now() ? (
-                  auctionBidders && auctionBidders.length > 0 ? (
-                    auctionBidders.map((element, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
-                        >
-                          <div className="flex items-center gap-3 flex-1">
-                            <img
-                              src={element.profileImage}
-                              alt={element.userName}
-                              className="w-10 h-10 rounded-full hidden md:block"
-                            />
-                            <p className="text-[17px] font-semibold whitestone:text-gray-900">
-                              {element.userName}
-                            </p>
-                          </div>
-                          <p className="text-[17px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
-                            {formatBDT(element.amount)}
+                {auctionBidders && auctionBidders.length > 0 ? (
+                  // Always show bidders if there are any (past or present)
+                  auctionBidders.map((element, index) => {
+                    const isEnded = Date.now() > new Date(auctionDetail.endTime).getTime();
+                    return (
+                      <div
+                        key={index}
+                        className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <img
+                            src={element.profileImage}
+                            alt={element.userName}
+                            className="w-10 h-10 rounded-full hidden md:block"
+                          />
+                          <p className="text-[17px] font-semibold whitestone:text-gray-900">
+                            {element.userName}
                           </p>
-                          {index === 0 ? (
-                            <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
-                              1st
-                            </p>
-                          ) : index === 1 ? (
-                            <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
-                              2nd
-                            </p>
-                          ) : index === 2 ? (
-                            <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
-                              3rd
-                            </p>
-                          ) : (
-                            <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
-                              {index + 1}th
-                            </p>
-                          )}
                         </div>
-                      );
-                    })
-                  ) : (
-                    <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
-                      <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
-                        No bids yet. Be the first to bid!
-                      </p>
-                    </div>
-                  )
+                        <p className="text-[17px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
+                          {formatBDT(element.amount)}
+                        </p>
+                        {isEnded && index === 0 ? (
+                          <div className="text-[14px] font-semibold text-white bg-gold-gradient px-3 py-1 rounded-full flex-1 text-end ml-2">
+                            Winner
+                          </div>
+                        ) : index === 0 ? (
+                          <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
+                            1st
+                          </p>
+                        ) : index === 1 ? (
+                          <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
+                            2nd
+                          </p>
+                        ) : index === 2 ? (
+                          <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
+                            3rd
+                          </p>
+                        ) : (
+                          <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
+                            {index + 1}th
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : Date.now() < new Date(auctionDetail.startTime) ? (
                   <img
                     src="/notStarted.png"
@@ -171,11 +232,11 @@ const AuctionItem = () => {
                     className="w-full max-h-[650px]"
                   />
                 ) : (
-                  <img
-                    src="/auctionEnded.png"
-                    alt="ended"
-                    className="w-full max-h-[650px]"
-                  />
+                  <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
+                    <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
+                      No bids yet. Be the first to bid!
+                    </p>
+                  </div>
                 )}
               </div>
 

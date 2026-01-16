@@ -1,6 +1,7 @@
 import { catchAsyncErrors } from "../../shared/middlewares/async.middleware.js";
 import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { User } from "./users.model.js";
+import { incrementMetric } from "../public/metrics.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { generateToken } from "../../shared/utils/jwt.util.js";
 
@@ -53,6 +54,12 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       url: cloudinaryResponse.secure_url,
     },
   });
+  // Increment persistent total users counter
+  try {
+    await incrementMetric("totalUsers", 1);
+  } catch (err) {
+    console.error("Failed to increment totalUsers metric:", err);
+  }
   generateToken(user, "User Registered.", 201, res);
 });
 

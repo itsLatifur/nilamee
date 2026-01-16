@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
+const Card = ({ imgSrc, title, startingBid, startTime, endTime, id, sold }) => {
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -48,6 +48,11 @@ const Card = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
         to={`/auction/item/${id}`}
         className="flex-grow basis-full bg-gradient-to-br from-burgundy-950/10 to-golden-950/5 dark:from-black/10 dark:to-gray-950/5 whitestone:bg-white/35 dark:backdrop-blur-sm whitestone:backdrop-blur-xl rounded-md group sm:basis-60 lg:basis-60 2xl:basis-80 border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 hover:border-burgundy-400 dark:hover:border-gray-600 whitestone:hover:border-blue-300 transition-all duration-300 card-hover relative overflow-hidden"
       >
+        {sold && (
+          <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+            SOLD
+          </div>
+        )}
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <img
