@@ -101,10 +101,10 @@ const Dashboard = () => {
                   Inspect and verify commission proofs
                 </p>
                 <Link
-                  to="/dashboard/payment-proofs"
+                  to="/dashboard/pending-payments"
                   className="bg-gold-gradient text-white font-semibold py-1 px-3 rounded-md border border-golden-400 whitestone:border-gray-400"
                 >
-                  Open Proofs
+                  Open Pending Payments
                 </Link>
               </div>
               <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/60 rounded-md border border-golden-400 whitestone:border-gray-300 p-4">

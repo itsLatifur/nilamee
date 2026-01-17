@@ -212,6 +212,18 @@ const SideDrawer = () => {
                     <FaEye /> View My Auctions
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to="/sell-history"
+                    className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
+                      location.pathname === "/sell-history"
+                        ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
+                        : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
+                    }`}
+                  >
+                    <FaWallet /> Sell History
+                  </Link>
+                </li>
               </>
             )}
             {isAuthenticated &&
@@ -318,14 +330,14 @@ const SideDrawer = () => {
                   </li>
                   <li>
                     <Link
-                      to="/dashboard/payment-proofs"
+                      to="/dashboard/pending-payments"
                       className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
-                        location.pathname === "/dashboard/payment-proofs"
+                        location.pathname === "/dashboard/pending-payments"
                           ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
                           : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
                       }`}
                     >
-                      <FaFileInvoiceDollar /> Payment Proofs
+                      <FaFileInvoiceDollar /> Pending Payments
                     </Link>
                   </li>
                 </>

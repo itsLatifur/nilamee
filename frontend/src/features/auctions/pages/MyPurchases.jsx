@@ -7,11 +7,14 @@ import { formatBDT } from "@/shared/utils/currency";
 import FeedbackForm from "@/shared/components/FeedbackForm";
 
 const MyPurchases = () => {
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { isAuthenticated, user, hasCheckedAuth } = useSelector(
+    (state) => state.user
+  );
   const navigate = useNavigate();
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmingDelivery, setConfirmingDelivery] = useState(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(null);
   const [raisingDispute, setRaisingDispute] = useState(null);
   const [leavingFeedback, setLeavingFeedback] = useState(null);
   const [disputeForm, setDisputeForm] = useState({
@@ -20,24 +23,51 @@ const MyPurchases = () => {
   });
 
   useEffect(() => {
+    // Wait until we've checked auth status to avoid premature redirects
+    if (!hasCheckedAuth) return;
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
     fetchMyPurchases();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, hasCheckedAuth]);
 
   const fetchMyPurchases = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/auctionitem/allitems`,
-        { withCredentials: true }
-      );
+      // Determine backend base URL (fall back to localhost:5000 if env not set)
+      const BACKEND =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-      // Filter auctions where current user is the highest bidder
-      const wonAuctions = response.data.items.filter(
-        (auction) => auction.highestBidder?._id === user._id
-      );
+      // Use server-side endpoint to retrieve auctions the user won
+      const response = await axios.get(`${BACKEND}/api/v1/auctions/my-wins`, {
+        withCredentials: true,
+      });
+
+      let wonAuctions = response.data.items || [];
+
+      // If backend returned no items, try debug endpoint as a fallback to surface candidates
+      if (!wonAuctions || wonAuctions.length === 0) {
+        try {
+          const dbg = await axios.get(
+            `${BACKEND}/api/v1/auctions/my-wins/debug`,
+            {
+              withCredentials: true,
+            }
+          );
+          if (dbg.data && dbg.data.matched > 0) {
+            wonAuctions = dbg.data.sampleMatched || [];
+          } else if (dbg.data && dbg.data.totalMatches > 0) {
+            // Show candidates if filters excluded them
+            wonAuctions = dbg.data.sampleAll || [];
+            toast.info(
+              "Showing candidate wins (debug) — backend filters excluded them."
+            );
+          }
+        } catch (err) {
+          // swallow debug errors
+          console.debug("Debug fetch failed", err?.message || err);
+        }
+      }
 
       setPurchases(wonAuctions);
       setLoading(false);
@@ -47,8 +77,37 @@ const MyPurchases = () => {
     }
   };
 
-  const handlePayNow = (auctionId) => {
-    navigate(`/auction/${auctionId}/payment`);
+  const handlePayNow = async (auctionId) => {
+    setPaymentProcessing(auctionId);
+    try {
+      const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+      // In development allow demo-pay fallback
+      const endpoint =
+        import.meta.env.NODE_ENV !== "production"
+          ? `${BACKEND}/api/v1/payment/auction/demo-pay/${auctionId}`
+          : `${BACKEND}/api/v1/payment/auction/init/${auctionId}`;
+
+      const response = await axios.post(endpoint, {}, { withCredentials: true });
+
+      if (response.data && response.data.success) {
+        // If demo endpoint used, just refresh purchases to reflect Paid state
+        if (endpoint.includes("demo-pay")) {
+          toast.success("Demo payment completed");
+          fetchMyPurchases();
+        } else if (response.data.gatewayUrl) {
+          window.location.href = response.data.gatewayUrl;
+        } else {
+          toast.error(response.data.message || "Failed to start payment");
+        }
+      } else {
+        toast.error(response.data?.message || "Failed to start payment");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to start payment");
+    } finally {
+      setPaymentProcessing(null);
+    }
   };
 
   const handleConfirmDelivery = async (auctionId) => {

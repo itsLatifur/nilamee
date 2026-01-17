@@ -2,6 +2,7 @@ import { catchAsyncErrors } from "../../shared/middlewares/async.middleware.js";
 import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { User } from "../users/users.model.js";
 import { TransactionHistory } from "../transactions/transactionHistory.model.js";
+import { Escrow } from "../escrow/escrow.model.js";
 import { Feedback } from "../feedback/feedback.model.js";
 
 // Get user profile (basic or premium view based on viewer's subscription)
@@ -163,4 +164,25 @@ export const getMyTrustStats = catchAsyncErrors(async (req, res, next) => {
       transactionHistory: transactionHistory.slice(0, 20), // Last 20
     },
   });
+});
+
+// Get receivable amount from escrows for current user (seller)
+export const getMyReceivables = catchAsyncErrors(async (req, res, next) => {
+  const sellerId = req.user._id;
+
+  // Sum sellerAmount for escrows that are Pending or Held (not yet Released/Refunded)
+  const agg = await Escrow.aggregate([
+    { $match: { sellerId: sellerId, status: { $in: ["Pending", "Held"] } } },
+    {
+      $group: {
+        _id: null,
+        totalReceivable: { $sum: "$sellerAmount" },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const totalReceivable = agg && agg.length > 0 ? agg[0].totalReceivable : 0;
+
+  res.status(200).json({ success: true, receivable: totalReceivable });
 });

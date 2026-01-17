@@ -10,6 +10,31 @@ import { Escrow } from "../escrow/escrow.model.js";
 import { TransactionHistory } from "../transactions/transactionHistory.model.js";
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Notification } from "../../models/notificationSchema.js";
+import { AdminActivityLog } from "./activityLog.model.js";
+
+// Helper to write activity logs
+const logActivity = async (entry) => {
+  try {
+    if (!entry) return null;
+    // Ensure required fields
+    const payload = {
+      action: entry.action,
+      performedBy: entry.performedBy,
+      performedByName: entry.performedByName || "System",
+      performedByRole: entry.performedByRole || "System",
+      targetUser: entry.targetUser || null,
+      targetUserName: entry.targetUserName || null,
+      targetResource: entry.targetResource || null,
+      changes: entry.changes || {},
+      reason: entry.reason || null,
+      ipAddress: entry.ipAddress || null,
+    };
+    return await AdminActivityLog.create(payload);
+  } catch (err) {
+    console.error("Failed to record admin activity log:", err);
+    return null;
+  }
+};
 
 // Helper to perform cascade cleanup when a user is removed/banned
 const performRemovalCascade = async (user, performedById, req) => {
@@ -326,6 +351,124 @@ export const getPendingAuctions = catchAsyncErrors(async (req, res, next) => {
     pendingAuctions,
   });
 });
+
+// List pending payments (escrows that are held and require admin approval)
+export const getPendingPayments = catchAsyncErrors(async (req, res, next) => {
+  const pending = await Escrow.find({ status: { $in: ["Held", "Pending"] } })
+    .populate("auctionId", "title currentBid")
+    .populate("buyerId", "userName email")
+    .populate("sellerId", "userName email paymentInfo");
+
+  res.status(200).json({ success: true, pending });
+});
+
+// Approve pending escrow payout: collect commission, mark escrow released, record transaction
+export const approvePendingPayment = catchAsyncErrors(
+  async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new ErrorHandler("Invalid ID format.", 400));
+    }
+
+    const escrow = await Escrow.findById(id).populate("auctionId");
+    if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
+
+    if (escrow.status === "Released") {
+      return next(new ErrorHandler("Escrow already released.", 400));
+    }
+
+    // Compute commission and seller amounts (should be present on escrow)
+    const commissionAmount = escrow.commissionAmount || 0;
+    const sellerAmount =
+      escrow.sellerAmount || escrow.totalAmount - commissionAmount;
+
+    // Create Commission record for platform revenue
+    try {
+      await Commission.create({
+        amount: commissionAmount,
+        user: escrow.sellerId,
+      });
+    } catch (err) {
+      console.error("Failed to create commission record:", err);
+    }
+
+    // Mark escrow released and record processing info
+    escrow.status = "Released";
+    escrow.releasedAt = new Date();
+    escrow.processedBy = req.user._id;
+    escrow.processedAt = new Date();
+
+    // Snapshot seller paymentInfo if available
+    try {
+      const seller = await User.findById(escrow.sellerId).select(
+        "paymentInfo userName email totalTransactionVolume completedAuctionsCount stats"
+      );
+      if (seller && seller.paymentInfo) {
+        escrow.payoutInfo = {
+          method:
+            seller.paymentInfo.bankName ||
+            seller.paymentInfo.mobileWallet ||
+            "",
+          account:
+            seller.paymentInfo.bankAccountNumber ||
+            seller.paymentInfo.mobileWalletNumber ||
+            "",
+          name: seller.paymentInfo.bankAccountName || seller.userName || "",
+        };
+
+        // Update seller stats and totals to reflect received funds
+        seller.totalTransactionVolume =
+          (seller.totalTransactionVolume || 0) + sellerAmount;
+        seller.completedAuctionsCount =
+          (seller.completedAuctionsCount || 0) + 1;
+        seller.stats = seller.stats || {};
+        seller.stats.totalAuctionsCompleted =
+          (seller.stats.totalAuctionsCompleted || 0) + 1;
+        seller.lastActivityDate = new Date();
+        await seller.save();
+
+        // Record transaction history for seller
+        try {
+          await TransactionHistory.create({
+            userId: seller._id,
+            auctionId: escrow.auctionId._id,
+            role: "Auctioneer",
+            amount: sellerAmount,
+            auctionTitle: escrow.auctionId.title || "",
+            outcome: "Success",
+          });
+        } catch (err) {
+          console.error("Failed to create transaction history:", err);
+        }
+      }
+    } catch (err) {
+      console.error("Error while snapshotting seller info:", err);
+    }
+
+    await escrow.save();
+
+    // Notify seller
+    try {
+      await Notification.create({
+        userId: escrow.sellerId,
+        title: "Payout Approved",
+        message: `Your payout of BDT ${sellerAmount.toFixed(2)} for auction ${
+          escrow.auctionId.title
+        } has been approved. Commission: BDT ${commissionAmount.toFixed(2)}.`,
+        type: "info",
+      });
+    } catch (err) {
+      console.error("Failed to create notification:", err);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Payout approved and released.",
+      escrow,
+    });
+  }
+);
 
 export const approveAuction = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
@@ -1216,10 +1359,10 @@ export const updateUserRole = catchAsyncErrors(async (req, res, next) => {
 
 // Get Activity Logs (Super Admin Only)
 export const getActivityLogs = catchAsyncErrors(async (req, res, next) => {
-  // Only Super Admin can view activity logs
-  if (req.user.role !== "Super Admin") {
+  // Super Admin and Admin can view activity logs
+  if (req.user.role !== "Super Admin" && req.user.role !== "Admin") {
     return next(
-      new ErrorHandler("Only Super Admin can view activity logs.", 403)
+      new ErrorHandler("Only Super Admin or Admin can view activity logs.", 403)
     );
   }
 

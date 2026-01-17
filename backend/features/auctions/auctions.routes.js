@@ -2,6 +2,8 @@ import {
   addNewAuctionItem,
   getAllItems,
   getAuctionDetails,
+  getMyWonAuctions,
+  getMyWonAuctionsDebug,
   getMyAuctionItems,
   removeFromAuction,
   republishItem,
@@ -36,6 +38,11 @@ router.get(
   isAuthorized("Auctioneer"),
   getMyAuctionItems
 );
+
+// Won auctions for buyers
+router.get("/my-wins", isAuthenticated, getMyWonAuctions);
+// Debug route for development: shows why auctions matched/filtered
+router.get("/my-wins/debug", isAuthenticated, getMyWonAuctionsDebug);
 
 router.delete(
   "/delete/:id",

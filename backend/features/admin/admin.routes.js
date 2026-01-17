@@ -12,8 +12,10 @@ import {
   monthlyRevenue,
   updateProofStatus,
   getPendingAuctions,
+  getPendingPayments,
   approveAuction,
   rejectAuction,
+  approvePendingPayment,
   createAdmin,
   getAllUsers,
   banUser,
@@ -88,6 +90,21 @@ router.get(
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
   getPendingAuctions
+);
+
+// Pending escrow payouts awaiting admin approval
+router.get(
+  "/payments/pending",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  getPendingPayments
+);
+
+router.post(
+  "/payments/approve/:id",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  approvePendingPayment
 );
 
 router.put(
@@ -217,7 +234,7 @@ router.put(
 router.get(
   "/activity-logs",
   isAuthenticated,
-  isAuthorized("Super Admin"),
+  isAuthorized("Super Admin", "Admin"),
   getActivityLogs
 );
 

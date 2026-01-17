@@ -56,6 +56,8 @@ app.use(
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auctionitem", auctionItemRouter);
+// Alias route: support both /api/v1/auctionitem and /api/v1/auctions for frontend compatibility
+app.use("/api/v1/auctions", auctionItemRouter);
 app.use("/api/v1/bid", bidRouter);
 app.use("/api/v1/commission", commissionRouter);
 app.use("/api/v1/superadmin", superAdminRouter);

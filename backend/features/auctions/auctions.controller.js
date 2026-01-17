@@ -17,7 +17,7 @@ import {
 export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return next(
-      new ErrorHandler("At least one auction item image required.", 400)
+      new ErrorHandler("At least one auction item image required.", 400),
     );
   }
 
@@ -36,8 +36,8 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
       return next(
         new ErrorHandler(
           "File format not supported. Use PNG, JPEG, or WEBP.",
-          400
-        )
+          400,
+        ),
       );
     }
   }
@@ -89,16 +89,16 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Auction starting time must be greater than present time.",
-        400
-      )
+        400,
+      ),
     );
   }
   if (new Date(startTime) >= new Date(endTime)) {
     return next(
       new ErrorHandler(
         "Auction starting time must be less than ending time.",
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -110,15 +110,18 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
         img.tempFilePath,
         {
           folder: "MERN_AUCTION_PLATFORM_AUCTIONS",
-        }
+        },
       );
       if (!cloudinaryResponse || cloudinaryResponse.error) {
         console.error(
           "Cloudinary error:",
-          cloudinaryResponse.error || "Unknown cloudinary error."
+          cloudinaryResponse.error || "Unknown cloudinary error.",
         );
         return next(
-          new ErrorHandler("Failed to upload auction image to cloudinary.", 500)
+          new ErrorHandler(
+            "Failed to upload auction image to cloudinary.",
+            500,
+          ),
         );
       }
       uploadedImages.push({
@@ -149,7 +152,7 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(error.message || "Failed to created auction.", 500)
+      new ErrorHandler(error.message || "Failed to created auction.", 500),
     );
   }
 });
@@ -192,6 +195,139 @@ export const getMyAuctionItems = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+// Get auctions the current user won (highestBidder) and that have ended
+export const getMyWonAuctions = catchAsyncErrors(async (req, res, next) => {
+  const userId = req.user._id;
+
+  // Find auctions where highestBidder matches current user.
+  // Note: some auctions may store `endTime` as string; perform robust filtering in JS
+  // Find auctions where highestBidder matches current user OR the user appears in bids (various shapes)
+  // This makes the endpoint more forgiving if data was stored in different formats.
+  const allWon = await Auction.find({
+    $or: [
+      { highestBidder: userId },
+      { "bids.userId": userId },
+      { "bids.bidder.id": userId },
+    ],
+  })
+    .sort({ endTime: -1 })
+    .populate("createdBy", "userName email");
+
+  const now = new Date();
+  const items = allWon.filter((auc) => {
+    try {
+      // Determine the resolved winner for this auction
+      let winnerId = null;
+      if (auc.highestBidder) winnerId = auc.highestBidder.toString();
+      else if (Array.isArray(auc.bids) && auc.bids.length > 0) {
+        const top = auc.bids.reduce(
+          (prev, cur) => (cur.amount > (prev.amount || 0) ? cur : prev),
+          {},
+        );
+        if (top) {
+          if (top.userId) winnerId = top.userId.toString();
+          else if (top.bidder && top.bidder.id)
+            winnerId = top.bidder.id.toString();
+        }
+      }
+
+      // Only include auctions where the resolved winner is the current user
+      if (!winnerId || winnerId !== userId.toString()) return false;
+
+      // Now apply the same ended/awaiting-payment checks
+      const end = auc.endTime ? new Date(auc.endTime) : null;
+      if (end && !isNaN(end.getTime())) {
+        return end < now;
+      }
+      if (
+        typeof auc.overallStatus === "string" &&
+        auc.overallStatus.includes("Ended")
+      ) {
+        return true;
+      }
+      if (
+        auc.paymentDeadline ||
+        (auc.paymentStatus && auc.paymentStatus !== "Unpaid")
+      ) {
+        return true;
+      }
+      return false;
+    } catch (err) {
+      return false;
+    }
+  });
+
+  res.status(200).json({ success: true, items });
+});
+
+// Debug endpoint: returns diagnostic info about matched and filtered auctions for the current user
+export const getMyWonAuctionsDebug = catchAsyncErrors(
+  async (req, res, next) => {
+    const userId = req.user._id;
+
+    const allWon = await Auction.find({
+      $or: [
+        { highestBidder: userId },
+        { "bids.userId": userId },
+        { "bids.bidder.id": userId },
+      ],
+    })
+      .sort({ endTime: -1 })
+      .populate("createdBy", "userName email");
+
+    const now = new Date();
+    const items = [];
+    const sampleAll = [];
+    for (const auc of allWon) {
+      // compute resolved winner
+      let winnerId = null;
+      if (auc.highestBidder) winnerId = auc.highestBidder.toString();
+      else if (Array.isArray(auc.bids) && auc.bids.length > 0) {
+        const top = auc.bids.reduce(
+          (prev, cur) => (cur.amount > (prev.amount || 0) ? cur : prev),
+          {},
+        );
+        if (top) {
+          if (top.userId) winnerId = top.userId.toString();
+          else if (top.bidder && top.bidder.id)
+            winnerId = top.bidder.id.toString();
+        }
+      }
+
+      const end = auc.endTime ? new Date(auc.endTime) : null;
+      const isEnded =
+        (end && !isNaN(end.getTime()) && end < now) ||
+        (typeof auc.overallStatus === "string" &&
+          auc.overallStatus.includes("Ended")) ||
+        auc.paymentDeadline ||
+        (auc.paymentStatus && auc.paymentStatus !== "Unpaid");
+
+      sampleAll.push(
+        Object.assign({}, auc.toObject ? auc.toObject() : auc, {
+          resolvedWinner: winnerId,
+          isEnded,
+        }),
+      );
+
+      if (winnerId && winnerId === userId.toString() && isEnded) {
+        items.push(
+          Object.assign({}, auc.toObject ? auc.toObject() : auc, {
+            resolvedWinner: winnerId,
+          }),
+        );
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      totalMatches: allWon.length,
+      matched: items.length,
+      sampleAll: sampleAll.slice(0, 5),
+      sampleMatched: items.slice(0, 5),
+    });
+  },
+);
+
 export const removeFromAuction = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -228,12 +364,12 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   }
   if (!req.body.startTime || !req.body.endTime) {
     return next(
-      new ErrorHandler("Starttime and Endtime for republish is mandatory.")
+      new ErrorHandler("Starttime and Endtime for republish is mandatory."),
     );
   }
   if (new Date(auctionItem.endTime) > Date.now()) {
     return next(
-      new ErrorHandler("Auction is already active, cannot republish", 400)
+      new ErrorHandler("Auction is already active, cannot republish", 400),
     );
   }
   let data = {
@@ -244,16 +380,16 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Auction starting time must be greater than present time",
-        400
-      )
+        400,
+      ),
     );
   }
   if (data.startTime >= data.endTime) {
     return next(
       new ErrorHandler(
         "Auction starting time must be less than ending time.",
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -283,7 +419,7 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
       new: true,
       runValidators: false,
       useFindAndModify: false,
-    }
+    },
   );
   res.status(200).json({
     success: true,
@@ -307,7 +443,7 @@ export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
   // Verify user is the seller
   if (auction.createdBy.toString() !== req.user._id.toString()) {
     return next(
-      new ErrorHandler("You are not authorized to update this auction.", 403)
+      new ErrorHandler("You are not authorized to update this auction.", 403),
     );
   }
 
@@ -319,7 +455,7 @@ export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
   // Verify not already shipped
   if (auction.deliveryStatus !== "Not Shipped") {
     return next(
-      new ErrorHandler("This item has already been marked as shipped.", 400)
+      new ErrorHandler("This item has already been marked as shipped.", 400),
     );
   }
 
@@ -340,7 +476,7 @@ export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
     }\n- Amount Paid: BDT ${auction.currentBid}\n- Tracking Number: ${
       trackingNumber || "Not provided"
     }\n- Shipped On: ${new Date().toLocaleDateString(
-      "en-BD"
+      "en-BD",
     )}\n\n**Next Steps:**\n1. Track your shipment using the tracking number${
       trackingNumber ? ` (${trackingNumber})` : ""
     }\n2. Once you receive the item, please confirm delivery on our platform\n3. Your confirmation will release the payment to the seller\n\n**Important:**\nYou have 48 hours after receiving the item to confirm delivery or report any issues.\n\nTrack your order: ${
@@ -379,7 +515,7 @@ export const confirmDelivery = catchAsyncErrors(async (req, res, next) => {
     auction.highestBidder.toString() !== req.user._id.toString()
   ) {
     return next(
-      new ErrorHandler("You are not authorized to confirm this delivery.", 403)
+      new ErrorHandler("You are not authorized to confirm this delivery.", 403),
     );
   }
 
@@ -466,7 +602,7 @@ export const confirmDelivery = catchAsyncErrors(async (req, res, next) => {
     ).toFixed(2)}\n- Platform Commission (7%): BDT ${(
       auction.currentBid * 0.07
     ).toFixed(
-      2
+      2,
     )}\n- Status: Payment Released\n\n**Next Steps:**\nYour payment has been released from escrow. An admin will process the payout shortly.\n\nThe transaction is now complete!\n\nThank you for using Nilamee Auction Platform!\n\nBest regards,\nNilamee Auction Team`;
 
     await sendEmail({

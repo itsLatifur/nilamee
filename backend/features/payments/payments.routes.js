@@ -34,6 +34,18 @@ router.post("/auction/success", auctionPaymentSuccess);
 router.post("/auction/fail", auctionPaymentFail);
 router.post("/auction/cancel", auctionPaymentCancel);
 router.post("/auction/ipn", auctionPaymentIPN);
+// Dev/demo only: simulate auction payment without SSLCommerz
+if (process.env.NODE_ENV !== "production") {
+  router.post(
+    "/auction/demo-pay/:auctionId",
+    isAuthenticated,
+    async (req, res, next) => {
+      // Lazy import controller to avoid circular issues
+      const { demoAuctionPay } = await import("./payments.controller.js");
+      return demoAuctionPay(req, res, next);
+    },
+  );
+}
 
 // Validate transaction
 router.get("/validate/:transactionId", isAuthenticated, validatePayment);

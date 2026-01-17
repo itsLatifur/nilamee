@@ -46,6 +46,21 @@ const escrowSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  // Payout information recorded when admin approves the payout
+  payoutInfo: {
+    method: String,
+    account: String,
+    name: String,
+  },
+  processedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  processedAt: {
+    type: Date,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

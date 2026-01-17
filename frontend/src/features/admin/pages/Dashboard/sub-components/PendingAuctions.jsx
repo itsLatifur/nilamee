@@ -90,6 +90,7 @@ const PendingAuctions = () => {
               <th className="py-3 px-4 text-left">Starting Bid</th>
               <th className="py-3 px-4 text-left">Auctioneer</th>
               <th className="py-3 px-4 text-left">Start Time</th>
+              <th className="py-3 px-4 text-left">End Time</th>
               <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
@@ -118,6 +119,9 @@ const PendingAuctions = () => {
                 </td>
                 <td className="py-3 px-4 text-warm-white text-sm">
                   {new Date(auction.startTime).toLocaleString()}
+                </td>
+                <td className="py-3 px-4 text-warm-white text-sm">
+                  {new Date(auction.endTime).toLocaleString()}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex gap-2 justify-center">

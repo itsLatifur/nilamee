@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SideDrawer from "./shared/layouts/SideDrawer";
 import Home from "./shared/components/Home";
@@ -23,10 +23,13 @@ import ManageUsers from "./features/admin/pages/ManageUsers";
 import ManageAuctions from "./features/admin/pages/ManageAuctions";
 import PendingAuctionsPage from "./features/admin/pages/PendingAuctionsPage";
 import PaymentProofsPage from "./features/admin/pages/PaymentProofsPage";
+import PendingPaymentsPage from "./features/admin/pages/PendingPaymentsPage";
 import StatsPage from "./features/admin/pages/StatsPage";
 import ManageRoles from "./features/admin/pages/ManageRoles";
 import DatabaseControl from "./features/admin/pages/DatabaseControl";
-import AdminActivityLog from "./features/admin/pages/Dashboard/sub-components/AdminActivityLog";
+const AdminActivityLog = lazy(() =>
+  import("./features/admin/pages/Dashboard/sub-components/AdminActivityLog.jsx")
+);
 import Contact from "./shared/components/Contact";
 import UserProfile from "./features/profile/pages/UserProfile";
 import PaymentInfo from "./features/profile/pages/PaymentInfo";
@@ -35,6 +38,7 @@ import PaymentFailed from "./features/payments/pages/PaymentFailed";
 import PaymentCancelled from "./features/payments/pages/PaymentCancelled";
 import AuctionPayment from "./features/auctions/pages/AuctionPayment";
 import MyPurchases from "./features/auctions/pages/MyPurchases";
+import SellHistory from "./features/auctions/pages/SellHistory";
 import ManageDisputes from "./features/admin/pages/ManageDisputes";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -97,9 +101,12 @@ const App = () => {
         <Route path="/auctions" element={<Auctions />} />
         <Route path="/auction/item/:id" element={<AuctionItem />} />
         <Route path="/auction/:id/payment" element={<AuctionPayment />} />
+        {/* alias: backend endpoint path -> show purchases UI */}
+        <Route path="/auctions/my-wins" element={<MyPurchases />} />
         <Route path="/my-purchases" element={<MyPurchases />} />
         <Route path="/create-auction" element={<CreateAuction />} />
         <Route path="/view-my-auctions" element={<ViewMyAuctions />} />
+        <Route path="/sell-history" element={<SellHistory />} />
         <Route path="/auction/details/:id" element={<ViewAuctionDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/manage-users" element={<ManageUsers />} />
@@ -112,9 +119,20 @@ const App = () => {
           path="/dashboard/payment-proofs"
           element={<PaymentProofsPage />}
         />
+        <Route
+          path="/dashboard/pending-payments"
+          element={<PendingPaymentsPage />}
+        />
         <Route path="/dashboard/stats" element={<StatsPage />} />
         <Route path="/dashboard/manage-roles" element={<ManageRoles />} />
-        <Route path="/dashboard/activity-log" element={<AdminActivityLog />} />
+        <Route
+          path="/dashboard/activity-log"
+          element={
+            <Suspense fallback={<div className="p-8">Loading...</div>}>
+              <AdminActivityLog />
+            </Suspense>
+          }
+        />
         <Route path="/dashboard/manage-disputes" element={<ManageDisputes />} />
         <Route
           path="/dashboard/database-control"
@@ -134,8 +152,6 @@ const App = () => {
         position="top-right"
         toastClassName={toastClassName}
         bodyClassName="!text-gray-900"
-        progressClassName="!bg-blue-600"
-        style={{ zIndex: 99999 }}
       />
       <PremiumModal
         isOpen={showPremiumModal}

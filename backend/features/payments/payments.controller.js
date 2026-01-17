@@ -26,7 +26,7 @@ export const initCommissionPayment = catchAsyncErrors(
 
     if (user.unpaidCommission === 0) {
       return next(
-        new ErrorHandler("You don't have any unpaid commissions.", 400)
+        new ErrorHandler("You don't have any unpaid commissions.", 400),
       );
     }
 
@@ -34,8 +34,8 @@ export const initCommissionPayment = catchAsyncErrors(
       return next(
         new ErrorHandler(
           `The amount exceeds your unpaid commission balance. Your unpaid commission is BDT ${user.unpaidCommission}`,
-          400
-        )
+          400,
+        ),
       );
     }
 
@@ -95,15 +95,18 @@ export const initCommissionPayment = catchAsyncErrors(
         });
       } else {
         return next(
-          new ErrorHandler("Failed to initialize payment gateway.", 500)
+          new ErrorHandler("Failed to initialize payment gateway.", 500),
         );
       }
     } catch (error) {
       return next(
-        new ErrorHandler(error.message || "Payment initialization failed.", 500)
+        new ErrorHandler(
+          error.message || "Payment initialization failed.",
+          500,
+        ),
       );
     }
-  }
+  },
 );
 
 // Payment success callback
@@ -131,12 +134,12 @@ export const paymentSuccess = catchAsyncErrors(async (req, res, next) => {
   } catch (err) {
     console.error(
       "Failed to increment totalTransactionsCount for commission:",
-      err
+      err,
     );
   }
 
   res.redirect(
-    `${process.env.FRONTEND_URL}/payment-success?tran_id=${tran_id}`
+    `${process.env.FRONTEND_URL}/payment-success?tran_id=${tran_id}`,
   );
 });
 
@@ -164,7 +167,7 @@ export const paymentCancel = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.redirect(
-    `${process.env.FRONTEND_URL}/payment-cancelled?tran_id=${tran_id}`
+    `${process.env.FRONTEND_URL}/payment-cancelled?tran_id=${tran_id}`,
   );
 });
 
@@ -188,7 +191,7 @@ export const paymentIPN = catchAsyncErrors(async (req, res, next) => {
       } catch (err) {
         console.error(
           "Failed to increment totalTransactionsCount for commission IPN:",
-          err
+          err,
         );
       }
     }
@@ -247,7 +250,7 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
     auction.highestBidder.toString() !== user._id.toString()
   ) {
     return next(
-      new ErrorHandler("You are not the winner of this auction.", 403)
+      new ErrorHandler("You are not the winner of this auction.", 403),
     );
   }
 
@@ -310,12 +313,12 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
       });
     } else {
       return next(
-        new ErrorHandler("Failed to initialize payment gateway.", 500)
+        new ErrorHandler("Failed to initialize payment gateway.", 500),
       );
     }
   } catch (error) {
     return next(
-      new ErrorHandler(error.message || "Payment initialization failed.", 500)
+      new ErrorHandler(error.message || "Payment initialization failed.", 500),
     );
   }
 });
@@ -473,9 +476,9 @@ Track your purchase: ${process.env.FRONTEND_URL}/buyer/purchases/${
     }
 
     res.redirect(
-      `${process.env.FRONTEND_URL}/payment-success?type=auction&tran_id=${tran_id}&auction_id=${auction._id}`
+      `${process.env.FRONTEND_URL}/payment-success?type=auction&tran_id=${tran_id}&auction_id=${auction._id}`,
     );
-  }
+  },
 );
 
 // Auction payment failure callback
@@ -490,7 +493,7 @@ export const auctionPaymentFail = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.redirect(
-    `${process.env.FRONTEND_URL}/payment-failed?type=auction&tran_id=${tran_id}`
+    `${process.env.FRONTEND_URL}/payment-failed?type=auction&tran_id=${tran_id}`,
   );
 });
 
@@ -506,7 +509,7 @@ export const auctionPaymentCancel = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.redirect(
-    `${process.env.FRONTEND_URL}/payment-cancelled?type=auction&tran_id=${tran_id}`
+    `${process.env.FRONTEND_URL}/payment-cancelled?type=auction&tran_id=${tran_id}`,
   );
 });
 
@@ -554,6 +557,66 @@ export const auctionPaymentIPN = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.status(200).send("IPN received");
+});
+
+// Dev/demo helper: mark auction as paid without calling SSLCommerz (development only)
+export const demoAuctionPay = catchAsyncErrors(async (req, res, next) => {
+  if (process.env.NODE_ENV === "production") {
+    return next(new ErrorHandler("Not allowed in production", 403));
+  }
+
+  const { auctionId } = req.params;
+  const auction = await Auction.findById(auctionId).populate("createdBy");
+  const buyer = await User.findById(req.user._id);
+  if (!auction) return next(new ErrorHandler("Auction not found", 404));
+  if (!buyer) return next(new ErrorHandler("Buyer not found", 404));
+
+  // Ensure user is actual winner
+  if (
+    !auction.highestBidder ||
+    auction.highestBidder.toString() !== buyer._id.toString()
+  ) {
+    return next(
+      new ErrorHandler("You are not the winner of this auction.", 403),
+    );
+  }
+
+  // Mark as paid
+  auction.paymentStatus = "Paid";
+  auction.paidAt = new Date();
+  auction.overallStatus = "Paid - Awaiting Shipment";
+  await auction.save();
+
+  const amount = auction.currentBid;
+  const commissionAmount = parseFloat(amount) * 0.07;
+  const sellerAmount = parseFloat(amount) * 0.93;
+
+  await Escrow.create({
+    auctionId: auction._id,
+    buyerId: buyer._id,
+    sellerId: auction.createdBy._id,
+    totalAmount: parseFloat(amount),
+    commissionAmount,
+    sellerAmount,
+    status: "Held",
+    transactionId: `DEMO_${auction._id}_${Date.now()}`,
+    createdAt: new Date(),
+  });
+
+  // Increment metric
+  try {
+    await incrementMetric("totalTransactionsCount", 1);
+  } catch (err) {
+    console.error(err);
+  }
+
+  res
+    .status(200)
+    .json({
+      success: true,
+      message: "Demo payment completed",
+      auctionId: auction._id,
+    });
 });
 
 // Initialize Premium Subscription Payment
@@ -672,7 +735,7 @@ export const verifyPremiumPayment = catchAsyncErrors(async (req, res, next) => {
 
   console.log(
     "User lookup result:",
-    user ? `Found user: ${user.userName} (${user.email})` : "User not found"
+    user ? `Found user: ${user.userName} (${user.email})` : "User not found",
   );
 
   if (!user) {
@@ -736,7 +799,7 @@ export const handlePremiumSuccess = catchAsyncErrors(async (req, res) => {
           user.isPremium = true;
           user.premiumActivatedAt = new Date();
           user.premiumExpiresAt = new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000
+            Date.now() + 30 * 24 * 60 * 60 * 1000,
           );
           user.pendingPremiumTransaction = undefined;
           await user.save();
@@ -754,7 +817,7 @@ export const handlePremiumSuccess = catchAsyncErrors(async (req, res) => {
 
   // Always redirect to frontend success page
   res.redirect(
-    `${process.env.FRONTEND_URL}/payment-success?type=premium&tranId=${tran_id}&status=success`
+    `${process.env.FRONTEND_URL}/payment-success?type=premium&tranId=${tran_id}&status=success`,
   );
 });
 
@@ -782,7 +845,7 @@ export const premiumPaymentIPN = catchAsyncErrors(async (req, res) => {
           user.isPremium = true;
           user.premiumActivatedAt = new Date();
           user.premiumExpiresAt = new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000
+            Date.now() + 30 * 24 * 60 * 60 * 1000,
           );
           user.pendingPremiumTransaction = undefined;
           await user.save();
@@ -813,7 +876,7 @@ export const cancelPremiumSubscription = catchAsyncErrors(
 
     if (!user.isPremium) {
       return next(
-        new ErrorHandler("You don't have an active premium subscription", 400)
+        new ErrorHandler("You don't have an active premium subscription", 400),
       );
     }
 
@@ -833,5 +896,5 @@ export const cancelPremiumSubscription = catchAsyncErrors(
       success: true,
       message: "Premium subscription cancelled successfully",
     });
-  }
+  },
 );
