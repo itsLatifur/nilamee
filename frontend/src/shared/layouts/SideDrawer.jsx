@@ -24,12 +24,14 @@ import NotificationPanel from "../../components/NotificationPanel";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config/env";
 import { toast } from "react-toastify";
+import { API_URL } from "../../config/env";
 
 const SideDrawer = () => {
   const [show, setShow] = useState(false);
   const [showThemes, setShowThemes] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pushNotification, setPushNotification] = useState(null);
   const { currentTheme, setTheme, THEMES } = useTheme();
   const location = useLocation();
 
@@ -49,7 +51,7 @@ const SideDrawer = () => {
         {
           withCredentials: true,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
       console.log("Role switch response:", data);
       toast.success(data.message);
@@ -68,9 +70,54 @@ const SideDrawer = () => {
       fetchUnreadCount();
       // Poll every 30 seconds
       const interval = setInterval(fetchUnreadCount, 30000);
-      return () => clearInterval(interval);
+      // Open SSE connection for real-time notifications
+      let es;
+      try {
+        es = new EventSource(`${API_URL}/notification/stream`);
+        es.onmessage = (ev) => {
+          if (!ev.data || ev.data.trim().startsWith(":")) return; // ignore comments/pings
+          try {
+            const payload = JSON.parse(ev.data);
+            setUnreadCount((s) => (typeof s === "number" ? s + 1 : 1));
+            setPushNotification(payload);
+          } catch (err) {
+            console.debug("Invalid SSE payload", err);
+          }
+        };
+        es.onerror = (err) => {
+          console.debug("SSE error", err);
+        };
+      } catch (e) {
+        console.debug("Failed to open notification SSE", e);
+      }
+
+      return () => {
+        clearInterval(interval);
+        try {
+          es && es.close();
+        } catch (e) {}
+      };
     }
   }, [isAuthenticated]);
+
+  // Show a small toast when a live notification arrives
+  useEffect(() => {
+    if (!pushNotification) return;
+    // If notification panel is already open, no need to pop a toast
+    if (showNotifications) return;
+    const title = pushNotification.title || "Notification";
+    const message = pushNotification.message || "";
+    toast.info(
+      <div>
+        <div style={{ fontWeight: 600 }}>{title}</div>
+        <div style={{ fontSize: 12 }}>{message}</div>
+      </div>,
+      {
+        onClick: () => setShowNotifications(true),
+        autoClose: 6000,
+      },
+    );
+  }, [pushNotification, showNotifications]);
 
   const fetchUnreadCount = async () => {
     try {
@@ -369,7 +416,7 @@ const SideDrawer = () => {
                 <button
                   onClick={() =>
                     handleRoleSwitch(
-                      user.role === "Auctioneer" ? "Bidder" : "Auctioneer"
+                      user.role === "Auctioneer" ? "Bidder" : "Auctioneer",
                     )
                   }
                   className="bg-burgundy-600 font-semibold text-xl py-2 px-4 rounded-md text-warm-white border-2 border-golden-400 whitestone:border-gray-400 shadow-lg transition-all duration-300 btn-hover w-full"
@@ -583,6 +630,7 @@ const SideDrawer = () => {
           setShowNotifications(false);
           fetchUnreadCount(); // Refresh count when closing
         }}
+        pushNotification={pushNotification}
       />
     </>
   );

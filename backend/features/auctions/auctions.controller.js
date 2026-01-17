@@ -8,6 +8,7 @@ import ErrorHandler from "../../shared/middlewares/error.middleware.js";
 import { v2 as cloudinary } from "cloudinary";
 import mongoose from "mongoose";
 import { sendEmail } from "../../utils/sendEmail.js";
+import { Notification } from "../../models/notificationSchema.js";
 import {
   calculateBadgeTier,
   calculateStarRating,
@@ -537,79 +538,112 @@ export const confirmDelivery = catchAsyncErrors(async (req, res, next) => {
   // Release escrow (mark as released - admin can manually process)
   const escrow = await Escrow.findOne({ auctionId: auction._id });
   if (escrow && escrow.status === "Held") {
-    escrow.status = "Released";
-    escrow.releasedAt = new Date();
-    await escrow.save();
-  }
+    if (escrow.adminHold) {
+      // If admin has placed a manual hold, do not auto-release. Notify parties and admin.
+      auction.overallStatus = "On Hold - Awaiting Admin Action";
+      await auction.save();
 
-  // UPDATE SELLER TRUST SCORE
-  const seller = await User.findById(auction.createdBy._id);
-  if (seller) {
-    const deliveryTime = Date.now() - new Date(auction.shippedAt).getTime();
-    const deliveryHours = deliveryTime / (1000 * 60 * 60);
+      // Notify buyer and seller that admin placed a hold
+      try {
+        if (auction.createdBy && auction.createdBy.email) {
+          await sendEmail({
+            email: auction.createdBy.email,
+            subject: `Payout On Hold - ${auction.title}`,
+            message: `Your payout for auction "${auction.title}" is currently on hold by the admin for review. Admin will review and process shortly.`,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to email seller about hold:", err);
+      }
 
-    const trustPointsEarned = calculateTrustPoints({
-      role: "Auctioneer",
-      amount: auction.currentBid,
-      timeHours: deliveryHours,
-    });
+      try {
+        const buyer = auction.highestBidder;
+        if (buyer && buyer.email) {
+          await sendEmail({
+            email: buyer.email,
+            subject: `Delivery Confirmed - Payment On Hold`,
+            message: `The buyer has confirmed delivery for "${auction.title}" but the payment is currently on hold by admin. We will notify you when the review is complete.`,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to email buyer about hold:", err);
+      }
+    } else {
+      escrow.status = "Released";
+      escrow.releasedAt = new Date();
+      await escrow.save();
 
-    seller.trustScore += trustPointsEarned;
-    seller.totalTransactionVolume += auction.currentBid;
-    seller.completedAuctionsCount += 1;
-    seller.stats.totalAuctionsCompleted += 1;
-    seller.stats.averageDeliveryTime =
-      (seller.stats.averageDeliveryTime * (seller.completedAuctionsCount - 1) +
-        deliveryHours) /
-      seller.completedAuctionsCount;
+      // UPDATE SELLER TRUST SCORE
+      const seller = await User.findById(auction.createdBy._id);
+      if (seller) {
+        const deliveryTime = Date.now() - new Date(auction.shippedAt).getTime();
+        const deliveryHours = deliveryTime / (1000 * 60 * 60);
 
-    // First delivery? Award verified badge
-    if (!seller.isVerifiedSeller) {
-      seller.isVerifiedSeller = true;
-      if (!seller.firstSuccessfulAuctionDate) {
-        seller.firstSuccessfulAuctionDate = new Date();
+        const trustPointsEarned = calculateTrustPoints({
+          role: "Auctioneer",
+          amount: auction.currentBid,
+          timeHours: deliveryHours,
+        });
+
+        seller.trustScore += trustPointsEarned;
+        seller.totalTransactionVolume += auction.currentBid;
+        seller.completedAuctionsCount += 1;
+        seller.stats.totalAuctionsCompleted += 1;
+        seller.stats.averageDeliveryTime =
+          (seller.stats.averageDeliveryTime *
+            (seller.completedAuctionsCount - 1) +
+            deliveryHours) /
+          seller.completedAuctionsCount;
+
+        // First delivery? Award verified badge
+        if (!seller.isVerifiedSeller) {
+          seller.isVerifiedSeller = true;
+          if (!seller.firstSuccessfulAuctionDate) {
+            seller.firstSuccessfulAuctionDate = new Date();
+          }
+        }
+
+        // Recalculate badge tier and star rating
+        seller.badgeTier = calculateBadgeTier(seller.totalTransactionVolume);
+        seller.starRating = calculateStarRating(seller.trustScore);
+        seller.lastActivityDate = new Date();
+        await seller.save();
+
+        // Log transaction history
+        await TransactionHistory.create({
+          userId: seller._id,
+          auctionId: auction._id,
+          role: "Auctioneer",
+          amount: auction.currentBid,
+          trustPointsEarned,
+          deliveryTimeHours: deliveryHours,
+          outcome: "Success",
+          auctionTitle: auction.title,
+        });
+
+        // Notify seller
+        const subject = `Delivery Confirmed - Payment Released for ${auction.title}`;
+        const message = `Dear ${
+          seller.userName
+        },\n\nGreat news! The buyer has confirmed delivery of "${
+          auction.title
+        }".\n\n**Transaction Details:**\n- Item: ${
+          auction.title
+        }\n- Total Amount: BDT ${auction.currentBid}\n- Your Share (93%): BDT ${(
+          auction.currentBid * 0.93
+        ).toFixed(2)}\n- Platform Commission (7%): BDT ${(
+          auction.currentBid * 0.07
+        ).toFixed(
+          2,
+        )}\n- Status: Payment Released\n\n**Next Steps:**\nYour payment has been released from escrow. An admin will process the payout shortly.\n\nThe transaction is now complete!\n\nThank you for using Nilamee Auction Platform!\n\nBest regards,\nNilamee Auction Team`;
+
+        await sendEmail({
+          email: seller.email,
+          subject,
+          message,
+        });
       }
     }
-
-    // Recalculate badge tier and star rating
-    seller.badgeTier = calculateBadgeTier(seller.totalTransactionVolume);
-    seller.starRating = calculateStarRating(seller.trustScore);
-    seller.lastActivityDate = new Date();
-    await seller.save();
-
-    // Log transaction history
-    await TransactionHistory.create({
-      userId: seller._id,
-      auctionId: auction._id,
-      role: "Auctioneer",
-      amount: auction.currentBid,
-      trustPointsEarned,
-      deliveryTimeHours: deliveryHours,
-      outcome: "Success",
-      auctionTitle: auction.title,
-    });
-
-    // Notify seller
-    const subject = `Delivery Confirmed - Payment Released for ${auction.title}`;
-    const message = `Dear ${
-      seller.userName
-    },\n\nGreat news! The buyer has confirmed delivery of "${
-      auction.title
-    }".\n\n**Transaction Details:**\n- Item: ${
-      auction.title
-    }\n- Total Amount: BDT ${auction.currentBid}\n- Your Share (93%): BDT ${(
-      auction.currentBid * 0.93
-    ).toFixed(2)}\n- Platform Commission (7%): BDT ${(
-      auction.currentBid * 0.07
-    ).toFixed(
-      2,
-    )}\n- Status: Payment Released\n\n**Next Steps:**\nYour payment has been released from escrow. An admin will process the payout shortly.\n\nThe transaction is now complete!\n\nThank you for using Nilamee Auction Platform!\n\nBest regards,\nNilamee Auction Team`;
-
-    await sendEmail({
-      email: seller.email,
-      subject,
-      message,
-    });
   }
 
   res.status(200).json({

@@ -5,6 +5,7 @@ import {
   getTrustLeaderboard,
   getMyTrustStats,
   getMyReceivables,
+  getMyEscrows,
 } from "./profile.controller.js";
 import { isAuthenticated } from "../../shared/middlewares/auth.middleware.js";
 
@@ -15,5 +16,8 @@ router.get("/me", isAuthenticated, getMyProfile);
 router.get("/leaderboard", isAuthenticated, getTrustLeaderboard);
 router.get("/my-stats", isAuthenticated, getMyTrustStats);
 router.get("/my-receivables", isAuthenticated, getMyReceivables);
+router.get("/my-escrows", isAuthenticated, getMyEscrows);
+router.get("/my-escrows/buyer", isAuthenticated, getMyBuyerEscrows);
+router.get("/escrow/:id", isAuthenticated, getMyEscrowDetail);
 
 export default router;

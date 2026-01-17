@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 const AuctionItem = () => {
   const { id } = useParams();
   const { loading, auctionDetail, auctionBidders } = useSelector(
-    (state) => state.auction
+    (state) => state.auction,
   );
   const {
     isAuthenticated,
@@ -53,22 +53,28 @@ const AuctionItem = () => {
 
   return (
     <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">
-      <div className="text-[16px] flex flex-wrap gap-2 items-center">
+      <div className="text-[14px] flex items-center gap-1 whitespace-nowrap text-left">
         <Link
           to="/"
-          className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
+          className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900 mr-1"
         >
           Home
         </Link>
-        <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
+        <FaGreaterThan
+          className="text-golden-300 whitestone:text-gray-900 mx-1"
+          size={12}
+        />
         <Link
           to={"/auctions"}
-          className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900"
+          className="font-semibold transition-all duration-300 hover:text-golden-500 whitestone:hover:text-black whitestone:text-gray-900 mx-1"
         >
           Auctions
         </Link>
-        <FaGreaterThan className="text-golden-300 whitestone:text-gray-900" />
-        <p className="text-golden-300 whitestone:text-gray-900">
+        <FaGreaterThan
+          className="text-golden-300 whitestone:text-gray-900 mx-1"
+          size={12}
+        />
+        <p className="text-golden-300 whitestone:text-gray-900 ml-1 truncate">
           {auctionDetail?.title}
         </p>
       </div>

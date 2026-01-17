@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Spinner from "./Spinner";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaCrown } from "react-icons/fa";
 import { formatBDT } from "@/shared/utils/currency";
 import { useSelector } from "react-redux";
 
@@ -15,6 +15,118 @@ const AuctionView = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [descExpanded, setDescExpanded] = useState(false);
+  const auctionStarted = !!(
+    auctionDetail?.startTime &&
+    Date.now() >= new Date(auctionDetail.startTime).getTime()
+  );
+  const auctionEnded = !!(
+    auctionDetail?.endTime &&
+    Date.now() > new Date(auctionDetail.endTime).getTime()
+  );
+  const [timeLeft, setTimeLeft] = useState("--");
+  const nameRefs = useRef([]);
+  const amountRefs = useRef([]);
+
+  const ordinal = (n) => {
+    const j = n % 10;
+    const k = n % 100;
+    if (k >= 11 && k <= 13) return n + "th";
+    if (j === 1) return n + "st";
+    if (j === 2) return n + "nd";
+    if (j === 3) return n + "rd";
+    return n + "th";
+  };
+
+  const getStatusLabel = (auction) => {
+    if (!auction) return "";
+    const now = Date.now();
+    if (auction.overallStatus === "Cancelled") return "Cancelled";
+    const ended = auction.endTime
+      ? new Date(auction.endTime).getTime() < now
+      : false;
+    const sold = ended && !!auction.highestBidder;
+    if (sold) return "Sold";
+    return "Available";
+  };
+
+  const statusLabel = getStatusLabel(auctionDetail);
+
+  const getStatusBadgeClass = (label) => {
+    if (label === "Sold") return "bg-yellow-100 text-yellow-800";
+    if (label === "Cancelled") return "bg-red-100 text-red-800";
+    return "bg-green-100 text-green-800"; // Available
+  };
+
+  useEffect(() => {
+    let timer;
+    function update() {
+      if (!auctionDetail?.endTime) {
+        setTimeLeft("--");
+        return;
+      }
+      const diff = new Date(auctionDetail.endTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft("Ended");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const parts = [];
+      if (days) parts.push(`${days}D`);
+      if (hours || days) parts.push(`${hours}H`);
+      parts.push(`${minutes}M`);
+      parts.push(`${seconds}S`);
+      setTimeLeft(parts.join(" "));
+    }
+    update();
+    if (auctionStarted && !auctionEnded) {
+      timer = setInterval(update, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [auctionDetail?.endTime, auctionStarted, auctionEnded]);
+
+  // Fit text within fixed columns by reducing font-size if necessary
+  useEffect(() => {
+    function fit(el, min = 12) {
+      if (!el) return;
+      const style = window.getComputedStyle(el);
+      let fontSize = parseFloat(style.fontSize);
+      // allow up to 3 steps of reduction
+      let attempts = 0;
+      while (
+        el.scrollWidth > el.clientWidth &&
+        attempts < 10 &&
+        fontSize > min
+      ) {
+        fontSize = Math.max(min, fontSize - 1);
+        el.style.fontSize = fontSize + "px";
+        attempts += 1;
+      }
+    }
+
+    // apply to all name and amount refs
+    (nameRefs.current || []).forEach((el) => fit(el, 12));
+    (amountRefs.current || []).forEach((el) => fit(el, 12));
+
+    function onResize() {
+      // reset sizes then refit
+      (nameRefs.current || []).forEach((el) => {
+        if (el) el.style.fontSize = "";
+      });
+      (amountRefs.current || []).forEach((el) => {
+        if (el) el.style.fontSize = "";
+      });
+      (nameRefs.current || []).forEach((el) => fit(el, 12));
+      (amountRefs.current || []).forEach((el) => fit(el, 12));
+    }
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [auctionBidders]);
 
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const restrictedRoles = ["Auctioneer", "Admin", "Super Admin"];
@@ -45,8 +157,8 @@ const AuctionView = ({
   if (loading) return <Spinner />;
 
   return (
-    <div className="auction-view flex gap-4 flex-col 2xl:flex-row 2xl:items-stretch">
-      {/* LEFT: Image block (unchanged), plus item details below */}
+    <div className="auction-view flex gap-4 flex-col 2xl:flex-row 2xl:items-start">
+      {/* LEFT: Image block (main content) */}
       <div className="flex-1 flex flex-col gap-3">
         <div className="bg-white dark:bg-gray-900 w-full p-5 rounded-lg mt-3 2xl:self-stretch">
           <div className="relative">
@@ -92,6 +204,7 @@ const AuctionView = ({
               </>
             )}
           </div>
+
           {auctionDetail?.images && auctionDetail.images.length > 1 && (
             <div className="grid grid-cols-6 gap-2 mt-4">
               {auctionDetail.images.map((image, index) => (
@@ -114,14 +227,30 @@ const AuctionView = ({
             </div>
           )}
         </div>
+        {/* Title (immediately below image) */}
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border-2 border-golden-400 whitestone:border-white/30 mt-3">
+          <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-0 min-[480px]:text-xl md:text-2xl lg:text-3xl">
+            {auctionDetail?.title}
+          </h3>
+          {statusLabel && (
+            <div className="mt-2">
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeClass(statusLabel)}`}
+              >
+                {statusLabel}
+              </span>
+            </div>
+          )}
+        </div>
 
+        {/* Item Details (unchanged) */}
         {(auctionDetail?.location ||
           auctionDetail?.address ||
           auctionDetail?.authenticity ||
           (auctionDetail?.customFields &&
-            auctionDetail.customFields.length > 0)) && (
+            auctionDetail.customFields.length > 0) ||
+          auctionDetail?.condition) && (
           <>
-            <p className="text-xl w-fit font-bold mt-6">Item Details</p>
             <hr className="my-2 border-t-[1px] border-t-stone-700" />
             <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-golden-400 whitestone:border-white/30">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,159 +305,201 @@ const AuctionView = ({
                           {field.value}
                         </span>
                       </div>
-                    ) : null
+                    ) : null,
                   )}
               </div>
             </div>
           </>
         )}
-      </div>
 
-      {/* RIGHT: Title + Description (top, equal height to image), then Bids */}
-      <div className="flex-1 flex flex-col gap-4 2xl:items-stretch">
-        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-golden-400 whitestone:border-white/30 mt-3 2xl:self-stretch">
-          <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
-            {auctionDetail?.title}
-          </h3>
-          {auctionDetail?.condition && (
-            <p className="text-xl font-semibold">
-              Condition:{" "}
-              <span className="text-golden-500 whitestone:text-gray-900">
-                {auctionDetail.condition}
-              </span>
-            </p>
-          )}
-          {auctionDetail?.startingBid != null && (
-            <p className="text-xl font-semibold">
-              Minimum Bid:{" "}
-              <span className="text-golden-500 whitestone:text-gray-900">
-                {formatBDT(auctionDetail.startingBid)}
-              </span>
-            </p>
-          )}
-          {auctionDetail?.description && (
-            <>
-              <p className="text-xl w-fit font-bold mt-4">
-                Auction Item Description
+        {/* Description (after item details) */}
+        {auctionDetail?.description && (
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-golden-400 whitestone:border-white/30 mt-4">
+            <p className="text-xl w-fit font-bold">Auction Item Description</p>
+            <hr className="my-2 border-t-[1px] border-t-stone-700" />
+            <div>
+              <p
+                className={`${descExpanded ? "" : "line-clamp-3"} text-[18px] my-2 whitestone:text-gray-900`}
+              >
+                {auctionDetail.description}
               </p>
-              <hr className="my-2 border-t-[1px] border-t-stone-700" />
-              <div>
-                <p
-                  className={`${
-                    descExpanded ? "" : "line-clamp-3"
-                  } text-[18px] my-2 whitestone:text-gray-900`}
-                >
-                  {auctionDetail.description}
+              <button
+                type="button"
+                className="text-golden-500 whitestone:text-blue-600 font-semibold hover:underline btn-hover-no-scale"
+                onClick={() => setDescExpanded((v) => !v)}
+              >
+                {descExpanded ? "Show less" : "Show more"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* RIGHT: Sidebar with auction card and bids history (replaces services area) */}
+      <aside className="w-full 2xl:w-[520px] flex-shrink-0 flex flex-col gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-golden-400 whitestone:border-white/30 mt-3">
+          {/* Top: Current / Final Bid or Not started - full width to allow long amounts */}
+          <div className="w-full">
+            {!auctionStarted && !auctionEnded ? (
+              <p className="text-sm text-gray-500">Not Started</p>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500">
+                  {auctionEnded
+                    ? "FINAL BID"
+                    : auctionBidders && auctionBidders.length > 0
+                      ? "CURRENT BID"
+                      : ""}
                 </p>
-                <button
-                  type="button"
-                  className="text-golden-500 whitestone:text-blue-600 font-semibold hover:underline btn-hover-no-scale"
-                  onClick={() => setDescExpanded((v) => !v)}
-                >
-                  {descExpanded ? "Show less" : "Show more"}
-                </button>
+                {(auctionEnded ||
+                  (auctionStarted &&
+                    auctionBidders &&
+                    auctionBidders.length > 0)) && (
+                  <p className="text-2xl md:text-3xl font-bold text-golden-500 mt-1 break-keep">
+                    {auctionBidders && auctionBidders[0]
+                      ? formatBDT(auctionBidders[0].amount)
+                      : formatBDT(
+                          auctionDetail?.currentBid ||
+                            auctionDetail?.startingBid ||
+                            0,
+                        )}
+                  </p>
+                )}
+
+                {/* subtle separator */}
+                <div className="mt-3 mb-3 border-t border-gray-200"></div>
+
+                {/* Place bid control: shown under current/final bid and above stats */}
+                {showActionBar &&
+                  canPlaceBid &&
+                  auctionStarted &&
+                  !auctionEnded && (
+                    <div className="mb-3">
+                      <div className="bg-gold-gradient shadow-sm border-2 border-golden-300 dark:border-golden-400 whitestone:border-white/20 py-3 px-3 rounded-md flex items-center gap-3">
+                        <input
+                          type="number"
+                          className="w-32 focus:outline-none md:text-[16px] p-1 rounded bg-white text-black"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          placeholder="Amount"
+                        />
+                        <button
+                          onClick={onBid}
+                          className="p-2 bg-burgundy-600 text-white rounded-md"
+                        >
+                          Place Bid
+                        </button>
+                      </div>
+                    </div>
+                  )}
+              </>
+            )}
+          </div>
+
+          {/* Below: stats and starting amount with TIME LEFT and ENDING side-by-side */}
+          <div className="mt-2 grid grid-cols-1 gap-2 text-sm text-gray-600">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-xs text-gray-400">TIME LEFT</p>
+                <p className="font-semibold">
+                  {auctionStarted && !auctionEnded
+                    ? timeLeft
+                    : auctionEnded
+                      ? "Ended"
+                      : "--"}
+                </p>
               </div>
-            </>
-          )}
+              <div className="flex-1 text-right">
+                <p className="text-xs text-gray-400">ENDING</p>
+                <p className="font-semibold">
+                  {auctionDetail?.endTime
+                    ? new Date(auctionDetail.endTime).toLocaleString()
+                    : "--"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs text-gray-400">STARTING AMOUNT</p>
+                <p className="font-semibold">
+                  {formatBDT(auctionDetail?.startingBid || 0)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-400">NUMBER OF BIDS</p>
+                <p className="font-semibold">
+                  {auctionBidders ? auctionBidders.length : 0}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="relative bg-luxury-gradient rounded-t-md p-4 shadow-xl border-2 border-golden-400 whitestone:border-white/30 dark:border-golden-500">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gold-gradient"></div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gold-gradient"></div>
-          <h3 className="text-white whitestone:text-black text-2xl font-semibold">
-            BIDS
-          </h3>
-        </div>
-        <div className="bg-white dark:bg-gray-900 px-4 py-2 min-h-fit lg:min-h-[650px] border-x-2 border-b-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 rounded-b-md">
+        {/* Bids list (keeps current bidder rendering) */}
+        <div className="bg-white dark:bg-gray-900 px-4 py-2 min-h-fit lg:min-h-[360px] border-2 border-golden-400 dark:border-golden-500 whitestone:border-white/30 rounded-md">
+          <h4 className="text-lg font-semibold mb-2">BID HISTORY</h4>
           {auctionBidders && auctionBidders.length > 0 ? (
-            // Always show bidders if present (active or past auctions)
             auctionBidders.map((element, index) => {
               const isEnded =
                 Date.now() > new Date(auctionDetail?.endTime).getTime();
               return (
                 <div
                   key={index}
-                  className="py-3 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
+                  className={`py-3 grid grid-cols-[56px_28px_1fr_1fr] items-center gap-2 border-b border-gray-200 dark:border-gray-700 ${
+                    isEnded && index === 0
+                      ? "border-2 border-golden-300 dark:border-golden-500 whitestone:border-blue-500 rounded-md bg-golden-50/10"
+                      : ""
+                  }`}
                 >
-                  <p className="text-[18px] font-semibold whitestone:text-gray-900 flex-1">
-                    {element.userName}
-                  </p>
-                  <p className="text-[18px] font-bold text-golden-400 whitestone:text-amber-600 flex-1 text-center">
+                  <div className="text-center">
+                    <span className="text-[14px] font-semibold">
+                      {ordinal(index + 1)}
+                    </span>
+                  </div>
+
+                  {/* Crown column: small fixed column so names align whether crown shown or not */}
+                  <div className="text-center">
+                    {isEnded && index === 0 ? (
+                      <FaCrown className="text-golden-500" />
+                    ) : (
+                      <span className="inline-block w-4 h-4" />
+                    )}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <p
+                        ref={(el) => (nameRefs.current[index] = el)}
+                        className={`text-[16px] font-semibold whitestone:text-gray-900 truncate ${isEnded && index === 0 ? "text-golden-600" : ""}`}
+                      >
+                        {element.userName}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p
+                    ref={(el) => (amountRefs.current[index] = el)}
+                    className="text-[15px] font-bold text-golden-400 whitestone:text-amber-600 text-right pr-4"
+                  >
                     {formatBDT(element.amount)}
                   </p>
-                  {isEnded && index === 0 ? (
-                    <div className="text-[14px] font-semibold text-white bg-gold-gradient px-3 py-1 rounded-full flex-1 text-end ml-2">
-                      Winner
-                    </div>
-                  ) : index === 0 ? (
-                    <p className="text-[20px] font-semibold text-golden-500 flex-1 text-end">
-                      1st
-                    </p>
-                  ) : index === 1 ? (
-                    <p className="text-[20px] font-semibold text-golden-300 flex-1 text-end">
-                      2nd
-                    </p>
-                  ) : index === 2 ? (
-                    <p className="text-[20px] font-semibold text-golden-200 flex-1 text-end">
-                      3rd
-                    </p>
-                  ) : (
-                    <p className="text-[20px] font-semibold whitestone:text-gray-900 text-warm-white flex-1 text-end">
-                      {index + 1}th
-                    </p>
-                  )}
                 </div>
               );
             })
           ) : Date.now() < new Date(auctionDetail?.startTime) ? (
-            <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
+            <div className="rounded-md p-6 my-4 text-center">
               <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
                 Auction has not started yet!
               </p>
             </div>
           ) : (
-            <div className="bg-gradient-to-br from-burgundy-400/20 to-burgundy-500/20 dark:from-gray-800/30 dark:to-black/30 whitestone:from-blue-50/40 whitestone:to-blue-100/30 rounded-md p-6 my-4 text-center border border-golden-300 dark:border-golden-500 whitestone:border-white/30">
+            <div className="rounded-md p-6 my-4 text-center">
               <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
                 Auction has ended!
               </p>
             </div>
           )}
         </div>
-
-        {showActionBar && canPlaceBid && (
-          <div className="bg-gold-gradient shadow-lg border-2 border-golden-300 dark:border-golden-400 whitestone:border-white/30 py-4 text-[16px] md:text-[24px] font-semibold px-4 flex items-center justify-between whitestone:text-white rounded-md mt-4">
-            {Date.now() >= new Date(auctionDetail?.startTime) &&
-            Date.now() <= new Date(auctionDetail?.endTime) ? (
-              <>
-                <div className="flex gap-3 flex-col sm:flex-row sm:items-center">
-                  <p className="text-white whitestone:text-black">Place Bid</p>
-                  <input
-                    type="number"
-                    className="w-32 focus:outline-none md:text-[20px] p-1 rounded bg-white"
-                    style={{ color: "#000000" }}
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                </div>
-                <button
-                  className="p-4 text-warm-white bg-burgundy-600 rounded-full transition-all duration-300 hover:bg-burgundy-700 dark:hover:bg-black whitestone:hover:bg-blue-600 dark:bg-gray-900 btn-hover"
-                  onClick={onBid}
-                >
-                  Bid
-                </button>
-              </>
-            ) : new Date(auctionDetail?.startTime) > Date.now() ? (
-              <p className="text-white whitestone:text-black font-semibold text-xl">
-                Auction has not started yet!
-              </p>
-            ) : (
-              <p className="text-white whitestone:text-black font-semibold text-xl">
-                Auction has ended!
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      </aside>
     </div>
   );
 };

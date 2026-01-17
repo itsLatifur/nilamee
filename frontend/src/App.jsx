@@ -27,8 +27,9 @@ import PendingPaymentsPage from "./features/admin/pages/PendingPaymentsPage";
 import StatsPage from "./features/admin/pages/StatsPage";
 import ManageRoles from "./features/admin/pages/ManageRoles";
 import DatabaseControl from "./features/admin/pages/DatabaseControl";
-const AdminActivityLog = lazy(() =>
-  import("./features/admin/pages/Dashboard/sub-components/AdminActivityLog.jsx")
+const AdminActivityLog = lazy(
+  () =>
+    import("./features/admin/pages/Dashboard/sub-components/AdminActivityLog.jsx"),
 );
 import Contact from "./shared/components/Contact";
 import UserProfile from "./features/profile/pages/UserProfile";
@@ -39,6 +40,7 @@ import PaymentCancelled from "./features/payments/pages/PaymentCancelled";
 import AuctionPayment from "./features/auctions/pages/AuctionPayment";
 import MyPurchases from "./features/auctions/pages/MyPurchases";
 import SellHistory from "./features/auctions/pages/SellHistory";
+import EscrowDetail from "./features/auctions/pages/EscrowDetail";
 import ManageDisputes from "./features/admin/pages/ManageDisputes";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -107,6 +109,7 @@ const App = () => {
         <Route path="/create-auction" element={<CreateAuction />} />
         <Route path="/view-my-auctions" element={<ViewMyAuctions />} />
         <Route path="/sell-history" element={<SellHistory />} />
+        <Route path="/escrow/:id" element={<EscrowDetail />} />
         <Route path="/auction/details/:id" element={<ViewAuctionDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/manage-users" element={<ManageUsers />} />

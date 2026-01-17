@@ -83,6 +83,10 @@ export const API_ENDPOINTS = {
     UPDATE_USER_ROLE: (userId) => `${API_URL}/superadmin/user/role/${userId}`,
     // Activity logs
     ACTIVITY_LOGS: `${API_URL}/superadmin/activity-logs`,
+    // Auction admin actions
+    HOLD_AUCTION: (id) => `${API_URL}/superadmin/auction/hold/${id}`,
+    UNHOLD_AUCTION: (id) => `${API_URL}/superadmin/auction/unhold/${id}`,
+    CANCEL_AUCTION: (id) => `${API_URL}/superadmin/auction/cancel/${id}`,
   },
 
   // Notification endpoints

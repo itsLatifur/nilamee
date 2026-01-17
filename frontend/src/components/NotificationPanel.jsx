@@ -3,7 +3,7 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../config/env";
 import { toast } from "react-toastify";
 
-const NotificationPanel = ({ isOpen, onClose }) => {
+const NotificationPanel = ({ isOpen, onClose, pushNotification }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -29,15 +29,22 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  // Handle incoming pushed notification from SSE
+  useEffect(() => {
+    if (!pushNotification) return;
+    setNotifications((prev) => [pushNotification, ...(prev || [])]);
+    setUnreadCount((s) => (typeof s === "number" ? s + 1 : 1));
+  }, [pushNotification]);
+
   const markAsRead = async (id) => {
     try {
       await axios.put(
         API_ENDPOINTS.NOTIFICATION.READ(id),
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
@@ -50,7 +57,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       await axios.put(
         API_ENDPOINTS.NOTIFICATION.READ_ALL,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
@@ -152,7 +159,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
                 <div
                   key={notification._id}
                   className={`p-4 border-l-4 ${getNotificationColor(
-                    notification.type
+                    notification.type,
                   )} ${notification.isRead ? "bg-white" : "bg-blue-50"}`}
                 >
                   <div className="flex gap-3">

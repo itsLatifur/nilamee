@@ -10,7 +10,7 @@ export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
   const { userId } = req.params;
 
   const user = await User.findById(userId).select(
-    "-password -paymentMethods -unpaidCommission -deletedAt -deletionReason -bannedReason -suspendedReason"
+    "-password -paymentMethods -unpaidCommission -deletedAt -deletionReason -bannedReason -suspendedReason",
   );
 
   if (!user) {
@@ -119,7 +119,7 @@ export const getTrustLeaderboard = catchAsyncErrors(async (req, res, next) => {
 
   const topUsers = await User.find(query)
     .select(
-      "userName badgeTier starRating trustScore totalTransactionVolume completedAuctionsCount isPremium isVerifiedSeller isVerifiedBuyer"
+      "userName badgeTier starRating trustScore totalTransactionVolume completedAuctionsCount isPremium isVerifiedSeller isVerifiedBuyer",
     )
     .sort({ trustScore: -1 })
     .limit(parseInt(limit));
@@ -141,7 +141,7 @@ export const getMyTrustStats = catchAsyncErrors(async (req, res, next) => {
 
   const totalPointsEarned = transactionHistory.reduce(
     (sum, t) => sum + (t.trustPointsEarned || 0),
-    0
+    0,
   );
 
   const feedbackCount = await Feedback.countDocuments({
@@ -185,4 +185,53 @@ export const getMyReceivables = catchAsyncErrors(async (req, res, next) => {
   const totalReceivable = agg && agg.length > 0 ? agg[0].totalReceivable : 0;
 
   res.status(200).json({ success: true, receivable: totalReceivable });
+});
+
+// Get escrows for current seller (for display in sell history)
+export const getMyEscrows = catchAsyncErrors(async (req, res, next) => {
+  const sellerId = req.user._id;
+
+  const escrows = await Escrow.find({ sellerId })
+    .sort({ createdAt: -1 })
+    .populate("auctionId", "title")
+    .populate("buyerId", "userName email");
+
+  res.status(200).json({ success: true, escrows });
+});
+
+// Get escrows where the current user is the buyer
+export const getMyBuyerEscrows = catchAsyncErrors(async (req, res, next) => {
+  const buyerId = req.user._id;
+
+  const escrows = await Escrow.find({ buyerId })
+    .sort({ createdAt: -1 })
+    .populate("auctionId", "title")
+    .populate("sellerId", "userName email");
+
+  res.status(200).json({ success: true, escrows });
+});
+
+// Get single escrow detail for seller (or admin)
+export const getMyEscrowDetail = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id) return next(new ErrorHandler("Escrow id required.", 400));
+
+  const escrow = await Escrow.findById(id)
+    .populate("auctionId", "title currentBid")
+    .populate("buyerId", "userName email")
+    .populate("sellerId", "userName email paymentInfo");
+
+  if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
+
+  // Allow seller (owner) or admin user to view
+  if (
+    escrow.sellerId.toString() !== req.user._id.toString() &&
+    req.user.role !== "Admin" &&
+    req.user.role !== "Super Admin"
+  ) {
+    return next(new ErrorHandler("Not authorized to view this escrow.", 403));
+  }
+
+  res.status(200).json({ success: true, escrow });
 });

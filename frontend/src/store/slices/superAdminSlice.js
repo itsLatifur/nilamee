@@ -60,7 +60,11 @@ const superAdminSlice = createSlice({
     },
     successForPendingPayments(state, action) {
       state.loading = false;
-      state.pendingPayments = action.payload;
+      // payload includes pending array and pagination metadata
+      state.pendingPayments = action.payload.pending || [];
+      state.pendingTotal = action.payload.total || 0;
+      state.pendingPage = action.payload.page || 1;
+      state.pendingPages = action.payload.pages || 1;
     },
     failureForPendingPayments(state, action) {
       state.loading = false;
@@ -137,18 +141,54 @@ export const getMonthlyRevenue = () => async (dispatch) => {
 export const getPendingPayments = () => async (dispatch) => {
   dispatch(superAdminSlice.actions.requestForPendingPayments());
   try {
+    // default pagination and filters
     const response = await axios.get(
-      "http://localhost:5000/api/v1/superadmin/payments/pending",
+      `http://localhost:5000/api/v1/superadmin/payments/pending?page=1&limit=20`,
       { withCredentials: true },
     );
     dispatch(
-      superAdminSlice.actions.successForPendingPayments(response.data.pending),
+      superAdminSlice.actions.successForPendingPayments({
+        pending: response.data.pending,
+        total: response.data.total,
+        page: response.data.page,
+        pages: response.data.pages,
+      }),
     );
   } catch (error) {
     dispatch(superAdminSlice.actions.failureForPendingPayments());
     console.error(error.response?.data?.message || error.message);
   }
 };
+
+export const getPendingPaymentsPage =
+  ({
+    page = 1,
+    limit = 20,
+    status = "All",
+    processed = "All",
+    hold = "All",
+  } = {}) =>
+  async (dispatch) => {
+    dispatch(superAdminSlice.actions.requestForPendingPayments());
+    try {
+      const qs = `?page=${page}&limit=${limit}&status=${encodeURIComponent(status)}&processed=${encodeURIComponent(processed)}&hold=${encodeURIComponent(hold)}`;
+      const response = await axios.get(
+        `http://localhost:5000/api/v1/superadmin/payments/pending${qs}`,
+        { withCredentials: true },
+      );
+      dispatch(
+        superAdminSlice.actions.successForPendingPayments({
+          pending: response.data.pending,
+          total: response.data.total,
+          page: response.data.page,
+          pages: response.data.pages,
+        }),
+      );
+    } catch (error) {
+      dispatch(superAdminSlice.actions.failureForPendingPayments());
+      console.error(error.response?.data?.message || error.message);
+    }
+  };
 
 export const approvePendingPayment = (id) => async (dispatch) => {
   try {
@@ -158,10 +198,62 @@ export const approvePendingPayment = (id) => async (dispatch) => {
       { withCredentials: true },
     );
     toast.success(response.data.message);
-    dispatch(getPendingPayments());
+    return response;
   } catch (error) {
     console.error(error.response?.data?.message || error.message);
     toast.error(error.response?.data?.message || "Failed to approve payout");
+  }
+};
+
+export const holdPendingPayment =
+  (id, note = "") =>
+  async (dispatch) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/v1/superadmin/payments/hold/${id}`,
+        { note },
+        { withCredentials: true },
+      );
+      toast.info(response.data.message || "Escrow placed on hold");
+      return response;
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || "Failed to place hold");
+    }
+  };
+
+export const unholdPendingPayment =
+  (id, note = "") =>
+  async (dispatch) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/v1/superadmin/payments/unhold/${id}`,
+        { note },
+        { withCredentials: true },
+      );
+      toast.success(response.data.message || "Escrow hold removed");
+      return response;
+    } catch (error) {
+      console.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || "Failed to remove hold");
+    }
+  };
+
+export const addEscrowNote = (id, note) => async (dispatch) => {
+  try {
+    const response = await axios.post(
+      `http://localhost:5000/api/v1/superadmin/escrow/note/${id}`,
+      { note },
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    toast.success(response.data.message || "Note added");
+    return response;
+  } catch (error) {
+    console.error(error.response?.data?.message || error.message);
+    toast.error(error.response?.data?.message || "Failed to add note");
   }
 };
 

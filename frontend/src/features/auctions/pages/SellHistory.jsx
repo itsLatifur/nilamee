@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { API_URL } from "@/config/env";
 import Spinner from "@/custom-components/Spinner";
@@ -8,19 +8,29 @@ const SellHistory = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({});
   const [receivable, setReceivable] = useState(0);
+  const [escrows, setEscrows] = useState([]);
+  const escrowsByAuction = useMemo(() => {
+    const map = {};
+    (escrows || []).forEach((e) => {
+      if (e.auctionId && e.auctionId._id) map[e.auctionId._id] = e;
+    });
+    return map;
+  }, [escrows]);
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [sRes, rRes] = await Promise.all([
+        const [sRes, rRes, eRes] = await Promise.all([
           axios.get(`${API_URL}/profile/my-stats`, { withCredentials: true }),
           axios.get(`${API_URL}/profile/my-receivables`, {
             withCredentials: true,
           }),
+          axios.get(`${API_URL}/profile/my-escrows`, { withCredentials: true }),
         ]);
         setStats(sRes.data.stats);
         setReceivable(rRes.data.receivable || 0);
+        setEscrows(eRes.data.escrows || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -42,7 +52,7 @@ const SellHistory = () => {
   const totalEarned = safeStats.totalTransactionVolume || 0;
   const completedCount = safeStats.completedAuctionsCount || 0;
   const sellTransactions = (safeStats.transactionHistory || []).filter(
-    (t) => t.role === "Auctioneer"
+    (t) => t.role === "Auctioneer",
   );
 
   return (
@@ -94,12 +104,13 @@ const SellHistory = () => {
               <th className="py-2 px-3">Amount</th>
               <th className="py-2 px-3">Completed At</th>
               <th className="py-2 px-3">Outcome</th>
+              <th className="py-2 px-3">Escrow Status</th>
             </tr>
           </thead>
           <tbody>
             {sellTransactions.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-4 text-center text-gray-400">
+                <td colSpan={5} className="py-4 text-center text-gray-400">
                   No sales yet.
                 </td>
               </tr>
@@ -107,7 +118,12 @@ const SellHistory = () => {
               sellTransactions.map((t) => (
                 <tr key={t._id} className="border-t border-gray-700">
                   <td className="py-3 px-3 text-warm-white">
-                    {t.auctionTitle}
+                    <a
+                      href={`/escrow/${escrowsByAuction[t.auctionId && t.auctionId._id ? t.auctionId._id : t.auctionId]?._id || ""}`}
+                      className="text-blue-300 hover:underline"
+                    >
+                      {t.auctionTitle}
+                    </a>
                   </td>
                   <td className="py-3 px-3 text-golden-300">
                     {formatBDT(t.amount)}
@@ -116,6 +132,32 @@ const SellHistory = () => {
                     {new Date(t.completedAt).toLocaleString()}
                   </td>
                   <td className="py-3 px-3 text-gray-300">{t.outcome}</td>
+                  <td className="py-3 px-3 text-gray-300">
+                    {(() => {
+                      const auctionKey =
+                        t.auctionId && t.auctionId._id
+                          ? t.auctionId._id
+                          : t.auctionId;
+                      const esc = escrowsByAuction[auctionKey];
+                      if (!esc) return <span className="text-gray-400">-</span>;
+                      return (
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {esc.status}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {esc.processedAt
+                              ? `Processed: ${new Date(esc.processedAt).toLocaleString()}`
+                              : esc.adminHold
+                                ? "On Hold"
+                                : esc.status === "Released"
+                                  ? "Released - awaiting processing"
+                                  : "Not processed"}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </td>
                 </tr>
               ))
             )}

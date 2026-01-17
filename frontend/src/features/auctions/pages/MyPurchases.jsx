@@ -8,10 +8,11 @@ import FeedbackForm from "@/shared/components/FeedbackForm";
 
 const MyPurchases = () => {
   const { isAuthenticated, user, hasCheckedAuth } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   const navigate = useNavigate();
   const [purchases, setPurchases] = useState([]);
+  const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmingDelivery, setConfirmingDelivery] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(null);
@@ -52,7 +53,7 @@ const MyPurchases = () => {
             `${BACKEND}/api/v1/auctions/my-wins/debug`,
             {
               withCredentials: true,
-            }
+            },
           );
           if (dbg.data && dbg.data.matched > 0) {
             wonAuctions = dbg.data.sampleMatched || [];
@@ -60,7 +61,7 @@ const MyPurchases = () => {
             // Show candidates if filters excluded them
             wonAuctions = dbg.data.sampleAll || [];
             toast.info(
-              "Showing candidate wins (debug) — backend filters excluded them."
+              "Showing candidate wins (debug) — backend filters excluded them.",
             );
           }
         } catch (err) {
@@ -70,6 +71,17 @@ const MyPurchases = () => {
       }
 
       setPurchases(wonAuctions);
+      // Also fetch any escrows where current user is the buyer so we can show escrow status
+      try {
+        const escRes = await axios.get(
+          `${BACKEND}/api/v1/profile/my-escrows/buyer`,
+          { withCredentials: true },
+        );
+        setEscrows(escRes.data.escrows || []);
+      } catch (err) {
+        console.debug("Failed to fetch buyer escrows", err?.message || err);
+      }
+
       setLoading(false);
     } catch (error) {
       toast.error("Failed to load purchases");
@@ -80,7 +92,8 @@ const MyPurchases = () => {
   const handlePayNow = async (auctionId) => {
     setPaymentProcessing(auctionId);
     try {
-      const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const BACKEND =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
       // In development allow demo-pay fallback
       const endpoint =
@@ -88,7 +101,11 @@ const MyPurchases = () => {
           ? `${BACKEND}/api/v1/payment/auction/demo-pay/${auctionId}`
           : `${BACKEND}/api/v1/payment/auction/init/${auctionId}`;
 
-      const response = await axios.post(endpoint, {}, { withCredentials: true });
+      const response = await axios.post(
+        endpoint,
+        {},
+        { withCredentials: true },
+      );
 
       if (response.data && response.data.success) {
         // If demo endpoint used, just refresh purchases to reflect Paid state
@@ -113,7 +130,7 @@ const MyPurchases = () => {
   const handleConfirmDelivery = async (auctionId) => {
     if (
       !window.confirm(
-        "Are you sure you want to confirm delivery? This will release payment to the seller."
+        "Are you sure you want to confirm delivery? This will release payment to the seller.",
       )
     ) {
       return;
@@ -126,7 +143,7 @@ const MyPurchases = () => {
           import.meta.env.VITE_BACKEND_URL
         }/api/v1/auctionitem/confirm-delivery/${auctionId}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data.success) {
@@ -135,7 +152,7 @@ const MyPurchases = () => {
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to confirm delivery"
+        error.response?.data?.message || "Failed to confirm delivery",
       );
     } finally {
       setConfirmingDelivery(null);
@@ -157,7 +174,7 @@ const MyPurchases = () => {
           type: disputeForm.type,
           description: disputeForm.description,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data.success) {
@@ -361,6 +378,37 @@ const MyPurchases = () => {
                         </p>
                       )}
                     </div>
+
+                    {/* Escrow summary for buyers */}
+                    {(() => {
+                      const map = {};
+                      (escrows || []).forEach((e) => {
+                        if (e.auctionId && e.auctionId._id)
+                          map[e.auctionId._id] = e;
+                      });
+                      const esc = map[auction._id];
+                      if (!esc) return null;
+                      return (
+                        <div className="mb-4 p-3 bg-gray-800 rounded text-sm">
+                          <div className="text-gray-200 font-medium">
+                            Escrow Status:{" "}
+                            <span className="text-white">{esc.status}</span>
+                          </div>
+                          <div className="text-gray-400 text-xs mt-1">
+                            {esc.adminHold
+                              ? "On Hold by Admin"
+                              : esc.status === "Released"
+                                ? "Released - awaiting processing"
+                                : "Not processed yet"}
+                          </div>
+                          <div className="text-gray-400 text-xs">
+                            {esc.processedAt
+                              ? `Processed: ${new Date(esc.processedAt).toLocaleString()}`
+                              : ""}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Action Buttons */}
                     <div className="flex flex-wrap gap-3">

@@ -1,6 +1,6 @@
 import Card from "@/custom-components/Card";
 import Spinner from "@/custom-components/Spinner";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 
 const Auctions = () => {
@@ -8,22 +8,50 @@ const Auctions = () => {
   const [displayedAuctions, setDisplayedAuctions] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("Available");
   const itemsPerPage = 10;
 
   // Initialize displayed auctions
+  // Compute filtered auctions based on selected status
+  const filteredAuctions = useMemo(() => {
+    if (!allAuctions) return [];
+    const now = Date.now();
+    return allAuctions.filter((auction) => {
+      const ended = auction.endTime
+        ? new Date(auction.endTime).getTime() < now
+        : false;
+      const cancelled = auction.overallStatus === "Cancelled";
+      const sold = ended && !!auction.highestBidder;
+
+      if (statusFilter === "All") return true;
+      if (statusFilter === "Available") {
+        return !ended && !cancelled;
+      }
+      if (statusFilter === "Sold") return sold;
+      if (statusFilter === "Cancelled") return cancelled;
+      return true;
+    });
+  }, [allAuctions, statusFilter]);
+
+  // Initialize displayed auctions when the list or filter changes
   useEffect(() => {
-    if (allAuctions && allAuctions.length > 0) {
-      setDisplayedAuctions(allAuctions.slice(0, itemsPerPage));
-      setHasMore(allAuctions.length > itemsPerPage);
+    if (filteredAuctions && filteredAuctions.length > 0) {
+      setDisplayedAuctions(filteredAuctions.slice(0, itemsPerPage));
+      setHasMore(filteredAuctions.length > itemsPerPage);
+      setPage(1);
+    } else {
+      setDisplayedAuctions([]);
+      setHasMore(false);
+      setPage(1);
     }
-  }, [allAuctions]);
+  }, [filteredAuctions]);
 
   // Load more auctions
   const loadMoreAuctions = () => {
     const nextPage = page + 1;
     const startIndex = page * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const newAuctions = allAuctions.slice(startIndex, endIndex);
+    const newAuctions = filteredAuctions.slice(startIndex, endIndex);
 
     if (newAuctions.length > 0) {
       setDisplayedAuctions((prev) => [...prev, ...newAuctions]);
@@ -63,6 +91,22 @@ const Auctions = () => {
             >
               Auctions
             </h1>
+            <div className="flex items-center justify-between mb-4">
+              <div />
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-500 mr-2">Filter:</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 rounded border border-gray-300 bg-white text-sm"
+                >
+                  <option value="Available">Available</option>
+                  <option value="Sold">Sold</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="All">All</option>
+                </select>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-6">
               {displayedAuctions.map((element) => (
                 <Card

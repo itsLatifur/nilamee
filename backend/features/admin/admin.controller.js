@@ -11,6 +11,7 @@ import { TransactionHistory } from "../transactions/transactionHistory.model.js"
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Notification } from "../../models/notificationSchema.js";
 import { AdminActivityLog } from "./activityLog.model.js";
+import { Escrow } from "../escrow/escrow.model.js";
 
 // Helper to write activity logs
 const logActivity = async (entry) => {
@@ -203,7 +204,7 @@ export const getPaymentProofDetail = catchAsyncErrors(
       success: true,
       paymentProofDetail,
     });
-  }
+  },
 );
 
 export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
@@ -223,7 +224,7 @@ export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
       new: true,
       runValidators: true,
       useFindAndModify: false,
-    }
+    },
   );
   res.status(200).json({
     success: true,
@@ -354,12 +355,53 @@ export const getPendingAuctions = catchAsyncErrors(async (req, res, next) => {
 
 // List pending payments (escrows that are held and require admin approval)
 export const getPendingPayments = catchAsyncErrors(async (req, res, next) => {
-  const pending = await Escrow.find({ status: { $in: ["Held", "Pending"] } })
+  // Server-side pagination and filtering for admin pending payments
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const statusFilter = req.query.status || null; // e.g., Held, Released, Pending, Refunded
+  const processedFilter = req.query.processed || null; // Processed, NotProcessed, All
+  const holdFilter = req.query.hold || null; // OnHold, NotOnHold, All
+
+  const baseOr = [
+    { status: { $in: ["Held", "Pending"] } },
+    { status: "Released", processedAt: null },
+  ];
+
+  // Build main query
+  const query = { $or: baseOr };
+
+  // Apply status filter if provided
+  if (statusFilter && statusFilter !== "All") {
+    query.$or = [{ status: statusFilter }];
+  }
+
+  // Apply processed filter
+  if (processedFilter === "Processed") {
+    query.processedAt = { $ne: null };
+  } else if (processedFilter === "NotProcessed") {
+    query.processedAt = null;
+  }
+
+  // Apply hold filter
+  if (holdFilter === "OnHold") {
+    query.adminHold = true;
+  } else if (holdFilter === "NotOnHold") {
+    query.adminHold = false;
+  }
+
+  const total = await Escrow.countDocuments(query);
+  const pages = Math.max(1, Math.ceil(total / limit));
+  const skip = (page - 1) * limit;
+
+  const pending = await Escrow.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .populate("auctionId", "title currentBid")
     .populate("buyerId", "userName email")
     .populate("sellerId", "userName email paymentInfo");
 
-  res.status(200).json({ success: true, pending });
+  res.status(200).json({ success: true, pending, total, page, pages });
 });
 
 // Approve pending escrow payout: collect commission, mark escrow released, record transaction
@@ -374,8 +416,9 @@ export const approvePendingPayment = catchAsyncErrors(
     const escrow = await Escrow.findById(id).populate("auctionId");
     if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
 
-    if (escrow.status === "Released") {
-      return next(new ErrorHandler("Escrow already released.", 400));
+    // If this escrow is already processed (payout snapshot recorded), disallow
+    if (escrow.processedAt) {
+      return next(new ErrorHandler("Escrow already processed.", 400));
     }
 
     // Compute commission and seller amounts (should be present on escrow)
@@ -393,16 +436,20 @@ export const approvePendingPayment = catchAsyncErrors(
       console.error("Failed to create commission record:", err);
     }
 
-    // Mark escrow released and record processing info
-    escrow.status = "Released";
-    escrow.releasedAt = new Date();
+    // If not already marked Released, mark it released now
+    if (escrow.status !== "Released") {
+      escrow.status = "Released";
+      escrow.releasedAt = new Date();
+    }
+
+    // Record processing info
     escrow.processedBy = req.user._id;
     escrow.processedAt = new Date();
 
     // Snapshot seller paymentInfo if available
     try {
       const seller = await User.findById(escrow.sellerId).select(
-        "paymentInfo userName email totalTransactionVolume completedAuctionsCount stats"
+        "paymentInfo userName email totalTransactionVolume completedAuctionsCount stats",
       );
       if (seller && seller.paymentInfo) {
         escrow.payoutInfo = {
@@ -462,13 +509,202 @@ export const approvePendingPayment = catchAsyncErrors(
       console.error("Failed to create notification:", err);
     }
 
+    // Notify buyer that payout was processed/released
+    try {
+      await Notification.create({
+        userId: escrow.buyerId,
+        title: "Payment Released",
+        message: `Payment for auction ${escrow.auctionId.title} has been released and payout processed to the seller. Thank you for confirming delivery.`,
+        type: "info",
+      });
+    } catch (err) {
+      console.error("Failed to create notification:", err);
+    }
+
     res.status(200).json({
       success: true,
-      message: "Payout approved and released.",
+      message: "Payout approved and processed.",
       escrow,
     });
-  }
+  },
 );
+
+// Add an admin note to an escrow (for investigations)
+export const addEscrowNote = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  const escrow = await Escrow.findById(id);
+  if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
+
+  escrow.adminNotes = escrow.adminNotes || [];
+  escrow.adminNotes.push({
+    note: note || "",
+    addedBy: req.user._id,
+    addedByName: req.user.userName,
+    addedAt: new Date(),
+  });
+  await escrow.save();
+
+  // Log admin activity
+  try {
+    await logActivity({
+      action: "ESCROW_ADD_NOTE",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: { resourceType: "Escrow", resourceId: escrow._id },
+      changes: { note: note },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for escrow note:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Note added to escrow.", escrow });
+});
+
+// Admin: place a manual hold on an escrow (prevent automatic release/payout)
+export const holdPendingPayment = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  const escrow = await Escrow.findById(id).populate("auctionId");
+  if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
+
+  // Require admin note for placing hold
+  if (!note || typeof note !== "string" || note.trim().length === 0) {
+    return next(
+      new ErrorHandler("Admin note is required when placing a hold.", 400),
+    );
+  }
+
+  escrow.adminHold = true;
+  escrow.adminNotes = escrow.adminNotes || [];
+  escrow.adminNotes.push({
+    note: note.trim(),
+    addedBy: req.user._id,
+    addedByName: req.user.userName,
+    addedAt: new Date(),
+  });
+  await escrow.save();
+
+  try {
+    await Notification.create({
+      userId: escrow.sellerId,
+      title: "Payout Placed On Hold",
+      message: `Payout for auction ${escrow.auctionId.title} has been placed on hold by admin.`,
+      type: "warning",
+    });
+    // Notify buyer as well
+    try {
+      await Notification.create({
+        userId: escrow.buyerId,
+        title: "Payment On Hold",
+        message: `Payment for auction ${escrow.auctionId.title} has been placed on hold by admin. We will notify you when the hold is removed.`,
+        type: "warning",
+      });
+    } catch (err) {
+      console.error("Failed to create buyer notification for hold:", err);
+    }
+  } catch (err) {
+    console.error("Failed to create notification:", err);
+  }
+
+  // Log admin activity including optional note
+  try {
+    await logActivity({
+      action: "ESCROW_PLACE_HOLD",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: { resourceType: "Escrow", resourceId: escrow._id },
+      changes: { adminHold: true, note: note || null },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for placing hold:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Escrow placed on hold.", escrow });
+});
+
+// Admin: remove manual hold on an escrow
+export const unholdPendingPayment = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  const escrow = await Escrow.findById(id).populate("auctionId");
+  if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
+
+  escrow.adminHold = false;
+  // Optionally record admin note when removing hold
+  if (note && typeof note === "string" && note.trim().length > 0) {
+    escrow.adminNotes = escrow.adminNotes || [];
+    escrow.adminNotes.push({
+      note: note.trim(),
+      addedBy: req.user._id,
+      addedByName: req.user.userName,
+      addedAt: new Date(),
+    });
+  }
+  await escrow.save();
+
+  try {
+    await Notification.create({
+      userId: escrow.sellerId,
+      title: "Payout Hold Removed",
+      message: `Admin has removed the hold for payout of auction ${escrow.auctionId.title}. You may be paid shortly.`,
+      type: "info",
+    });
+    // Notify buyer as well
+    try {
+      await Notification.create({
+        userId: escrow.buyerId,
+        title: "Payment Hold Removed",
+        message: `Admin has removed the hold for payment of auction ${escrow.auctionId.title}. The payout will be processed shortly.`,
+        type: "info",
+      });
+    } catch (err) {
+      console.error("Failed to create buyer notification for unhold:", err);
+    }
+  } catch (err) {
+    console.error("Failed to create notification:", err);
+  }
+
+  // Log admin activity including optional note
+  try {
+    await logActivity({
+      action: "ESCROW_REMOVE_HOLD",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: { resourceType: "Escrow", resourceId: escrow._id },
+      changes: { adminHold: false, note: note || null },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for removing hold:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Escrow hold removed.", escrow });
+});
 
 export const approveAuction = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
@@ -552,6 +788,275 @@ export const rejectAuction = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+// Admin: place a manual hold on an auction (prevent activity until reviewed)
+export const holdAuction = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  const auction = await Auction.findById(id);
+  if (!auction) return next(new ErrorHandler("Auction not found.", 404));
+
+  // Require admin note for placing a hold
+  if (!note || typeof note !== "string" || note.trim().length === 0) {
+    return next(
+      new ErrorHandler("Admin note is required when placing a hold.", 400),
+    );
+  }
+
+  auction.adminHold = true;
+  auction.adminNotes = auction.adminNotes || [];
+  auction.adminNotes.push({
+    note: note.trim(),
+    addedBy: req.user._id,
+    addedByName: req.user.userName,
+    addedAt: new Date(),
+  });
+  await auction.save();
+
+  // Notify auction owner and bidders
+  try {
+    await Notification.create({
+      userId: auction.createdBy,
+      title: "Auction Placed On Hold",
+      message: `Your auction \"${auction.title}\" has been placed on hold by admin. Reason: ${note.trim()}`,
+      type: "warning",
+    });
+  } catch (err) {
+    console.error("Failed to notify auction owner of hold:", err);
+  }
+
+  // Notify all admins about this action
+  try {
+    const admins = await User.find({
+      role: { $in: ["Admin", "Super Admin"] },
+    }).select("_id");
+    const adminNotifs = (admins || []).map((a) => ({
+      userId: a._id,
+      title: "Auction Held",
+      message: `Auction \"${auction.title}\" (ID: ${auction._id}) was placed on hold by ${req.user.userName}.`,
+      type: "info",
+    }));
+    if (adminNotifs.length) {
+      await Promise.all(adminNotifs.map((n) => Notification.create(n)));
+    }
+  } catch (err) {
+    console.error("Failed to notify admins of auction hold:", err);
+  }
+
+  // Log activity
+  try {
+    await logActivity({
+      action: "AUCTION_PLACE_HOLD",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "Auction",
+        resourceId: auction._id,
+        resourceName: auction.title,
+      },
+      changes: { adminHold: true, note },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for auction hold:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Auction placed on hold.", auction });
+});
+
+// Admin: remove manual hold on an auction
+export const unholdAuction = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  const auction = await Auction.findById(id);
+  if (!auction) return next(new ErrorHandler("Auction not found.", 404));
+
+  auction.adminHold = false;
+  if (note && typeof note === "string" && note.trim().length > 0) {
+    auction.adminNotes = auction.adminNotes || [];
+    auction.adminNotes.push({
+      note: note.trim(),
+      addedBy: req.user._id,
+      addedByName: req.user.userName,
+      addedAt: new Date(),
+    });
+  }
+  await auction.save();
+
+  try {
+    await Notification.create({
+      userId: auction.createdBy,
+      title: "Auction Hold Removed",
+      message: `Admin has removed the hold on your auction \"${auction.title}\".`,
+      type: "info",
+    });
+  } catch (err) {
+    console.error("Failed to notify auction owner of unhold:", err);
+  }
+
+  // Notify admins about the unhold
+  try {
+    const admins = await User.find({
+      role: { $in: ["Admin", "Super Admin"] },
+    }).select("_id");
+    const adminNotifs = (admins || []).map((a) => ({
+      userId: a._id,
+      title: "Auction Hold Removed",
+      message: `Hold removed for auction \"${auction.title}\" (ID: ${auction._id}) by ${req.user.userName}.`,
+      type: "info",
+    }));
+    if (adminNotifs.length) {
+      await Promise.all(adminNotifs.map((n) => Notification.create(n)));
+    }
+  } catch (err) {
+    console.error("Failed to notify admins of auction unhold:", err);
+  }
+
+  try {
+    await logActivity({
+      action: "AUCTION_REMOVE_HOLD",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "Auction",
+        resourceId: auction._id,
+        resourceName: auction.title,
+      },
+      changes: { adminHold: false, note: note || null },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for auction unhold:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Auction hold removed.", auction });
+});
+
+// Admin: cancel auction (mark overallStatus = Cancelled) with required note
+export const cancelAuction = catchAsyncErrors(async (req, res, next) => {
+  const { id } = req.params;
+  const { note } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorHandler("Invalid ID format.", 400));
+  }
+
+  if (!note || typeof note !== "string" || note.trim().length === 0) {
+    return next(
+      new ErrorHandler(
+        "Admin note is required when cancelling an auction.",
+        400,
+      ),
+    );
+  }
+
+  const auction = await Auction.findById(id).populate("bids.userId");
+  if (!auction) return next(new ErrorHandler("Auction not found.", 404));
+
+  auction.overallStatus = "Cancelled";
+  auction.deletionReason = note.trim();
+  auction.isDeleted = true;
+  auction.deletedAt = new Date();
+  auction.deletedBy = req.user._id;
+  auction.adminNotes = auction.adminNotes || [];
+  auction.adminNotes.push({
+    note: `Cancelled: ${note.trim()}`,
+    addedBy: req.user._id,
+    addedByName: req.user.userName,
+    addedAt: new Date(),
+  });
+  await auction.save();
+
+  // Notify owner and bidders
+  try {
+    await Notification.create({
+      userId: auction.createdBy,
+      title: "Auction Cancelled",
+      message: `Your auction \"${auction.title}\" has been cancelled by admin. Reason: ${note.trim()}`,
+      type: "warning",
+    });
+  } catch (err) {
+    console.error("Failed to notify auction owner of cancellation:", err);
+  }
+
+  // Notify admins about the cancellation
+  try {
+    const admins = await User.find({
+      role: { $in: ["Admin", "Super Admin"] },
+    }).select("_id");
+    const adminNotifs = (admins || []).map((a) => ({
+      userId: a._id,
+      title: "Auction Cancelled",
+      message: `Auction \"${auction.title}\" (ID: ${auction._id}) was cancelled by ${req.user.userName}. Reason: ${note.trim()}`,
+      type: "warning",
+    }));
+    if (adminNotifs.length) {
+      await Promise.all(adminNotifs.map((n) => Notification.create(n)));
+    }
+  } catch (err) {
+    console.error("Failed to notify admins of auction cancellation:", err);
+  }
+
+  try {
+    // Notify all bidders if present
+    if (Array.isArray(auction.bids)) {
+      for (const b of auction.bids) {
+        try {
+          if (b.userId) {
+            await Notification.create({
+              userId: b.userId,
+              title: "Auction Cancelled",
+              message: `An auction you bid on (\"${auction.title}\") has been cancelled by admin.`,
+              type: "info",
+            });
+          }
+        } catch (err) {
+          console.error("Failed to notify bidder of cancellation:", err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error notifying bidders:", err);
+  }
+
+  try {
+    await logActivity({
+      action: "CANCEL_AUCTION",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "Auction",
+        resourceId: auction._id,
+        resourceName: auction.title,
+      },
+      changes: { cancelled: true, note },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for cancellation:", err);
+  }
+
+  res
+    .status(200)
+    .json({ success: true, message: "Auction cancelled.", auction });
+});
+
 // User Management Functions
 
 // Create Admin (Super Admin and Admin can create admins)
@@ -563,8 +1068,8 @@ export const createAdmin = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Only Super Admin or Admin can create admin accounts.",
-        403
-      )
+        403,
+      ),
     );
   }
 
@@ -573,19 +1078,19 @@ export const createAdmin = catchAsyncErrors(async (req, res, next) => {
     // Admin can only create Admin role or custom roles
     if (role === "Super Admin") {
       return next(
-        new ErrorHandler("Admins cannot create Super Admin accounts.", 403)
+        new ErrorHandler("Admins cannot create Super Admin accounts.", 403),
       );
     }
     if (["Bidder", "Auctioneer"].includes(role)) {
       return next(
-        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400)
+        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400),
       );
     }
   } else if (req.user.role === "Super Admin") {
     // Super Admin can create any admin role except Bidder/Auctioneer
     if (["Bidder", "Auctioneer"].includes(role)) {
       return next(
-        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400)
+        new ErrorHandler("Cannot create Bidder or Auctioneer accounts.", 400),
       );
     }
   }
@@ -935,7 +1440,7 @@ export const removeAdmin = catchAsyncErrors(async (req, res, next) => {
   // Check if requester is Super Admin
   if (req.user.role !== "Super Admin") {
     return next(
-      new ErrorHandler("Only Super Admin can remove admin accounts.", 403)
+      new ErrorHandler("Only Super Admin can remove admin accounts.", 403),
     );
   }
 
@@ -1003,7 +1508,7 @@ export const permanentDeleteUser = catchAsyncErrors(async (req, res, next) => {
   // Only Super Admin can permanently delete
   if (req.user.role !== "Super Admin") {
     return next(
-      new ErrorHandler("Only Super Admin can permanently delete data.", 403)
+      new ErrorHandler("Only Super Admin can permanently delete data.", 403),
     );
   }
 
@@ -1019,7 +1524,7 @@ export const permanentDeleteUser = catchAsyncErrors(async (req, res, next) => {
   // Cannot permanently delete Super Admin
   if (user.role === "Super Admin") {
     return next(
-      new ErrorHandler("Cannot permanently delete Super Admin.", 403)
+      new ErrorHandler("Cannot permanently delete Super Admin.", 403),
     );
   }
 
@@ -1038,7 +1543,7 @@ export const permanentDeleteAuction = catchAsyncErrors(
 
     if (req.user.role !== "Super Admin") {
       return next(
-        new ErrorHandler("Only Super Admin can permanently delete data.", 403)
+        new ErrorHandler("Only Super Admin can permanently delete data.", 403),
       );
     }
 
@@ -1059,7 +1564,7 @@ export const permanentDeleteAuction = catchAsyncErrors(
       success: true,
       message: "Auction permanently deleted from database.",
     });
-  }
+  },
 );
 
 // Permanently delete payment proof from database
@@ -1069,7 +1574,7 @@ export const permanentDeletePaymentProof = catchAsyncErrors(
 
     if (req.user.role !== "Super Admin") {
       return next(
-        new ErrorHandler("Only Super Admin can permanently delete data.", 403)
+        new ErrorHandler("Only Super Admin can permanently delete data.", 403),
       );
     }
 
@@ -1090,7 +1595,7 @@ export const permanentDeletePaymentProof = catchAsyncErrors(
       success: true,
       message: "Payment proof permanently deleted from database.",
     });
-  }
+  },
 );
 
 // Get all soft-deleted items (for filtering)
@@ -1173,14 +1678,14 @@ export const createRole = catchAsyncErrors(async (req, res, next) => {
 
   if (!name || !permissions) {
     return next(
-      new ErrorHandler("Role name and permissions are required.", 400)
+      new ErrorHandler("Role name and permissions are required.", 400),
     );
   }
 
   // Only Super Admin can create roles
   if (req.user.role !== "Super Admin") {
     return next(
-      new ErrorHandler("Only Super Admin can create custom roles.", 403)
+      new ErrorHandler("Only Super Admin can create custom roles.", 403),
     );
   }
 
@@ -1233,7 +1738,7 @@ export const deleteRole = catchAsyncErrors(async (req, res, next) => {
   // Only Super Admin can delete roles
   if (req.user.role !== "Super Admin") {
     return next(
-      new ErrorHandler("Only Super Admin can delete custom roles.", 403)
+      new ErrorHandler("Only Super Admin can delete custom roles.", 403),
     );
   }
 
@@ -1252,8 +1757,8 @@ export const deleteRole = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         `Cannot delete role. ${usersWithRole} user(s) are assigned this role.`,
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -1299,7 +1804,7 @@ export const updateUserRole = catchAsyncErrors(async (req, res, next) => {
   // Prevent changing system user roles (Bidder, Auctioneer)
   if (["Bidder", "Auctioneer"].includes(user.role)) {
     return next(
-      new ErrorHandler("Cannot change role of Bidders or Auctioneers.", 400)
+      new ErrorHandler("Cannot change role of Bidders or Auctioneers.", 400),
     );
   }
 
@@ -1308,12 +1813,12 @@ export const updateUserRole = catchAsyncErrors(async (req, res, next) => {
     // Admin can only assign Admin role or custom roles
     if (role === "Super Admin") {
       return next(
-        new ErrorHandler("Admins cannot assign Super Admin role.", 403)
+        new ErrorHandler("Admins cannot assign Super Admin role.", 403),
       );
     }
   } else if (req.user.role !== "Super Admin") {
     return next(
-      new ErrorHandler("Only Admin or Super Admin can update user roles.", 403)
+      new ErrorHandler("Only Admin or Super Admin can update user roles.", 403),
     );
   }
 
@@ -1362,7 +1867,10 @@ export const getActivityLogs = catchAsyncErrors(async (req, res, next) => {
   // Super Admin and Admin can view activity logs
   if (req.user.role !== "Super Admin" && req.user.role !== "Admin") {
     return next(
-      new ErrorHandler("Only Super Admin or Admin can view activity logs.", 403)
+      new ErrorHandler(
+        "Only Super Admin or Admin can view activity logs.",
+        403,
+      ),
     );
   }
 
@@ -1420,3 +1928,72 @@ export const getActivityLogs = catchAsyncErrors(async (req, res, next) => {
     },
   });
 });
+
+// Admin-only endpoint to run the backfill job (safe one-off)
+export const runBackfillAddedByName = catchAsyncErrors(
+  async (req, res, next) => {
+    // Only super admin or admin can run
+    if (req.user.role !== "Admin" && req.user.role !== "Super Admin") {
+      return next(new ErrorHandler("Forbidden", 403));
+    }
+
+    // Run the script logic inline so we can reuse models and connection already active
+    try {
+      let auctionsUpdated = 0;
+      const auctions = await Auction.find({
+        "adminNotes.addedBy": { $exists: true },
+      });
+      for (const auction of auctions) {
+        let changed = false;
+        for (let i = 0; i < (auction.adminNotes || []).length; i++) {
+          const n = auction.adminNotes[i];
+          if ((!n.addedByName || n.addedByName === "") && n.addedBy) {
+            const u = await User.findById(n.addedBy).select("userName");
+            if (u) {
+              auction.adminNotes[i].addedByName = u.userName;
+              changed = true;
+            }
+          }
+        }
+        if (changed) {
+          await auction.save();
+          auctionsUpdated++;
+        }
+      }
+
+      let escrowsUpdated = 0;
+      const escrows = await Escrow.find({
+        "adminNotes.addedBy": { $exists: true },
+      });
+      for (const escrow of escrows) {
+        let changed = false;
+        for (let i = 0; i < (escrow.adminNotes || []).length; i++) {
+          const n = escrow.adminNotes[i];
+          if ((!n.addedByName || n.addedByName === "") && n.addedBy) {
+            const u = await User.findById(n.addedBy).select("userName");
+            if (u) {
+              escrow.adminNotes[i].addedByName = u.userName;
+              changed = true;
+            }
+          }
+        }
+        if (changed) {
+          await escrow.save();
+          escrowsUpdated++;
+        }
+      }
+
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Backfill completed",
+          auctionsUpdated,
+          escrowsUpdated,
+        });
+    } catch (err) {
+      console.error("Backfill API error:", err);
+      next(err);
+    }
+  },
+);

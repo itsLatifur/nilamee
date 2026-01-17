@@ -118,6 +118,20 @@ const auctionSchema = new mongoose.Schema({
     ],
     default: "Pending Approval",
   },
+  // Admin manual hold for auctions (prevents certain transitions)
+  adminHold: {
+    type: Boolean,
+    default: false,
+  },
+  // Admin notes attached to auction actions
+  adminNotes: [
+    {
+      note: { type: String },
+      addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      addedByName: { type: String, default: null },
+      addedAt: { type: Date, default: Date.now },
+    },
+  ],
   isDeleted: {
     type: Boolean,
     default: false,

@@ -61,6 +61,20 @@ const escrowSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  // If admin has placed a manual hold, automatic release/payout should be blocked
+  adminHold: {
+    type: Boolean,
+    default: false,
+  },
+  // Admin notes for audits and investigations
+  adminNotes: [
+    {
+      note: { type: String },
+      addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      addedByName: { type: String, default: null },
+      addedAt: { type: Date, default: Date.now },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
