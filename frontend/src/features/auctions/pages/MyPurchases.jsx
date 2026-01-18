@@ -96,11 +96,7 @@ const MyPurchases = () => {
       const BACKEND =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-      // In development allow demo-pay fallback
-      const endpoint =
-        import.meta.env.NODE_ENV !== "production"
-          ? `${BACKEND}/api/v1/payment/auction/demo-pay/${auctionId}`
-          : `${BACKEND}/api/v1/payment/auction/init/${auctionId}`;
+      const endpoint = `${BACKEND}/api/v1/payment/auction/init/${auctionId}`;
 
       const response = await axios.post(
         endpoint,
@@ -108,16 +104,8 @@ const MyPurchases = () => {
         { withCredentials: true },
       );
 
-      if (response.data && response.data.success) {
-        // If demo endpoint used, just refresh purchases to reflect Paid state
-        if (endpoint.includes("demo-pay")) {
-          toast.success("Demo payment completed");
-          fetchMyPurchases();
-        } else if (response.data.gatewayUrl) {
-          window.location.href = response.data.gatewayUrl;
-        } else {
-          toast.error(response.data.message || "Failed to start payment");
-        }
+      if (response.data && response.data.gatewayUrl) {
+        window.location.href = response.data.gatewayUrl;
       } else {
         toast.error(response.data?.message || "Failed to start payment");
       }

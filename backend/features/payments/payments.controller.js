@@ -67,6 +67,10 @@ export const validatePayment = catchAsyncErrors(async (req, res, next) => {
 // Initialize auction payment (winner pays for auction item)
 export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
   const { auctionId } = req.params;
+  console.log("[Auction Payment] init called", {
+    auctionId,
+    userId: req?.user?._id?.toString(),
+  });
   const user = await User.findById(req.user._id);
   const { shippingAddress } = req.body || {};
   const auction = await Auction.findById(auctionId).populate("createdBy");
@@ -106,22 +110,37 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
   const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live);
 
   const paymentData = {
-    total_amount: amount,
+    total_amount: parseFloat(amount),
     currency: "BDT",
     tran_id: transactionId,
+    // success handled by backend so we can process escrow creation
     success_url: `${process.env.BACKEND_URL}/api/v1/payment/auction/success`,
-    fail_url: `${process.env.BACKEND_URL}/api/v1/payment/auction/fail`,
-    cancel_url: `${process.env.BACKEND_URL}/api/v1/payment/auction/cancel`,
+    // use frontend fail/cancel like premium for better UX in sandbox
+    fail_url: `${process.env.FRONTEND_URL}/payment-failed?type=auction`,
+    cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled?type=auction`,
     ipn_url: `${process.env.BACKEND_URL}/api/v1/payment/auction/ipn`,
     product_name: auction.title,
     product_category: auction.category || "Auction Item",
     product_profile: "physical-goods",
-    cus_name: user.userName,
+    // Customer defaults mirroring premium flow to avoid invalid/missing fields
+    cus_name: user.userName || "Buyer",
     cus_email: user.email,
-    cus_add1: user.address || "N/A",
+    cus_add1: user.address || "Dhaka, Bangladesh",
+    cus_add2: "Bangladesh",
     cus_city: "Dhaka",
+    cus_state: "Dhaka",
+    cus_postcode: "1000",
     cus_country: "Bangladesh",
-    cus_phone: user.phone || "N/A",
+    cus_phone: user.phone || "01700000000",
+    // Shipping information (physical goods)
+    ship_name: String(auction.createdBy?.userName || user.userName || "Seller"),
+    ship_add1:
+      auction.createdBy?.address || user.address || "Dhaka, Bangladesh",
+    ship_add2: "Bangladesh",
+    ship_city: "Dhaka",
+    ship_state: "Dhaka",
+    ship_postcode: "1000",
+    ship_country: "Bangladesh",
     shipping_method: "YES",
     value_a: user._id.toString(), // Buyer ID
     value_b: auction._id.toString(), // Auction ID
@@ -138,25 +157,49 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
         console.error("Failed to save shipping address to user profile:", err);
       }
     }
+    console.log("[Auction Payment] calling sslcommerz.init", {
+      transactionId,
+      amount,
+      store_id: !!store_id,
+      is_live,
+    });
     const apiResponse = await sslcommerz.init(paymentData);
+    console.log("[Auction Payment] sslcommerz.init response:", apiResponse);
 
-    if (apiResponse.status === "SUCCESS") {
-      // Update auction payment status to pending
+    if (apiResponse && apiResponse.status === "SUCCESS") {
+      // Update auction payment status to pending and store pending transaction
       auction.paymentStatus = "Pending";
       auction.transactionId = transactionId;
+      auction.pendingTransaction = {
+        transactionId,
+        amount: parseFloat(amount),
+        initiatedAt: new Date(),
+      };
       await auction.save();
+
+      const gatewayUrl =
+        apiResponse.redirectGatewayURL || apiResponse.GatewayPageURL;
 
       res.status(200).json({
         success: true,
-        gatewayUrl: apiResponse.GatewayPageURL,
+        gatewayUrl,
         transactionId,
       });
     } else {
+      const reason =
+        apiResponse && apiResponse.failedreason
+          ? apiResponse.failedreason
+          : JSON.stringify(apiResponse || "no-response");
+      console.error("[Auction Payment] sslcommerz init failed:", reason);
       return next(
-        new ErrorHandler("Failed to initialize payment gateway.", 500),
+        new ErrorHandler(
+          `Failed to initialize payment gateway: ${reason}`,
+          500,
+        ),
       );
     }
   } catch (error) {
+    console.error("[Auction Payment] exception during init:", error);
     return next(
       new ErrorHandler(error.message || "Payment initialization failed.", 500),
     );
@@ -166,12 +209,48 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
 // Auction payment success callback
 export const auctionPaymentSuccess = catchAsyncErrors(
   async (req, res, next) => {
-    const { tran_id, amount, value_a, value_b, value_c } = req.body;
+    // Accept tran_id and other fields from POST body or GET query (SSLCommerz varies)
+    const tran_id = req.body.tran_id || req.query.tran_id || req.query.tranId;
+    const amount = req.body.amount || req.query.amount;
+    const value_a = req.body.value_a || req.query.value_a;
+    const value_b = req.body.value_b || req.query.value_b;
+    const value_c = req.body.value_c || req.query.value_c;
+
     // value_a = buyer ID, value_b = auction ID, value_c = seller ID
 
-    const auction = await Auction.findById(value_b).populate("createdBy");
-    const buyer = await User.findById(value_a);
-    const seller = await User.findById(value_c);
+    // Try to resolve auction/buyer/seller from provided values.
+    let auction = null;
+    let buyer = null;
+    let seller = null;
+
+    if (value_b) {
+      auction = await Auction.findById(value_b).populate(
+        "createdBy highestBidder",
+      );
+    }
+
+    // If auction not found via value_b, try to find by stored transactionId or pendingTransaction
+    if (!auction && tran_id) {
+      auction = await Auction.findOne({
+        $or: [
+          { transactionId: tran_id },
+          { "pendingTransaction.transactionId": tran_id },
+        ],
+      }).populate("createdBy highestBidder");
+    }
+
+    // Resolve buyer and seller
+    if (value_a) {
+      buyer = await User.findById(value_a);
+    } else if (auction && auction.highestBidder) {
+      buyer = await User.findById(auction.highestBidder);
+    }
+
+    if (value_c) {
+      seller = await User.findById(value_c);
+    } else if (auction && auction.createdBy) {
+      seller = await User.findById(auction.createdBy._id || auction.createdBy);
+    }
 
     if (!auction || !buyer || !seller) {
       return next(new ErrorHandler("Payment record not found.", 404));
@@ -181,6 +260,13 @@ export const auctionPaymentSuccess = catchAsyncErrors(
     auction.paymentStatus = "Paid";
     auction.paidAt = new Date();
     auction.overallStatus = "Paid - Awaiting Shipment";
+    // clear pendingTransaction if present
+    if (
+      auction.pendingTransaction &&
+      auction.pendingTransaction.transactionId === tran_id
+    ) {
+      auction.pendingTransaction = undefined;
+    }
     await auction.save();
 
     // Calculate commission (7%)
@@ -218,6 +304,15 @@ export const auctionPaymentSuccess = catchAsyncErrors(
     // UPDATE BUYER TRUST SCORE
     const paymentTime = Date.now() - new Date(auction.endTime).getTime();
     const paymentHours = paymentTime / (1000 * 60 * 60);
+
+    // Defensive initialization for buyer numeric/stats fields (may be missing)
+    buyer.trustScore = Number(buyer.trustScore || 0);
+    buyer.totalTransactionVolume = Number(buyer.totalTransactionVolume || 0);
+    buyer.stats = buyer.stats || {};
+    buyer.stats.totalAuctionsWon = Number(buyer.stats.totalAuctionsWon || 0);
+    buyer.stats.averagePaymentTime = Number(
+      buyer.stats.averagePaymentTime || 0,
+    );
 
     const trustPointsEarned = calculateTrustPoints({
       role: "Bidder",
@@ -399,74 +494,6 @@ export const auctionPaymentIPN = catchAsyncErrors(async (req, res, next) => {
   }
 
   res.status(200).send("IPN received");
-});
-
-// Dev/demo helper: mark auction as paid without calling SSLCommerz (development only)
-export const demoAuctionPay = catchAsyncErrors(async (req, res, next) => {
-  if (process.env.NODE_ENV === "production") {
-    return next(new ErrorHandler("Not allowed in production", 403));
-  }
-
-  const { auctionId } = req.params;
-  const auction = await Auction.findById(auctionId).populate("createdBy");
-  const buyer = await User.findById(req.user._id);
-  if (!auction) return next(new ErrorHandler("Auction not found", 404));
-  if (!buyer) return next(new ErrorHandler("Buyer not found", 404));
-
-  // Ensure user is actual winner
-  if (
-    !auction.highestBidder ||
-    auction.highestBidder.toString() !== buyer._id.toString()
-  ) {
-    return next(
-      new ErrorHandler("You are not the winner of this auction.", 403),
-    );
-  }
-
-  // Mark as paid
-  auction.paymentStatus = "Paid";
-  auction.paidAt = new Date();
-  auction.overallStatus = "Paid - Awaiting Shipment";
-  await auction.save();
-
-  const amount = auction.currentBid;
-  const commissionAmount = parseFloat(amount) * 0.07;
-  const sellerAmount = parseFloat(amount) * 0.93;
-
-  const existingEscrow = await Escrow.findOne({ auctionId: auction._id });
-  if (!existingEscrow) {
-    await Escrow.create({
-      auctionId: auction._id,
-      buyerId: buyer._id,
-      sellerId: auction.createdBy._id,
-      totalAmount: parseFloat(amount),
-      commissionAmount,
-      sellerAmount,
-      status: "Held",
-      transactionId: `DEMO_${auction._id}_${Date.now()}`,
-      shippingAddress: buyer.address || null,
-      createdAt: new Date(),
-    });
-  }
-
-  // Ensure no duplicate demo escrow (dev only)
-  // If an escrow already exists for this auction, do not create another.
-
-  // Ensure we did not create duplicates in dev; if an escrow already exists, do not duplicate
-  // (demo endpoint used only in non-production)
-
-  // Increment metric
-  try {
-    await incrementMetric("totalTransactionsCount", 1);
-  } catch (err) {
-    console.error(err);
-  }
-
-  res.status(200).json({
-    success: true,
-    message: "Demo payment completed",
-    auctionId: auction._id,
-  });
 });
 
 // Initialize Premium Subscription Payment

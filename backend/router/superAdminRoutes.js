@@ -8,6 +8,8 @@ import {
   getPaymentProofDetail,
   monthlyRevenue,
   updateProofStatus,
+  recentCommissions,
+  debugCommissions,
 } from "../controllers/superAdminController.js";
 
 const router = express.Router();
@@ -16,49 +18,63 @@ router.delete(
   "/auctionitem/delete/:id",
   isAuthenticated,
   isAuthorized("Super Admin"),
-  deleteAuctionItem
+  deleteAuctionItem,
 );
 
 router.get(
   "/paymentproofs/getall",
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
-  getAllPaymentProofs
+  getAllPaymentProofs,
 );
 
 router.get(
   "/paymentproof/:id",
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
-  getPaymentProofDetail
+  getPaymentProofDetail,
 );
 
 router.put(
   "/paymentproof/status/update/:id",
   isAuthenticated,
   isAuthorized("Super Admin"),
-  updateProofStatus
+  updateProofStatus,
 );
 
 router.delete(
   "/paymentproof/delete/:id",
   isAuthenticated,
   isAuthorized("Super Admin"),
-  deletePaymentProof
+  deletePaymentProof,
 );
 
 router.get(
   "/users/getall",
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
-  fetchAllUsers
+  fetchAllUsers,
 );
 
 router.get(
   "/monthlyincome",
   isAuthenticated,
   isAuthorized("Super Admin", "Admin"),
-  monthlyRevenue
+  monthlyRevenue,
+);
+
+router.get(
+  "/recent-commissions",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  recentCommissions,
+);
+
+router.get(
+  "/debug/commissions",
+  isAuthenticated,
+  isAuthorized("Super Admin", "Admin"),
+  debugCommissions,
 );
 
 export default router;

@@ -10,6 +10,7 @@ import AuctionItemDelete from "./sub-components/AuctionItemDelete";
 import BiddersAuctioneersGraph from "./sub-components/BiddersAuctioneersGraph";
 import PaymentGraph from "./sub-components/PaymentGraph";
 import PaymentProofs from "./sub-components/PaymentProofs";
+import CommissionList from "./sub-components/CommissionList";
 import Spinner from "@/custom-components/Spinner";
 import { useNavigate } from "react-router-dom";
 
@@ -62,6 +63,9 @@ const Dashboard = () => {
                     (monthlyRevenue || []).reduce((s, v) => s + (v || 0), 0),
                   )}
                 </p>
+              </div>
+              <div className="w-1/3">
+                <CommissionList />
               </div>
             </div>
             <div className="flex flex-col gap-10">

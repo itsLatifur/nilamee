@@ -1,17 +1,14 @@
 import { config } from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Load environment variables FIRST before any other imports
-const dotenvResult = config({
-  path: "./config/config.env",
-});
+// Resolve config path relative to this file so env loads regardless of cwd
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.join(__dirname, "config", "config.env");
+const dotenvResult = config({ path: envPath });
 
-// Debug: Check if dotenv loaded successfully
-console.log("Dotenv result:", dotenvResult);
-console.log("SSLCommerz Store ID from env:", process.env.SSLCOMMERZ_STORE_ID);
-console.log(
-  "SSLCommerz Password from env:",
-  process.env.SSLCOMMERZ_STORE_PASSWORD
-);
+console.log("Loaded env from:", envPath, "result:", dotenvResult?.parsed ? "OK" : "NO_VARS");
 
 import express from "express";
 import cors from "cors";

@@ -34,17 +34,33 @@ router.post("/auction/success", auctionPaymentSuccess);
 router.post("/auction/fail", auctionPaymentFail);
 router.post("/auction/cancel", auctionPaymentCancel);
 router.post("/auction/ipn", auctionPaymentIPN);
-// Dev/demo only: simulate auction payment without SSLCommerz
+// Allow GET fallback for SSLCommerz redirect (some gateways use GET)
+router.get("/auction/success", auctionPaymentSuccess);
+
+// Dev-only: trigger init as if the auction's highest bidder called it (bypasses auth)
 if (process.env.NODE_ENV !== "production") {
-  router.post(
-    "/auction/demo-pay/:auctionId",
-    isAuthenticated,
-    async (req, res, next) => {
-      // Lazy import controller to avoid circular issues
-      const { demoAuctionPay } = await import("./payments.controller.js");
-      return demoAuctionPay(req, res, next);
-    },
-  );
+  router.post("/auction/test-init/:auctionId", async (req, res, next) => {
+    try {
+      const { auctionId } = req.params;
+      const { Auction } = await import("../auctions/auctions.model.js");
+      const { User } = await import("../users/users.model.js");
+
+      const auction = await Auction.findById(auctionId);
+      if (!auction) return res.status(404).json({ success: false, message: "Auction not found" });
+      if (!auction.highestBidder) return res.status(400).json({ success: false, message: "Auction has no winner" });
+
+      const buyer = await User.findById(auction.highestBidder);
+      if (!buyer) return res.status(404).json({ success: false, message: "Buyer user not found" });
+
+      // Mock req.user for controller
+      req.user = { _id: buyer._id };
+
+      // Call the real controller
+      return initAuctionPayment(req, res, next);
+    } catch (err) {
+      return next(err);
+    }
+  });
 }
 
 // Validate transaction

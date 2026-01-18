@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { Commission } from "../models/commissionSchema.js";
+import { Escrow } from "../features/escrow/escrow.model.js";
 import { User } from "../features/users/users.model.js";
 import { Auction } from "../models/auctionSchema.js";
 import { PaymentProof } from "../models/commissionProofSchema.js";
@@ -38,7 +39,7 @@ export const getPaymentProofDetail = catchAsyncErrors(
       success: true,
       paymentProofDetail,
     });
-  }
+  },
 );
 
 export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
@@ -58,7 +59,7 @@ export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
       new: true,
       runValidators: true,
       useFindAndModify: false,
-    }
+    },
   );
   res.status(200).json({
     success: true,
@@ -147,7 +148,10 @@ export const monthlyRevenue = catchAsyncErrors(async (req, res, next) => {
   ]);
 
   // Fallback: if Commission collection is empty or amounts are all zero, aggregate from Escrow.commissionAmount (processed escrows)
-  const paymentsSum = (payments || []).reduce((s, p) => s + (p.totalAmount || 0), 0);
+  const paymentsSum = (payments || []).reduce(
+    (s, p) => s + (p.totalAmount || 0),
+    0,
+  );
   if (!payments || payments.length === 0 || paymentsSum === 0) {
     try {
       const escrowAgg = await Escrow.aggregate([
@@ -184,4 +188,79 @@ export const monthlyRevenue = catchAsyncErrors(async (req, res, next) => {
     success: true,
     totalMonthlyRevenue,
   });
+});
+
+// Return recent processed escrows with commission and seller amounts for admin overview
+export const recentCommissions = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const recent = await Escrow.find({ processedAt: { $ne: null } })
+      .sort({ processedAt: -1 })
+      .limit(20)
+      .populate("auctionId", "title")
+      .populate("sellerId", "userName email")
+      .populate("buyerId", "userName email");
+
+    const items = (recent || []).map((r) => ({
+      escrowId: r._id,
+      auctionTitle: r.auctionId?.title || "(auction)",
+      commissionAmount: r.commissionAmount || 0,
+      sellerAmount: r.sellerAmount || 0,
+      totalAmount: r.totalAmount || 0,
+      processedAt: r.processedAt || r.receivedAt || null,
+      seller: r.sellerId
+        ? { id: r.sellerId._id, userName: r.sellerId.userName }
+        : null,
+      buyer: r.buyerId
+        ? { id: r.buyerId._id, userName: r.buyerId.userName }
+        : null,
+    }));
+
+    res.status(200).json({ success: true, items });
+  } catch (err) {
+    console.error("recentCommissions failed:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch recent commissions" });
+  }
+});
+
+// Debug endpoint: show counts, sums and sample docs for quick admin verification
+export const debugCommissions = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const commissionCount = await Commission.countDocuments();
+    const commissionSumAgg = await Commission.aggregate([
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const commissionTotal =
+      commissionSumAgg && commissionSumAgg[0] ? commissionSumAgg[0].total : 0;
+    const commissionSample = await Commission.find()
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const escrowCount = await Escrow.countDocuments({
+      processedAt: { $ne: null },
+    });
+    const escrowSample = await Escrow.find({ processedAt: { $ne: null } })
+      .sort({ processedAt: -1 })
+      .limit(10)
+      .populate("auctionId", "title")
+      .populate("sellerId", "userName email")
+      .populate("buyerId", "userName email");
+
+    res.status(200).json({
+      success: true,
+      commission: {
+        count: commissionCount,
+        total: commissionTotal,
+        sample: commissionSample,
+      },
+      escrow: {
+        count: escrowCount,
+        sample: escrowSample,
+      },
+    });
+  } catch (err) {
+    console.error("debugCommissions failed:", err);
+    res.status(500).json({ success: false, message: "Debug query failed" });
+  }
 });
