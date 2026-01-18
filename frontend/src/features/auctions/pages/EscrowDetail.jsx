@@ -72,7 +72,10 @@ const EscrowDetail = () => {
           {escrow.status === "Shipped" &&
             currentUser &&
             escrow.buyerId &&
-            currentUser._id === escrow.buyerId._id && (
+            (currentUser._id === (escrow.buyerId._id || escrow.buyerId) ||
+              (currentUser.email &&
+                escrow.buyerId?.email &&
+                currentUser.email === escrow.buyerId.email)) && (
               <button
                 onClick={async () => {
                   try {

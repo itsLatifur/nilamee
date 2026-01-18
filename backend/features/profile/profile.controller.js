@@ -227,12 +227,35 @@ export const getMyEscrowDetail = catchAsyncErrors(async (req, res, next) => {
 
   if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
 
-  // Allow seller (owner) or admin user to view
-  if (
-    escrow.sellerId.toString() !== req.user._id.toString() &&
-    req.user.role !== "Admin" &&
-    req.user.role !== "Super Admin"
-  ) {
+  // Allow seller (owner), buyer (winner) or admin user to view
+  try {
+    const sellerIdValue = escrow.sellerId
+      ? escrow.sellerId._id
+        ? escrow.sellerId._id.toString()
+        : escrow.sellerId.toString()
+      : null;
+    const buyerIdValue = escrow.buyerId
+      ? escrow.buyerId._id
+        ? escrow.buyerId._id.toString()
+        : escrow.buyerId.toString()
+      : null;
+
+    const sellerEmail = escrow.sellerId && escrow.sellerId.email;
+    const buyerEmail = escrow.buyerId && escrow.buyerId.email;
+
+    const isAdmin =
+      req.user.role === "Admin" || req.user.role === "Super Admin";
+    const isSeller = sellerIdValue && sellerIdValue === req.user._id.toString();
+    const isBuyer = buyerIdValue && buyerIdValue === req.user._id.toString();
+    const emailMatch =
+      req.user.email &&
+      (req.user.email === sellerEmail || req.user.email === buyerEmail);
+
+    if (!isAdmin && !isSeller && !isBuyer && !emailMatch) {
+      return next(new ErrorHandler("Not authorized to view this escrow.", 403));
+    }
+  } catch (err) {
+    console.error("Escrow detail auth fallback failed:", err);
     return next(new ErrorHandler("Not authorized to view this escrow.", 403));
   }
 
@@ -519,9 +542,24 @@ export const receiveEscrow = catchAsyncErrors(async (req, res, next) => {
     console.error("Failed to create notification:", err);
   }
 
-  res.status(200).json({
-    success: true,
-    message: "Receipt confirmed and payout processed.",
-    escrow,
-  });
+  // Return the refreshed escrow document with populated refs
+  try {
+    const refreshed = await Escrow.findById(updated._id)
+      .populate("auctionId")
+      .populate("buyerId")
+      .populate("sellerId");
+
+    return res.status(200).json({
+      success: true,
+      message: "Receipt confirmed and payout processed.",
+      escrow: refreshed,
+    });
+  } catch (err) {
+    console.error("Failed to reload escrow after processing:", err);
+    return res.status(200).json({
+      success: true,
+      message: "Receipt confirmed and payout processed.",
+      escrow: updated,
+    });
+  }
 });

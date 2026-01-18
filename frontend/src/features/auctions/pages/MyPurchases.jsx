@@ -15,6 +15,7 @@ const MyPurchases = () => {
   const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmingDelivery, setConfirmingDelivery] = useState(null);
+  const [confirmingReceiveEscrow, setConfirmingReceiveEscrow] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(null);
   const [raisingDispute, setRaisingDispute] = useState(null);
   const [leavingFeedback, setLeavingFeedback] = useState(null);
@@ -159,6 +160,40 @@ const MyPurchases = () => {
     }
   };
 
+  const handleConfirmReceived = async (escrowId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to confirm receipt? This will release payment to the seller.",
+      )
+    )
+      return;
+
+    setConfirmingReceiveEscrow(escrowId);
+    try {
+      const BACKEND =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const response = await axios.put(
+        `${BACKEND}/api/v1/profile/escrow/receive/${escrowId}`,
+        {},
+        { withCredentials: true },
+      );
+
+      if (response.data && response.data.success) {
+        toast.success(
+          response.data.message || "Receipt confirmed and payout processed.",
+        );
+        // Refresh both purchases and escrows
+        fetchMyPurchases();
+      } else {
+        toast.error(response.data?.message || "Failed to confirm receipt");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to confirm receipt");
+    } finally {
+      setConfirmingReceiveEscrow(null);
+    }
+  };
+
   const handleRaiseDispute = async (auctionId) => {
     if (!disputeForm.description.trim()) {
       toast.error("Please describe the issue");
@@ -288,6 +323,12 @@ const MyPurchases = () => {
             const timeLeft = getTimeLeft(auction.paymentDeadline);
             const isPaymentUrgent =
               timeLeft && !timeLeft.startsWith("0h") && timeLeft !== "Expired";
+
+            // find associated escrow (if any)
+            const esc = (escrows || []).find(
+              (e) =>
+                e.auctionId && (e.auctionId._id || e.auctionId) === auction._id,
+            );
 
             return (
               <div
@@ -429,7 +470,26 @@ const MyPurchases = () => {
                         )}
 
                       {/* Confirm Delivery Button */}
-                      {auction.paymentStatus === "Paid" &&
+                      {/* If escrow exists and is Shipped, allow buyer to confirm received via escrow API */}
+                      {esc && esc.status === "Shipped" && (
+                        <button
+                          onClick={() => handleConfirmReceived(esc._id)}
+                          disabled={confirmingReceiveEscrow === esc._id}
+                          className={`px-6 py-2 rounded-lg text-white font-semibold transition ${
+                            confirmingReceiveEscrow === esc._id
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-green-600 hover:bg-green-700"
+                          }`}
+                        >
+                          {confirmingReceiveEscrow === esc._id
+                            ? "Confirming..."
+                            : "Confirm Received"}
+                        </button>
+                      )}
+
+                      {/* Fallback: legacy auction-level confirm button (keeps existing behavior) */}
+                      {(!esc || esc.status !== "Shipped") &&
+                        auction.paymentStatus === "Paid" &&
                         auction.deliveryStatus === "Shipped" &&
                         auction.overallStatus !== "Disputed" && (
                           <button
