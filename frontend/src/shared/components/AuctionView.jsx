@@ -499,7 +499,7 @@ const AuctionView = ({
           ) : (
             <div className="rounded-md p-6 my-4 text-center">
               <p className="text-warm-white whitestone:text-gray-900 text-lg font-semibold">
-                Auction has ended!
+                No bids placed.
               </p>
             </div>
           )}
