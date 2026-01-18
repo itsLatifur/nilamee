@@ -3,6 +3,16 @@ import mongoose from "mongoose";
 const commissionSchema = new mongoose.Schema({
   amount: Number,
   user: mongoose.Schema.Types.ObjectId,
+  escrowId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Escrow",
+    default: null,
+  },
+  source: {
+    type: String,
+    enum: ["auction", "premium"],
+    default: "auction",
+  },
   isDeleted: {
     type: Boolean,
     default: false,

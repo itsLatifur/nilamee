@@ -11,7 +11,6 @@ import { TransactionHistory } from "../transactions/transactionHistory.model.js"
 import { PaymentProof } from "../commissions/proof.model.js";
 import { Notification } from "../../models/notificationSchema.js";
 import { AdminActivityLog } from "./activityLog.model.js";
-import { Escrow } from "../escrow/escrow.model.js";
 
 // Helper to write activity logs
 const logActivity = async (entry) => {
@@ -416,105 +415,33 @@ export const approvePendingPayment = catchAsyncErrors(
     const escrow = await Escrow.findById(id).populate("auctionId");
     if (!escrow) return next(new ErrorHandler("Escrow not found.", 404));
 
-    // If this escrow is already processed (payout snapshot recorded), disallow
-    if (escrow.processedAt) {
-      return next(new ErrorHandler("Escrow already processed.", 400));
-    }
-
-    // Compute commission and seller amounts (should be present on escrow)
-    const commissionAmount = escrow.commissionAmount || 0;
-    const sellerAmount =
-      escrow.sellerAmount || escrow.totalAmount - commissionAmount;
-
-    // Create Commission record for platform revenue
-    try {
-      await Commission.create({
-        amount: commissionAmount,
-        user: escrow.sellerId,
-      });
-    } catch (err) {
-      console.error("Failed to create commission record:", err);
-    }
-
-    // If not already marked Released, mark it released now
+    // Admin should NOT process payouts. Only buyer 'receive' should trigger payout.
+    // Here we only mark the escrow as Released (if not already) so funds are available,
+    // but do NOT create Commission/TransactionHistory or set processedAt.
     if (escrow.status !== "Released") {
       escrow.status = "Released";
       escrow.releasedAt = new Date();
+      await escrow.save();
     }
 
-    // Record processing info
-    escrow.processedBy = req.user._id;
-    escrow.processedAt = new Date();
-
-    // Snapshot seller paymentInfo if available
-    try {
-      const seller = await User.findById(escrow.sellerId).select(
-        "paymentInfo userName email totalTransactionVolume completedAuctionsCount stats",
-      );
-      if (seller && seller.paymentInfo) {
-        escrow.payoutInfo = {
-          method:
-            seller.paymentInfo.bankName ||
-            seller.paymentInfo.mobileWallet ||
-            "",
-          account:
-            seller.paymentInfo.bankAccountNumber ||
-            seller.paymentInfo.mobileWalletNumber ||
-            "",
-          name: seller.paymentInfo.bankAccountName || seller.userName || "",
-        };
-
-        // Update seller stats and totals to reflect received funds
-        seller.totalTransactionVolume =
-          (seller.totalTransactionVolume || 0) + sellerAmount;
-        seller.completedAuctionsCount =
-          (seller.completedAuctionsCount || 0) + 1;
-        seller.stats = seller.stats || {};
-        seller.stats.totalAuctionsCompleted =
-          (seller.stats.totalAuctionsCompleted || 0) + 1;
-        seller.lastActivityDate = new Date();
-        await seller.save();
-
-        // Record transaction history for seller
-        try {
-          await TransactionHistory.create({
-            userId: seller._id,
-            auctionId: escrow.auctionId._id,
-            role: "Auctioneer",
-            amount: sellerAmount,
-            auctionTitle: escrow.auctionId.title || "",
-            outcome: "Success",
-          });
-        } catch (err) {
-          console.error("Failed to create transaction history:", err);
-        }
-      }
-    } catch (err) {
-      console.error("Error while snapshotting seller info:", err);
-    }
-
-    await escrow.save();
-
-    // Notify seller
+    // Notify seller that escrow was released by admin (payout will occur only when buyer confirms receipt)
     try {
       await Notification.create({
         userId: escrow.sellerId,
-        title: "Payout Approved",
-        message: `Your payout of BDT ${sellerAmount.toFixed(2)} for auction ${
-          escrow.auctionId.title
-        } has been approved. Commission: BDT ${commissionAmount.toFixed(2)}.`,
+        title: "Escrow Released by Admin",
+        message: `Escrow for auction ${escrow.auctionId.title} has been released by an admin. Payout will be processed when the buyer confirms receipt.`,
         type: "info",
       });
     } catch (err) {
       console.error("Failed to create notification:", err);
     }
 
-    // Notify buyer that payout was processed/released
+    // Notify buyer that escrow was released
     try {
       await Notification.create({
         userId: escrow.buyerId,
-        title: "Payment Released",
-        message: `Payment for auction ${escrow.auctionId.title} has been released and payout processed to the seller. Thank you for confirming delivery.`,
+        title: "Escrow Released",
+        message: `Escrow for auction ${escrow.auctionId.title} has been released by admin. The seller will be paid when you confirm receipt.`,
         type: "info",
       });
     } catch (err) {
@@ -523,7 +450,8 @@ export const approvePendingPayment = catchAsyncErrors(
 
     res.status(200).json({
       success: true,
-      message: "Payout approved and processed.",
+      message:
+        "Escrow released by admin. Payout will be processed only when buyer confirms receipt.",
       escrow,
     });
   },
@@ -719,6 +647,23 @@ export const approveAuction = catchAsyncErrors(async (req, res, next) => {
   }
 
   auction.approvalStatus = "approved";
+  // If auction is within its scheduled window, mark it Live so bidding can proceed.
+  try {
+    const now = Date.now();
+    const start = auction.startTime
+      ? new Date(auction.startTime).getTime()
+      : null;
+    const end = auction.endTime ? new Date(auction.endTime).getTime() : null;
+    if (start && end && start <= now && now < end) {
+      auction.overallStatus = "Live";
+    } else {
+      // keep it pending approval display until start time arrives
+      auction.overallStatus = "Pending Approval";
+    }
+  } catch (err) {
+    // non-fatal; continue
+    console.error("Error computing auction overallStatus on approve:", err);
+  }
   await auction.save();
 
   // Increment persistent total approved auctions counter
@@ -1983,14 +1928,12 @@ export const runBackfillAddedByName = catchAsyncErrors(
         }
       }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Backfill completed",
-          auctionsUpdated,
-          escrowsUpdated,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Backfill completed",
+        auctionsUpdated,
+        escrowsUpdated,
+      });
     } catch (err) {
       console.error("Backfill API error:", err);
       next(err);

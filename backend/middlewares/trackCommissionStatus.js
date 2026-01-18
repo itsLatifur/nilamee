@@ -1,18 +1,11 @@
-import { User } from "../features/users/users.model.js";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
-import ErrorHandler from "../middlewares/error.js";
 
+// Commission payment is now handled by the system automatically.
+// This middleware used to prevent auctioneers with unpaidCommission
+// from performing actions. Keep as a no-op to avoid blocking users.
 export const trackCommissionStatus = catchAsyncErrors(
   async (req, res, next) => {
-    const user = await User.findById(req.user._id);
-    if (user.unpaidCommission > 0) {
-      return next(
-        new ErrorHandler(
-          "You have unpaid commissions. Please pay them before posting a new auction.",
-          403
-        )
-      );
-    }
+    // Intentionally do nothing.
     next();
-  }
+  },
 );

@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.superAdmin);
+  const { monthlyRevenue } = useSelector((state) => state.superAdmin);
   useEffect(() => {
     dispatch(getMonthlyRevenue());
     dispatch(getAllUsers());
@@ -44,12 +45,24 @@ const Dashboard = () => {
               <h1
                 className={`text-white whitestone:text-black text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl flex items-center gap-4`}
               >
-                <span className="text-golden-300 whitestone:text-gray-900">?</span>
+                <span className="text-golden-300 whitestone:text-gray-900">
+                  ?
+                </span>
                 Dashboard
               </h1>
               <p className="text-golden-100 whitestone:text-gray-700 text-lg md:text-xl mt-4">
                 Super Admin Control Center
               </p>
+            </div>
+            <div className="flex gap-4">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-700 p-5 rounded-md">
+                <p className="text-sm text-white">Platform Revenue (YTD)</p>
+                <p className="text-2xl text-white font-bold">
+                  {new Intl.NumberFormat().format(
+                    (monthlyRevenue || []).reduce((s, v) => s + (v || 0), 0),
+                  )}
+                </p>
+              </div>
             </div>
             <div className="flex flex-col gap-10">
               <div>

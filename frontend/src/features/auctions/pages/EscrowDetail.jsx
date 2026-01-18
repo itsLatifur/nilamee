@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 import Spinner from "@/custom-components/Spinner";
 import { API_URL } from "@/config/env";
 import { formatBDT } from "@/shared/utils/currency";
@@ -9,6 +11,7 @@ const EscrowDetail = () => {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [escrow, setEscrow] = useState(null);
+  const currentUser = useSelector((state) => state.user.user);
 
   useEffect(() => {
     const fetch = async () => {
@@ -38,6 +41,79 @@ const EscrowDetail = () => {
           <Link to="/sell-history" className="text-sm text-blue-400">
             Back to Sell History
           </Link>
+          {escrow.status === "Released" &&
+            !escrow.adminHold &&
+            currentUser &&
+            (currentUser._id === escrow.sellerId?._id ||
+              currentUser.role === "Admin" ||
+              currentUser.role === "Super Admin") && (
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await axios.put(
+                      `${API_URL}/profile/escrow/ship/${id}`,
+                      {},
+                      { withCredentials: true },
+                    );
+                    setEscrow(res.data.escrow);
+                    toast.success(res.data.message || "Escrow marked shipped.");
+                  } catch (err) {
+                    console.error(err);
+                    toast.error(
+                      err.response?.data?.message || "Failed to mark shipped.",
+                    );
+                  }
+                }}
+                className="px-3 py-1 bg-emerald-600 text-white rounded text-sm"
+              >
+                Mark Shipped
+              </button>
+            )}
+          {escrow.status === "Shipped" &&
+            currentUser &&
+            escrow.buyerId &&
+            currentUser._id === escrow.buyerId._id && (
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await axios.put(
+                      `${API_URL}/profile/escrow/receive/${id}`,
+                      {},
+                      { withCredentials: true },
+                    );
+                    setEscrow(res.data.escrow);
+                    setTimeout(() => {
+                      // Dispatch an event so other pages (SellHistory) can refresh
+                      try {
+                        window.dispatchEvent(
+                          new CustomEvent("escrowProcessed", {
+                            detail: res.data.escrow,
+                          }),
+                        );
+                      } catch (e) {
+                        console.warn(
+                          "Failed to dispatch escrowProcessed event",
+                          e,
+                        );
+                      }
+                    }, 100);
+                    toast.success(
+                      res.data.message ||
+                        "Receipt confirmed and payout processed.",
+                    );
+                  } catch (err) {
+                    console.error(err);
+                    toast.error(
+                      err.response?.data?.message ||
+                        "Failed to confirm receipt.",
+                    );
+                  }
+                }}
+                className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
+              >
+                Confirm Received
+              </button>
+            )}
           <button
             onClick={() => {
               const r = escrow;
@@ -96,6 +172,12 @@ const EscrowDetail = () => {
             <p className="text-sm text-gray-300">Buyer</p>
             <p className="text-white">
               {escrow.buyerId?.userName} ({escrow.buyerId?.email})
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-300">Shipping Address</p>
+            <p className="text-white">
+              {escrow.shippingAddress || escrow.buyerId?.address || "-"}
             </p>
           </div>
           <div>

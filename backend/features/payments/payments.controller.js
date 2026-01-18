@@ -17,219 +17,49 @@ import {
 // Initialize SSLCommerz payment
 export const initCommissionPayment = catchAsyncErrors(
   async (req, res, next) => {
-    const { amount, comment } = req.body;
-    const user = await User.findById(req.user._id);
-
-    if (!amount || amount <= 0) {
-      return next(new ErrorHandler("Please provide a valid amount.", 400));
-    }
-
-    if (user.unpaidCommission === 0) {
-      return next(
-        new ErrorHandler("You don't have any unpaid commissions.", 400),
-      );
-    }
-
-    if (amount > user.unpaidCommission) {
-      return next(
-        new ErrorHandler(
-          `The amount exceeds your unpaid commission balance. Your unpaid commission is BDT ${user.unpaidCommission}`,
-          400,
-        ),
-      );
-    }
-
-    // Read SSLCommerz config inside function (after dotenv loads)
-    const store_id = process.env.SSLCOMMERZ_STORE_ID;
-    const store_passwd = process.env.SSLCOMMERZ_STORE_PASSWORD;
-    const is_live = process.env.SSLCOMMERZ_IS_LIVE === "true";
-
-    const transactionId = `COMM_${user._id}_${Date.now()}`;
-
-    const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-
-    const paymentData = {
-      total_amount: amount,
-      currency: "BDT",
-      tran_id: transactionId,
-      success_url: `${process.env.BACKEND_URL}/api/v1/payment/commission/success`,
-      fail_url: `${process.env.BACKEND_URL}/api/v1/payment/commission/fail`,
-      cancel_url: `${process.env.BACKEND_URL}/api/v1/payment/commission/cancel`,
-      ipn_url: `${process.env.BACKEND_URL}/api/v1/payment/commission/ipn`,
-      product_name: "Auction Commission Payment",
-      product_category: "Commission",
-      product_profile: "general",
-      cus_name: user.userName,
-      cus_email: user.email,
-      cus_add1: user.address || "N/A",
-      cus_city: "Dhaka",
-      cus_country: "Bangladesh",
-      cus_phone: user.phone || "N/A",
-      shipping_method: "NO",
-      value_a: user._id.toString(), // Store user ID
-      value_b: amount.toString(), // Store amount
-      value_c: comment || "", // Store comment
-    };
-
-    try {
-      const apiResponse = await sslcommerz.init(paymentData);
-
-      if (apiResponse.status === "SUCCESS") {
-        // Create pending payment proof record
-        await PaymentProof.create({
-          userId: user._id,
-          amount,
-          comment: comment || "",
-          transactionId,
-          status: "Pending",
-          proof: {
-            public_id: transactionId,
-            url: apiResponse.GatewayPageURL,
-          },
-        });
-
-        res.status(200).json({
-          success: true,
-          gatewayUrl: apiResponse.GatewayPageURL,
-          transactionId,
-        });
-      } else {
-        return next(
-          new ErrorHandler("Failed to initialize payment gateway.", 500),
-        );
-      }
-    } catch (error) {
-      return next(
-        new ErrorHandler(
-          error.message || "Payment initialization failed.",
-          500,
-        ),
-      );
-    }
+    // Manual commission payments have been deprecated.
+    // The platform now handles commission collection automatically.
+    return res.status(410).json({
+      success: false,
+      message:
+        "Manual commission payments are disabled. The platform handles commissions automatically.",
+    });
   },
 );
 
 // Payment success callback
 export const paymentSuccess = catchAsyncErrors(async (req, res, next) => {
-  const { tran_id, amount, value_a } = req.body; // value_a contains user ID
-
-  const paymentProof = await PaymentProof.findOne({ transactionId: tran_id });
-  const user = await User.findById(value_a);
-
-  if (!paymentProof || !user) {
-    return next(new ErrorHandler("Payment record not found.", 404));
-  }
-
-  // Update payment proof status
-  paymentProof.status = "Approved";
-  await paymentProof.save();
-
-  // Deduct commission from user
-  user.unpaidCommission = Math.max(0, user.unpaidCommission - amount);
-  await user.save();
-
-  // Increment transaction count for commission payment
-  try {
-    await incrementMetric("totalTransactionsCount", 1);
-  } catch (err) {
-    console.error(
-      "Failed to increment totalTransactionsCount for commission:",
-      err,
-    );
-  }
-
-  res.redirect(
-    `${process.env.FRONTEND_URL}/payment-success?tran_id=${tran_id}`,
-  );
+  // Deprecated: manual commission payment callbacks are no longer processed.
+  return res.redirect(`${process.env.FRONTEND_URL}/payment-deprecated`);
 });
 
 // Payment failure callback
 export const paymentFail = catchAsyncErrors(async (req, res, next) => {
-  const { tran_id } = req.body;
-
-  const paymentProof = await PaymentProof.findOne({ transactionId: tran_id });
-  if (paymentProof) {
-    paymentProof.status = "Rejected";
-    await paymentProof.save();
-  }
-
-  res.redirect(`${process.env.FRONTEND_URL}/payment-failed?tran_id=${tran_id}`);
+  // Deprecated
+  return res.redirect(`${process.env.FRONTEND_URL}/payment-deprecated`);
 });
 
 // Payment cancellation callback
 export const paymentCancel = catchAsyncErrors(async (req, res, next) => {
-  const { tran_id } = req.body;
-
-  const paymentProof = await PaymentProof.findOne({ transactionId: tran_id });
-  if (paymentProof) {
-    paymentProof.status = "Rejected";
-    await paymentProof.save();
-  }
-
-  res.redirect(
-    `${process.env.FRONTEND_URL}/payment-cancelled?tran_id=${tran_id}`,
-  );
+  // Deprecated
+  return res.redirect(`${process.env.FRONTEND_URL}/payment-deprecated`);
 });
 
 // IPN (Instant Payment Notification) - for webhook
 export const paymentIPN = catchAsyncErrors(async (req, res, next) => {
-  const { tran_id, status, amount, value_a } = req.body;
-
-  if (status === "VALID" || status === "VALIDATED") {
-    const paymentProof = await PaymentProof.findOne({ transactionId: tran_id });
-    const user = await User.findById(value_a);
-
-    if (paymentProof && user) {
-      paymentProof.status = "Approved";
-      await paymentProof.save();
-
-      user.unpaidCommission = Math.max(0, user.unpaidCommission - amount);
-      await user.save();
-      // Increment transaction count for commission payment via IPN
-      try {
-        await incrementMetric("totalTransactionsCount", 1);
-      } catch (err) {
-        console.error(
-          "Failed to increment totalTransactionsCount for commission IPN:",
-          err,
-        );
-      }
-    }
-  }
-
-  res.status(200).send("IPN received");
+  // Manual commission IPN processing is deprecated. Do not modify user unpaid balances.
+  res.status(200).send("Commission IPN deprecated");
 });
 
 // Validate payment transaction
 export const validatePayment = catchAsyncErrors(async (req, res, next) => {
   const { transactionId } = req.params;
-
-  const paymentProof = await PaymentProof.findOne({ transactionId });
-
-  if (!paymentProof) {
-    return next(new ErrorHandler("Payment not found.", 404));
-  }
-
-  // Read SSLCommerz config inside function (after dotenv loads)
-  const store_id = process.env.SSLCOMMERZ_STORE_ID;
-  const store_passwd = process.env.SSLCOMMERZ_STORE_PASSWORD;
-  const is_live = process.env.SSLCOMMERZ_IS_LIVE === "true";
-
-  const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-
-  try {
-    const validationResponse = await sslcommerz.validate({
-      val_id: transactionId,
-    });
-
-    res.status(200).json({
-      success: true,
-      paymentProof,
-      validation: validationResponse,
-    });
-  } catch (error) {
-    return next(new ErrorHandler("Validation failed.", 500));
-  }
+  // Validation for manual commission payments is deprecated.
+  return res.status(410).json({
+    success: false,
+    message:
+      "Commission payment validation is deprecated. Commissions are handled automatically by the platform.",
+  });
 });
 
 // ==================== AUCTION PAYMENT CONTROLLERS ====================
@@ -238,6 +68,7 @@ export const validatePayment = catchAsyncErrors(async (req, res, next) => {
 export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
   const { auctionId } = req.params;
   const user = await User.findById(req.user._id);
+  const { shippingAddress } = req.body || {};
   const auction = await Auction.findById(auctionId).populate("createdBy");
 
   if (!auction) {
@@ -298,6 +129,15 @@ export const initAuctionPayment = catchAsyncErrors(async (req, res, next) => {
   };
 
   try {
+    // Persist shipping address provided at checkout (if any) to buyer profile
+    if (shippingAddress && shippingAddress.trim().length > 0) {
+      try {
+        user.address = shippingAddress.trim();
+        await user.save();
+      } catch (err) {
+        console.error("Failed to save shipping address to user profile:", err);
+      }
+    }
     const apiResponse = await sslcommerz.init(paymentData);
 
     if (apiResponse.status === "SUCCESS") {
@@ -347,18 +187,26 @@ export const auctionPaymentSuccess = catchAsyncErrors(
     const commissionAmount = parseFloat(amount) * 0.07;
     const sellerAmount = parseFloat(amount) * 0.93;
 
-    // Create escrow record
-    await Escrow.create({
-      auctionId: auction._id,
-      buyerId: buyer._id,
-      sellerId: seller._id,
-      totalAmount: parseFloat(amount),
-      commissionAmount,
-      sellerAmount,
-      status: "Held",
-      transactionId: tran_id,
-      createdAt: new Date(),
-    });
+    // Create escrow record if not exists
+    // Use an atomic upsert to ensure only one escrow exists per auction
+    const escrow = await Escrow.findOneAndUpdate(
+      { auctionId: auction._id },
+      {
+        $setOnInsert: {
+          auctionId: auction._id,
+          buyerId: buyer._id,
+          sellerId: seller._id,
+          totalAmount: parseFloat(amount),
+          commissionAmount,
+          sellerAmount,
+          status: "Held",
+          transactionId: tran_id,
+          shippingAddress: buyer.address || null,
+          createdAt: new Date(),
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
     // Increment transaction count (one successful auction payment)
     try {
@@ -397,10 +245,11 @@ export const auctionPaymentSuccess = catchAsyncErrors(
     buyer.lastActivityDate = new Date();
     await buyer.save();
 
-    // Log transaction history
+    // Log transaction history (attach escrowId if present)
     await TransactionHistory.create({
       userId: buyer._id,
       auctionId: auction._id,
+      escrowId: escrow?._id || null,
       role: "Bidder",
       amount: parseFloat(amount),
       trustPointsEarned,
@@ -419,9 +268,6 @@ export const auctionPaymentSuccess = catchAsyncErrors(
         }".
       
 Payment Details:
-- Amount Paid: BDT ${amount}
-- Transaction ID: ${tran_id}
-- Your Share (after 7% commission): BDT ${sellerAmount.toFixed(2)}
 
 Next Steps:
 1. Ship the item to the buyer
@@ -429,10 +275,6 @@ Next Steps:
 3. Funds will be released to you after buyer confirms delivery
 
 Buyer Contact:
-- Name: ${buyer.userName}
-- Email: ${buyer.email}
-- Phone: ${buyer.phone || "N/A"}
-- Address: ${buyer.address || "N/A"}
 
 Log in to mark the item as shipped: ${
           process.env.FRONTEND_URL
@@ -452,9 +294,6 @@ Log in to mark the item as shipped: ${
         }" has been received successfully!
 
 Payment Details:
-- Amount: BDT ${amount}
-- Transaction ID: ${tran_id}
-- Status: Payment Held in Escrow
 
 What's Next:
 1. The seller will ship the item soon
@@ -463,9 +302,6 @@ What's Next:
 4. Funds will be released to seller after your confirmation
 
 Seller Contact:
-- Name: ${seller.userName}
-- Email: ${seller.email}
-- Phone: ${seller.phone || "N/A"}
 
 Track your purchase: ${process.env.FRONTEND_URL}/buyer/purchases/${
           auction._id
@@ -532,26 +368,32 @@ export const auctionPaymentIPN = catchAsyncErrors(async (req, res, next) => {
       const sellerAmount = parseFloat(amount) * 0.93;
 
       // Create escrow if not exists
-      const existingEscrow = await Escrow.findOne({ auctionId: auction._id });
-      if (!existingEscrow) {
-        await Escrow.create({
-          auctionId: auction._id,
-          buyerId: buyer._id,
-          sellerId: seller._id,
-          totalAmount: parseFloat(amount),
-          commissionAmount,
-          sellerAmount,
-          status: "Held",
-          transactionId: tran_id,
-          createdAt: new Date(),
-        });
+      // Create escrow if not exists (atomic upsert)
+      const now2 = new Date();
+      await Escrow.findOneAndUpdate(
+        { auctionId: auction._id },
+        {
+          $setOnInsert: {
+            auctionId: auction._id,
+            buyerId: buyer._id,
+            sellerId: seller._id,
+            totalAmount: parseFloat(amount),
+            commissionAmount,
+            sellerAmount,
+            status: "Held",
+            transactionId: tran_id,
+            shippingAddress: buyer.address || null,
+            createdAt: now2,
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
 
-        // Increment transaction count for IPN-created escrow
-        try {
-          await incrementMetric("totalTransactionsCount", 1);
-        } catch (err) {
-          console.error("Failed to increment totalTransactionsCount:", err);
-        }
+      // Increment transaction count for IPN-created escrow (best-effort)
+      try {
+        await incrementMetric("totalTransactionsCount", 1);
+      } catch (err) {
+        console.error("Failed to increment totalTransactionsCount:", err);
       }
     }
   }
@@ -591,17 +433,27 @@ export const demoAuctionPay = catchAsyncErrors(async (req, res, next) => {
   const commissionAmount = parseFloat(amount) * 0.07;
   const sellerAmount = parseFloat(amount) * 0.93;
 
-  await Escrow.create({
-    auctionId: auction._id,
-    buyerId: buyer._id,
-    sellerId: auction.createdBy._id,
-    totalAmount: parseFloat(amount),
-    commissionAmount,
-    sellerAmount,
-    status: "Held",
-    transactionId: `DEMO_${auction._id}_${Date.now()}`,
-    createdAt: new Date(),
-  });
+  const existingEscrow = await Escrow.findOne({ auctionId: auction._id });
+  if (!existingEscrow) {
+    await Escrow.create({
+      auctionId: auction._id,
+      buyerId: buyer._id,
+      sellerId: auction.createdBy._id,
+      totalAmount: parseFloat(amount),
+      commissionAmount,
+      sellerAmount,
+      status: "Held",
+      transactionId: `DEMO_${auction._id}_${Date.now()}`,
+      shippingAddress: buyer.address || null,
+      createdAt: new Date(),
+    });
+  }
+
+  // Ensure no duplicate demo escrow (dev only)
+  // If an escrow already exists for this auction, do not create another.
+
+  // Ensure we did not create duplicates in dev; if an escrow already exists, do not duplicate
+  // (demo endpoint used only in non-production)
 
   // Increment metric
   try {
@@ -610,13 +462,11 @@ export const demoAuctionPay = catchAsyncErrors(async (req, res, next) => {
     console.error(err);
   }
 
-  res
-    .status(200)
-    .json({
-      success: true,
-      message: "Demo payment completed",
-      auctionId: auction._id,
-    });
+  res.status(200).json({
+    success: true,
+    message: "Demo payment completed",
+    auctionId: auction._id,
+  });
 });
 
 // Initialize Premium Subscription Payment

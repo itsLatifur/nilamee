@@ -31,7 +31,7 @@ const escrowSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "Held", "Released", "Refunded"],
+    enum: ["Pending", "Held", "Released", "Refunded", "Shipped", "Received"],
     default: "Pending",
   },
   transactionId: {
@@ -43,6 +43,14 @@ const escrowSchema = new mongoose.Schema({
     default: null,
   },
   refundedAt: {
+    type: Date,
+    default: null,
+  },
+  shippedAt: {
+    type: Date,
+    default: null,
+  },
+  receivedAt: {
     type: Date,
     default: null,
   },
@@ -78,6 +86,10 @@ const escrowSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  shippingAddress: {
+    type: String,
+    default: null,
   },
 });
 

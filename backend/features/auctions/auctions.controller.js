@@ -28,48 +28,44 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
 
   // Validate max 6 images
   if (imageArray.length > 6) {
-    return next(new ErrorHandler("You can upload maximum 6 images.", 400));
+    return next(new ErrorHandler("Maximum 6 images allowed.", 400));
   }
 
-  const allowedFormats = ["image/png", "image/jpeg", "image/webp"];
-  for (const img of imageArray) {
-    if (!allowedFormats.includes(img.mimetype)) {
-      return next(
-        new ErrorHandler(
-          "File format not supported. Use PNG, JPEG, or WEBP.",
-          400,
-        ),
-      );
-    }
-  }
-
+  // Extract fields
   const {
     title,
     description,
     category,
     condition,
     startingBid,
-    startTime,
-    endTime,
+    startTime: startTimeRaw,
+    endTime: endTimeRaw,
     location,
     address,
     authenticity,
     customFields,
   } = req.body;
 
-  if (
-    !title ||
-    !description ||
-    !category ||
-    !condition ||
-    !startingBid ||
-    !startTime ||
-    !endTime
-  ) {
-    return next(new ErrorHandler("Please provide all required details.", 400));
+  // Validate required fields
+  if (!title || !startingBid || !startTimeRaw || !endTimeRaw) {
+    return next(new ErrorHandler("Missing required auction fields.", 400));
   }
 
-  // Parse customFields if it's a string
+  const startTime = new Date(startTimeRaw);
+  const endTime = new Date(endTimeRaw);
+  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    return next(new ErrorHandler("Invalid start or end time.", 400));
+  }
+  if (startTime >= endTime) {
+    return next(
+      new ErrorHandler(
+        "Auction starting time must be less than ending time.",
+        400,
+      ),
+    );
+  }
+
+  // Parse custom fields if provided
   let parsedCustomFields = [];
   if (customFields) {
     try {
@@ -77,30 +73,9 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
         typeof customFields === "string"
           ? JSON.parse(customFields)
           : customFields;
-
-      if (parsedCustomFields.length > 10) {
-        return next(new ErrorHandler("Maximum 10 custom fields allowed.", 400));
-      }
-    } catch (error) {
-      return next(new ErrorHandler("Invalid custom fields format.", 400));
+    } catch (err) {
+      return next(new ErrorHandler("Invalid customFields JSON.", 400));
     }
-  }
-
-  if (new Date(startTime) < Date.now()) {
-    return next(
-      new ErrorHandler(
-        "Auction starting time must be greater than present time.",
-        400,
-      ),
-    );
-  }
-  if (new Date(startTime) >= new Date(endTime)) {
-    return next(
-      new ErrorHandler(
-        "Auction starting time must be less than ending time.",
-        400,
-      ),
-    );
   }
 
   try {
@@ -145,6 +120,7 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
       authenticity: authenticity || "",
       customFields: parsedCustomFields,
       createdBy: req.user._id,
+      approvalStatus: "pending",
     });
     return res.status(201).json({
       success: true,
@@ -153,7 +129,7 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(error.message || "Failed to created auction.", 500),
+      new ErrorHandler(error.message || "Failed to create auction.", 500),
     );
   }
 });
@@ -341,16 +317,37 @@ export const removeFromAuction = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Auction not found.", 404));
   }
 
-  // Soft delete
-  auctionItem.isDeleted = true;
-  auctionItem.deletedAt = new Date();
-  auctionItem.deletedBy = req.user._id;
-  auctionItem.deletionReason = "Deleted by auctioneer";
-  await auctionItem.save();
+  // If there's an escrow for this auction, disallow deletion
+  const escrow = await Escrow.findOne({ auctionId: auctionItem._id });
+  if (escrow) {
+    return next(
+      new ErrorHandler(
+        "Cannot delete auction while escrow exists. Contact admin for assistance.",
+        400,
+      ),
+    );
+  }
 
+  // If the auction is sold (has a highest bidder), soft-delete it so admin can permanently remove later
+  if (auctionItem.highestBidder) {
+    auctionItem.isDeleted = true;
+    auctionItem.deletedAt = new Date();
+    auctionItem.deletedBy = req.user._id;
+    auctionItem.deletionReason = "Deleted by auctioneer after sale";
+    await auctionItem.save();
+    return res.status(200).json({
+      success: true,
+      message:
+        "Auction has been soft-deleted. Administrators can permanently remove it if needed.",
+      auctionItem,
+    });
+  }
+
+  // Otherwise (not sold, no escrow) allow permanent deletion
+  await auctionItem.deleteOne();
   res.status(200).json({
     success: true,
-    message: "Auction item deleted successfully.",
+    message: "Auction item permanently deleted.",
   });
 });
 
@@ -407,6 +404,13 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   data.highestBidder = null;
   data.approvalStatus = "pending"; // Republished auctions require admin approval
   data.rejectionReason = ""; // Clear any previous rejection reason
+  // Ensure any previous cancellation tag is cleared so auction appears in pending lists
+  data.overallStatus = "Pending Approval";
+  data.isDeleted = false;
+  data.deletedAt = null;
+  data.deletedBy = null;
+  data.deletionReason = null;
+  data.paymentStatus = "Unpaid";
   auctionItem = await Auction.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,
@@ -435,22 +439,58 @@ export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params;
   const { trackingNumber } = req.body;
 
-  const auction = await Auction.findById(id).populate("highestBidder");
+  const auction = await Auction.findById(id)
+    .populate("highestBidder")
+    .populate("createdBy");
 
   if (!auction) {
     return next(new ErrorHandler("Auction not found.", 404));
   }
 
   // Verify user is the seller
-  if (auction.createdBy.toString() !== req.user._id.toString()) {
+  // Verify user is the seller (handle populated or raw createdBy); allow email fallback
+  const createdByValue = auction.createdBy
+    ? auction.createdBy._id
+      ? auction.createdBy._id.toString()
+      : auction.createdBy.toString()
+    : null;
+  let authorizedToUpdate = false;
+  if (createdByValue === req.user._id.toString()) authorizedToUpdate = true;
+  if (req.user.role === "Admin" || req.user.role === "Super Admin")
+    authorizedToUpdate = true;
+  if (!authorizedToUpdate) {
+    try {
+      const ownerEmail =
+        auction.createdBy && auction.createdBy.email
+          ? auction.createdBy.email
+          : null;
+      if (ownerEmail && req.user.email && ownerEmail === req.user.email)
+        authorizedToUpdate = true;
+    } catch (err) {
+      console.error("Error during email fallback for markAsShipped auth:", err);
+    }
+  }
+  if (!authorizedToUpdate) {
     return next(
       new ErrorHandler("You are not authorized to update this auction.", 403),
     );
   }
 
   // Verify payment has been made
-  if (auction.paymentStatus !== "Paid") {
-    return next(new ErrorHandler("Payment has not been received yet.", 400));
+  // Verify there is an escrow/payment record for this auction
+  const escrow = await Escrow.findOne({ auctionId: auction._id });
+  if (!escrow) {
+    return next(
+      new ErrorHandler(
+        "No payment/escrow found for this auction. Cannot mark shipped.",
+        400,
+      ),
+    );
+  }
+
+  // Allow marking shipped when escrow is Held (money on hold) or Released
+  if (!(escrow.status === "Held" || escrow.status === "Released")) {
+    return next(new ErrorHandler("Escrow is not in a shippable state.", 400));
   }
 
   // Verify not already shipped
@@ -465,6 +505,16 @@ export const markAsShipped = catchAsyncErrors(async (req, res, next) => {
   auction.trackingNumber = trackingNumber || "";
   auction.overallStatus = "Shipped - In Transit";
   await auction.save();
+
+  // Update escrow status to Shipped and record tracking info
+  try {
+    escrow.status = "Shipped";
+    escrow.shippedAt = new Date();
+    escrow.trackingNumber = trackingNumber || "";
+    await escrow.save();
+  } catch (err) {
+    console.error("Failed to update escrow on markAsShipped:", err);
+  }
 
   // Notify buyer
   const buyer = auction.highestBidder;

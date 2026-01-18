@@ -157,7 +157,7 @@ const CardTwo = ({
                 );
               }
               const released =
-                escrowStatus === "Released" || paymentStatus === "Paid" || !!paidAt;
+                escrowStatus === "Released" || escrowStatus === "Received" || paymentStatus === "Paid" || !!paidAt;
               if (released && ended && (sold || true)) {
                 return (
                   <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">

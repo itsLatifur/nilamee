@@ -246,6 +246,16 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   data.commissionCalculated = false;
   data.currentBid = 0;
   data.highestBidder = null;
+  // Make sure republished auctions enter admin approval flow and are not stuck as Cancelled
+  data.approvalStatus = "pending";
+  data.rejectionReason = "";
+  data.overallStatus = "Pending Approval";
+  data.isDeleted = false;
+  data.deletedAt = null;
+  data.deletedBy = null;
+  data.deletionReason = null;
+  data.paymentStatus = "Unpaid";
+
   auctionItem = await Auction.findByIdAndUpdate(id, data, {
     new: true,
     runValidators: true,

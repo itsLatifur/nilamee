@@ -13,6 +13,12 @@ const transactionHistorySchema = new mongoose.Schema({
     required: true,
   },
 
+  escrowId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Escrow",
+    default: null,
+  },
+
   role: {
     type: String,
     enum: ["Auctioneer", "Bidder"],
@@ -63,5 +69,5 @@ transactionHistorySchema.index({ auctionId: 1 });
 
 export const TransactionHistory = mongoose.model(
   "TransactionHistory",
-  transactionHistorySchema
+  transactionHistorySchema,
 );

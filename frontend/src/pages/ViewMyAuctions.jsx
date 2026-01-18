@@ -18,6 +18,9 @@ const ViewMyAuctions = () => {
     }
     dispatch(getMyAuctionItems());
   }, [dispatch, isAuthenticated]);
+  const visibleAuctions = Array.isArray(myAuctions)
+    ? myAuctions.filter((a) => !a.isDeleted)
+    : [];
 
   return (
     <>
@@ -27,46 +30,37 @@ const ViewMyAuctions = () => {
         >
           My Auctions
         </h1>
-                  <CardTwo
-                    title={element.title}
-                    startingBid={element.startingBid}
-                    endTime={element.endTime}
-                    startTime={element.startTime}
-                    imgSrc={element.image?.url}
-                    id={element._id}
-                    key={element._id}
-                    sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
-                    overallStatus={element.overallStatus}
-                    adminHold={element.adminHold}
-                    escrowStatus={element.escrowStatus}
-                    paymentStatus={element.paymentStatus}
-                    paidAt={element.paidAt}
-                    highestBidder={element.highestBidder}
-                    showEndedBadge={true}
-              {myAuctions.length > 0 ? (
-              myAuctions.map((element) => {
-                return (
-                  <CardTwo
-                    title={element.title}
-                    startingBid={element.startingBid}
-                    endTime={element.endTime}
-                    startTime={element.startTime}
-                    imgSrc={element.image?.url}
-                    id={element._id}
-                    key={element._id}
-                    sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
-                  />
-                );
-              })
-            ) : (
-              <h3 className="text-[#666] text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl mt-5">
-                You have not posted any auction.
-              </h3>
-            )}{" "}
-            :
-          </div>
+
+        {loading ? (
+          <Spinner />
+        ) : visibleAuctions.length > 0 ? (
+          visibleAuctions.map((element) => (
+            <CardTwo
+              title={element.title}
+              startingBid={element.startingBid}
+              endTime={element.endTime}
+              startTime={element.startTime}
+              imgSrc={element.image?.url}
+              id={element._id}
+              key={element._id}
+              sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
+              overallStatus={element.overallStatus}
+              adminHold={element.adminHold}
+              escrowStatus={element.escrowStatus}
+              paymentStatus={element.paymentStatus}
+              paidAt={element.paidAt}
+              highestBidder={element.highestBidder}
+              showEndedBadge={true}
+            />
+          ))
+        ) : (
+          <h3 className="text-[#666] text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl mt-5">
+            You have not posted any auction.
+          </h3>
         )}
       </div>
+    </>
+  );
     </>
   );
 };

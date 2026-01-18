@@ -11,6 +11,7 @@ const AuctionPayment = () => {
   const [auction, setAuction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState(user?.address || "");
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
 
@@ -37,7 +38,7 @@ const AuctionPayment = () => {
       } else {
         const hours = Math.floor(difference / (1000 * 60 * 60));
         const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60)
+          (difference % (1000 * 60 * 60)) / (1000 * 60),
         );
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
         setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
@@ -51,7 +52,7 @@ const AuctionPayment = () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/auctionitem/auction/${id}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setAuction(response.data.auction);
       setLoading(false);
@@ -88,8 +89,8 @@ const AuctionPayment = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/payment/auction/init/${id}`,
-        {},
-        { withCredentials: true }
+        { shippingAddress },
+        { withCredentials: true },
       );
 
       if (response.data.success && response.data.gatewayUrl) {
@@ -305,8 +306,8 @@ const AuctionPayment = () => {
                     paymentLoading
                       ? "bg-gray-400 cursor-not-allowed"
                       : isCritical
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-blue-600 hover:bg-blue-700"
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
                   {paymentLoading ? (
