@@ -16,6 +16,13 @@ const CardTwo = ({
   endTime,
   id,
   sold,
+  overallStatus,
+  adminHold,
+  escrowStatus,
+  paymentStatus,
+  paidAt,
+  highestBidder,
+  showEndedBadge = false,
 }) => {
   const calculateTimeLeft = () => {
     const now = new Date();
@@ -123,11 +130,44 @@ const CardTwo = ({
                 Republish Auction
               </button>
             )}
-            {sold && (
-              <div className="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                SOLD
-              </div>
-            )}
+            {(() => {
+              const now = Date.now();
+              const ended = endTime ? new Date(endTime).getTime() < now : false;
+              // Ended-but-unsold badge (only show when explicitly allowed, e.g., owner's view)
+              if (showEndedBadge && ended && !highestBidder) {
+                return (
+                  <div className="absolute top-2 left-2 bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    Ended
+                  </div>
+                );
+              }
+              if (overallStatus === "Cancelled") {
+                return (
+                  <div className="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    Cancelled
+                  </div>
+                );
+              }
+              if (adminHold) {
+                return (
+                  <div className="absolute top-2 left-2 bg-amber-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    On Hold
+                  </div>
+                );
+              }
+              const released =
+                escrowStatus === "Released" ||
+                paymentStatus === "Paid" ||
+                !!paidAt;
+              if (released && ended && (sold || true)) {
+                return (
+                  <div className="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    SOLD
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
         </div>
       </div>

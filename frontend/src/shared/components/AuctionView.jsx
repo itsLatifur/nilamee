@@ -44,7 +44,12 @@ const AuctionView = ({
     const ended = auction.endTime
       ? new Date(auction.endTime).getTime() < now
       : false;
-    const sold = ended && !!auction.highestBidder;
+    // Only label as Sold when the final payment/escrow has been released or auction is explicitly paid
+    const escrowReleased =
+      (auction.escrow && auction.escrow.status === "Released") ||
+      auction.paymentStatus === "Paid" ||
+      !!auction.paidAt;
+    const sold = ended && !!auction.highestBidder && escrowReleased;
     if (sold) return "Sold";
     return "Available";
   };

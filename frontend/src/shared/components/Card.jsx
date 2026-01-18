@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const Card = ({ imgSrc, title, startingBid, startTime, endTime, id, sold }) => {
+const Card = ({
+  imgSrc,
+  title,
+  startingBid,
+  startTime,
+  endTime,
+  id,
+  sold,
+  overallStatus,
+  adminHold,
+  escrowStatus,
+  paymentStatus,
+  paidAt,
+}) => {
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -50,11 +63,36 @@ const Card = ({ imgSrc, title, startingBid, startTime, endTime, id, sold }) => {
       >
         <div className="absolute top-0 left-0 w-1 h-full bg-gold-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitestone:text-white"></div>
         <div className="absolute top-0 right-0 w-1 h-full bg-luxury-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        {sold && (
-          <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
-            SOLD
-          </div>
-        )}
+        {/* Status badges: Cancelled, On Hold, Sold (only when final payment/release completed) */}
+        {(() => {
+          const now = Date.now();
+          const ended = endTime ? new Date(endTime).getTime() < now : false;
+          if (overallStatus === "Cancelled") {
+            return (
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                Cancelled
+              </div>
+            );
+          }
+          if (adminHold) {
+            return (
+              <div className="absolute top-3 left-3 bg-amber-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                On Hold
+              </div>
+            );
+          }
+          // Only show sold when escrow/payment released or explicit paid flag
+          const released =
+            escrowStatus === "Released" || paymentStatus === "Paid" || !!paidAt;
+          if (released && ended && (sold || true)) {
+            return (
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                SOLD
+              </div>
+            );
+          }
+          return null;
+        })()}
         <img
           src={imgSrc}
           alt={title}

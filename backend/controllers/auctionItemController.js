@@ -1,4 +1,5 @@
 import { Auction } from "../models/auctionSchema.js";
+import { Escrow } from "../features/escrow/escrow.model.js";
 import { User } from "../features/users/users.model.js";
 import { Bid } from "../models/bidSchema.js";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
@@ -42,16 +43,16 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Auction starting time must be greater than present time.",
-        400
-      )
+        400,
+      ),
     );
   }
   if (new Date(startTime) >= new Date(endTime)) {
     return next(
       new ErrorHandler(
         "Auction starting time must be less than ending time.",
-        400
-      )
+        400,
+      ),
     );
   }
   const alreadyOneAuctionActive = await Auction.find({
@@ -66,15 +67,15 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
       image.tempFilePath,
       {
         folder: "MERN_AUCTION_PLATFORM_AUCTIONS",
-      }
+      },
     );
     if (!cloudinaryResponse || cloudinaryResponse.error) {
       console.error(
         "Cloudinary error:",
-        cloudinaryResponse.error || "Unknown cloudinary error."
+        cloudinaryResponse.error || "Unknown cloudinary error.",
       );
       return next(
-        new ErrorHandler("Failed to upload auction image to cloudinary.", 500)
+        new ErrorHandler("Failed to upload auction image to cloudinary.", 500),
       );
     }
     const auctionItem = await Auction.create({
@@ -98,16 +99,55 @@ export const addNewAuctionItem = catchAsyncErrors(async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(error.message || "Failed to created auction.", 500)
+      new ErrorHandler(error.message || "Failed to created auction.", 500),
     );
   }
 });
 
 export const getAllItems = catchAsyncErrors(async (req, res, next) => {
-  let items = await Auction.find();
+  // Only return auctions that are not deleted and not currently held in escrow
+  // Auctions which have an Escrow in Pending/Held state are excluded from public lists.
+  let items = await Auction.find({ isDeleted: false }).lean();
+
+  // Attach escrow status (if any) and filter-out auctions that are still in escrow
+  if (items.length === 0) {
+    return res.status(200).json({ success: true, items: [] });
+  }
+
+  const auctionIds = items.map((i) => i._id);
+  const escrows = await Escrow.find({ auctionId: { $in: auctionIds } }).lean();
+  const escrowMap = {};
+  escrows.forEach((e) => {
+    if (e && e.auctionId) escrowMap[e.auctionId.toString()] = e;
+  });
+
+  const filtered = items
+    .filter((item) => {
+      const esc = escrowMap[item._id.toString()];
+      // if there's an escrow in Pending or Held state, hide the auction from public
+      if (esc && (esc.status === "Pending" || esc.status === "Held"))
+        return false;
+      // hide auctions where escrow was refunded (problem during payout)
+      if (esc && esc.status === "Refunded") return false;
+      // hide auctions that were cancelled by admin or due to payment/escrow problems
+      if (item.overallStatus === "Cancelled") return false;
+      // also hide auctions that have ended but were not sold (no highestBidder)
+      const ended = item.endTime
+        ? new Date(item.endTime).getTime() < Date.now()
+        : false;
+      const sold = ended && !!item.highestBidder;
+      if (ended && !sold) return false;
+      return true;
+    })
+    .map((item) => {
+      const esc = escrowMap[item._id.toString()];
+      if (esc) item.escrowStatus = esc.status; // e.g., Released or Refunded
+      return item;
+    });
+
   res.status(200).json({
     success: true,
-    items,
+    items: filtered,
   });
 });
 
@@ -121,10 +161,13 @@ export const getAuctionDetails = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Auction not found.", 404));
   }
   const bidders = auctionItem.bids.sort((a, b) => b.amount - a.amount);
+  // Attach related escrow info if present so frontend can make badge decisions
+  const escrow = await Escrow.findOne({ auctionId: auctionItem._id }).lean();
+  const payload = { auctionItem, bidders };
+  if (escrow) payload.escrow = escrow;
   res.status(200).json({
     success: true,
-    auctionItem,
-    bidders,
+    ...payload,
   });
 });
 
@@ -163,12 +206,12 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
   }
   if (!req.body.startTime || !req.body.endTime) {
     return next(
-      new ErrorHandler("Starttime and Endtime for republish is mandatory.")
+      new ErrorHandler("Starttime and Endtime for republish is mandatory."),
     );
   }
   if (new Date(auctionItem.endTime) > Date.now()) {
     return next(
-      new ErrorHandler("Auction is already active, cannot republish", 400)
+      new ErrorHandler("Auction is already active, cannot republish", 400),
     );
   }
   let data = {
@@ -179,16 +222,16 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Auction starting time must be greater than present time",
-        400
-      )
+        400,
+      ),
     );
   }
   if (data.startTime >= data.endTime) {
     return next(
       new ErrorHandler(
         "Auction starting time must be less than ending time.",
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -216,7 +259,7 @@ export const republishItem = catchAsyncErrors(async (req, res, next) => {
       new: true,
       runValidators: false,
       useFindAndModify: false,
-    }
+    },
   );
   res.status(200).json({
     success: true,

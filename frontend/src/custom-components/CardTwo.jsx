@@ -6,6 +6,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { deleteAuction, republishAuction } from "@/store/slices/auctionSlice";
 
 const CardTwo = ({
+  overallStatus,
+  adminHold,
+  escrowStatus,
+  paymentStatus,
+  paidAt,
   imgSrc,
   title,
   startingBid,
@@ -14,6 +19,8 @@ const CardTwo = ({
   id,
   sold,
 }) => {
+  highestBidder,
+  showEndedBadge = false,
   const calculateTimeLeft = () => {
     const now = new Date();
     const startDifference = new Date(startTime) - now;
@@ -125,11 +132,41 @@ const CardTwo = ({
                 Republish Disabled
               </button>
             )}
-            {sold && (
-              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
-                SOLD
-              </div>
-            )}
+            {(() => {
+              const now = Date.now();
+              const ended = endTime ? new Date(endTime).getTime() < now : false;
+              if (showEndedBadge && ended && !highestBidder) {
+                return (
+                  <div className="absolute top-3 left-3 bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                    Ended
+                  </div>
+                );
+              }
+              if (overallStatus === "Cancelled") {
+                return (
+                  <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                    Cancelled
+                  </div>
+                );
+              }
+              if (adminHold) {
+                return (
+                  <div className="absolute top-3 left-3 bg-amber-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                    On Hold
+                  </div>
+                );
+              }
+              const released =
+                escrowStatus === "Released" || paymentStatus === "Paid" || !!paidAt;
+              if (released && ended && (sold || true)) {
+                return (
+                  <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold z-20">
+                    SOLD
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
         </div>
       </div>

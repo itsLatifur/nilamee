@@ -51,7 +51,7 @@ const Home = () => {
       try {
         const res = await axios.get(
           "http://localhost:5000/api/v1/public/stats",
-          { withCredentials: false }
+          { withCredentials: false },
         );
         if (mounted && res.data && res.data.stats) setSiteStats(res.data.stats);
       } catch (err) {
@@ -66,15 +66,36 @@ const Home = () => {
     };
   }, []);
 
-  // Get featured auctions (first 6)
-  const featuredAuctions = allAuctions.slice(0, 6);
+  // Get featured auctions (first 6) — exclude deleted and ended-but-unsold defensively
+  const featuredAuctions = allAuctions
+    .filter((a) => {
+      if (a.isDeleted) return false;
+      if (a.overallStatus === "Cancelled") return false;
+      if (a.escrowStatus === "Refunded") return false;
+      const now = Date.now();
+      const ended = a.endTime ? new Date(a.endTime).getTime() < now : false;
+      const sold = ended && !!a.highestBidder;
+      if (ended && !sold) return false;
+      return true;
+    })
+    .slice(0, 6);
 
   // Get latest auctions (sorted by creation date, last 8)
   const latestAuctions = [...allAuctions]
+    .filter((a) => {
+      if (a.isDeleted) return false;
+      if (a.overallStatus === "Cancelled") return false;
+      if (a.escrowStatus === "Refunded") return false;
+      const now = Date.now();
+      const ended = a.endTime ? new Date(a.endTime).getTime() < now : false;
+      const sold = ended && !!a.highestBidder;
+      if (ended && !sold) return false;
+      return true;
+    })
     .sort(
       (a, b) =>
         new Date(b.createdAt || b.startTime) -
-        new Date(a.createdAt || a.startTime)
+        new Date(a.createdAt || a.startTime),
     )
     .slice(0, 8);
 
@@ -117,7 +138,7 @@ const Home = () => {
       .sort(
         (a, b) =>
           new Date(b.createdAt || b.startTime) -
-          new Date(a.createdAt || a.startTime)
+          new Date(a.createdAt || a.startTime),
       );
     for (const auc of auctionsInCategory) {
       const url = auc.images?.[0]?.url || auc.image?.url || null;
@@ -210,25 +231,34 @@ const Home = () => {
 
               <div className="relative">
                 <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-                  {featuredAuctions.map((auction) => (
-                    <div
-                      key={auction._id}
-                      className="flex-shrink-0 w-[300px] snap-start"
-                    >
-                      <Card
-                        title={auction.title}
-                        imgSrc={auction.images?.[0]?.url || auction.image?.url}
-                        startTime={auction.startTime}
-                        endTime={auction.endTime}
-                        startingBid={auction.startingBid}
-                        id={auction._id}
-                        sold={
-                          !!auction.highestBidder &&
-                          new Date(auction.endTime) < Date.now()
-                        }
-                      />
-                    </div>
-                  ))}
+                  {featuredAuctions
+                    .filter((a) => !a.isDeleted)
+                    .map((auction) => (
+                      <div
+                        key={auction._id}
+                        className="flex-shrink-0 w-[300px] snap-start"
+                      >
+                        <Card
+                          title={auction.title}
+                          imgSrc={
+                            auction.images?.[0]?.url || auction.image?.url
+                          }
+                          startTime={auction.startTime}
+                          endTime={auction.endTime}
+                          startingBid={auction.startingBid}
+                          id={auction._id}
+                          sold={
+                            !!auction.highestBidder &&
+                            new Date(auction.endTime) < Date.now()
+                          }
+                          overallStatus={auction.overallStatus}
+                          adminHold={auction.adminHold}
+                          escrowStatus={auction.escrowStatus}
+                          paymentStatus={auction.paymentStatus}
+                          paidAt={auction.paidAt}
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
             </section>
@@ -254,25 +284,34 @@ const Home = () => {
 
               <div className="relative">
                 <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-                  {latestAuctions.map((auction) => (
-                    <div
-                      key={auction._id}
-                      className="flex-shrink-0 w-[300px] snap-start"
-                    >
-                      <Card
-                        title={auction.title}
-                        imgSrc={auction.images?.[0]?.url || auction.image?.url}
-                        startTime={auction.startTime}
-                        endTime={auction.endTime}
-                        startingBid={auction.startingBid}
-                        id={auction._id}
-                        sold={
-                          !!auction.highestBidder &&
-                          new Date(auction.endTime) < Date.now()
-                        }
-                      />
-                    </div>
-                  ))}
+                  {latestAuctions
+                    .filter((a) => !a.isDeleted)
+                    .map((auction) => (
+                      <div
+                        key={auction._id}
+                        className="flex-shrink-0 w-[300px] snap-start"
+                      >
+                        <Card
+                          title={auction.title}
+                          imgSrc={
+                            auction.images?.[0]?.url || auction.image?.url
+                          }
+                          startTime={auction.startTime}
+                          endTime={auction.endTime}
+                          startingBid={auction.startingBid}
+                          id={auction._id}
+                          sold={
+                            !!auction.highestBidder &&
+                            new Date(auction.endTime) < Date.now()
+                          }
+                          overallStatus={auction.overallStatus}
+                          adminHold={auction.adminHold}
+                          escrowStatus={auction.escrowStatus}
+                          paymentStatus={auction.paymentStatus}
+                          paidAt={auction.paidAt}
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
             </section>
@@ -295,7 +334,9 @@ const Home = () => {
                 <button
                   onClick={() =>
                     setCurrentCategoryIndex((prev) =>
-                      prev === 0 ? Math.max(0, categories.length - 6) : prev - 1
+                      prev === 0
+                        ? Math.max(0, categories.length - 6)
+                        : prev - 1,
                     )
                   }
                   className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 lg:hidden"
@@ -313,7 +354,7 @@ const Home = () => {
                         <Link
                           key={index}
                           to={`/auctions?category=${encodeURIComponent(
-                            category.name
+                            category.name,
                           )}`}
                           className="category-card group relative bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border-2 border-white/20 hover:border-white/60 transition-all duration-300 h-48 w-full"
                         >
@@ -370,7 +411,7 @@ const Home = () => {
                         <Link
                           key={index}
                           to={`/auctions?category=${encodeURIComponent(
-                            category.name
+                            category.name,
                           )}`}
                           className="category-card flex-shrink-0 w-[240px] h-48 group relative bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border-2 border-white/20 hover:border-white/60 transition-all duration-300"
                         >
@@ -424,7 +465,7 @@ const Home = () => {
                 <button
                   onClick={() =>
                     setCurrentCategoryIndex((prev) =>
-                      prev >= categories.length - 6 ? 0 : prev + 1
+                      prev >= categories.length - 6 ? 0 : prev + 1,
                     )
                   }
                   className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 lg:hidden"

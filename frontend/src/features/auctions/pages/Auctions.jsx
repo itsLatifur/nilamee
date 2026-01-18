@@ -89,6 +89,18 @@ const Auctions = () => {
     const now = Date.now();
     let list = [...allAuctions];
 
+    // Defensive: remove auctions that ended but were not sold (no highestBidder)
+    // Also remove cancelled auctions and auctions with refunded escrow
+    list = list.filter((auction) => {
+      if (auction.overallStatus === "Cancelled") return false;
+      if (auction.escrowStatus === "Refunded") return false;
+      const ended = auction.endTime
+        ? new Date(auction.endTime).getTime() < now
+        : false;
+      const sold = ended && !!auction.highestBidder;
+      return !(ended && !sold);
+    });
+
     // category filter (multi)
     if (selectedCategories && selectedCategories.length > 0) {
       list = list.filter((a) => selectedCategories.includes(a.category));
@@ -412,6 +424,11 @@ const Auctions = () => {
                     !!element.highestBidder &&
                     new Date(element.endTime) < Date.now()
                   }
+                  overallStatus={element.overallStatus}
+                  adminHold={element.adminHold}
+                  escrowStatus={element.escrowStatus}
+                  paymentStatus={element.paymentStatus}
+                  paidAt={element.paidAt}
                   key={element._id}
                 />
               ))}

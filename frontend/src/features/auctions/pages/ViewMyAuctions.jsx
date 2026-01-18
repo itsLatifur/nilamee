@@ -55,6 +55,13 @@ const ViewMyAuctions = () => {
                         !!element.highestBidder &&
                         new Date(element.endTime) < Date.now()
                       }
+                      overallStatus={element.overallStatus}
+                      adminHold={element.adminHold}
+                      escrowStatus={element.escrowStatus}
+                      paymentStatus={element.paymentStatus}
+                      paidAt={element.paidAt}
+                      highestBidder={element.highestBidder}
+                      showEndedBadge={true}
                     />
                     {element.approvalStatus === "pending" && (
                       <div className="absolute top-2 right-2 bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">

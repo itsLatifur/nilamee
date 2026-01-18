@@ -36,6 +36,13 @@ const ViewMyAuctions = () => {
                     id={element._id}
                     key={element._id}
                     sold={!!element.highestBidder && new Date(element.endTime) < Date.now()}
+                    overallStatus={element.overallStatus}
+                    adminHold={element.adminHold}
+                    escrowStatus={element.escrowStatus}
+                    paymentStatus={element.paymentStatus}
+                    paidAt={element.paidAt}
+                    highestBidder={element.highestBidder}
+                    showEndedBadge={true}
               {myAuctions.length > 0 ? (
               myAuctions.map((element) => {
                 return (
