@@ -183,7 +183,7 @@ const Auctions = () => {
                 <div className="relative">
                   <button
                     onClick={() => setShowFilterPanel((s) => !s)}
-                    className="px-3 py-1 rounded bg-transparent border border-gray-300 text-sm"
+                    className="px-3 py-1 rounded bg-transparent border border-gray-300 text-sm whitestone:!text-blue-600"
                     aria-expanded={showFilterPanel}
                     aria-controls="auctions-filter-panel"
                   >
