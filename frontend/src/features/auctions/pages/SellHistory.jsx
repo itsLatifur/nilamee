@@ -114,7 +114,8 @@ const SellHistory = () => {
           <thead>
             <tr className="text-gray-300">
               <th className="py-2 px-3">Auction</th>
-              <th className="py-2 px-3">Amount</th>
+              <th className="py-2 px-3">Seller Receivable</th>
+              <th className="py-2 px-3">Commission</th>
               <th className="py-2 px-3">Completed At</th>
               <th className="py-2 px-3">Outcome</th>
               <th className="py-2 px-3">Escrow Status</th>
@@ -174,7 +175,14 @@ const SellHistory = () => {
                     </a>
                   </td>
                   <td className="py-3 px-3 text-golden-300">
-                    {formatBDT(esc.totalAmount || esc.sellerAmount || 0)}
+                    {formatBDT(
+                      typeof esc.sellerAmount === "number"
+                        ? esc.sellerAmount
+                        : esc.totalAmount || 0,
+                    )}
+                  </td>
+                  <td className="py-3 px-3 text-golden-300">
+                    {formatBDT(esc.commissionAmount || 0)}
                   </td>
                   <td className="py-3 px-3 text-gray-300">
                     {esc.processedAt

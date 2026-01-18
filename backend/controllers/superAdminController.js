@@ -130,7 +130,8 @@ export const fetchAllUsers = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const monthlyRevenue = catchAsyncErrors(async (req, res, next) => {
-  const payments = await Commission.aggregate([
+  // Try Commission collection first (primary source)
+  let payments = await Commission.aggregate([
     {
       $group: {
         _id: {
@@ -144,6 +145,29 @@ export const monthlyRevenue = catchAsyncErrors(async (req, res, next) => {
       $sort: { "_id.year": 1, "_id.month": 1 },
     },
   ]);
+
+  // Fallback: if Commission collection is empty or amounts are all zero, aggregate from Escrow.commissionAmount (processed escrows)
+  const paymentsSum = (payments || []).reduce((s, p) => s + (p.totalAmount || 0), 0);
+  if (!payments || payments.length === 0 || paymentsSum === 0) {
+    try {
+      const escrowAgg = await Escrow.aggregate([
+        { $match: { processedAt: { $ne: null } } },
+        {
+          $group: {
+            _id: {
+              month: { $month: "$processedAt" },
+              year: { $year: "$processedAt" },
+            },
+            totalAmount: { $sum: "$commissionAmount" },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]);
+      if (escrowAgg && escrowAgg.length > 0) payments = escrowAgg;
+    } catch (err) {
+      console.error("Fallback escrow commission aggregation failed:", err);
+    }
+  }
 
   const tranformDataToMonthlyArray = (payments, totalMonths = 12) => {
     const result = Array(totalMonths).fill(0);
