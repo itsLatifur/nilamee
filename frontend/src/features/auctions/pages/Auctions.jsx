@@ -208,41 +208,38 @@ const Auctions = () => {
                             <p className="text-sm font-semibold mb-2">
                               Categories
                             </p>
-                            <div className="flex flex-wrap gap-2">
-                              {auctionCategories.map((cat) => {
-                                const active =
-                                  tempSelectedCategories.includes(cat);
-                                return (
-                                  <button
+                            <div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto pr-2">
+                                {auctionCategories.map((cat) => (
+                                  <label
                                     key={cat}
-                                    onClick={() => {
-                                      setTempSelectedCategories((prev) =>
-                                        prev.includes(cat)
-                                          ? prev.filter((c) => c !== cat)
-                                          : [...prev, cat],
-                                      );
-                                    }}
-                                    className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition border flex-shrink-0 ${
-                                      active
-                                        ? "bg-golden-400 text-white"
-                                        : "bg-transparent text-warm-white border-white/20"
-                                    }`}
-                                    style={{
-                                      maxWidth: 160,
-                                      height: 28,
-                                      lineHeight: "20px",
-                                    }}
+                                    className="flex items-center gap-2 text-sm overflow-hidden whitespace-nowrap truncate"
                                   >
-                                    {cat}
-                                  </button>
-                                );
-                              })}
-                              <button
-                                onClick={() => setTempSelectedCategories([])}
-                                className="px-2 py-0.5 rounded-full text-[11px] text-gray-500"
-                              >
-                                Clear
-                              </button>
+                                    <input
+                                      type="checkbox"
+                                      checked={tempSelectedCategories.includes(
+                                        cat,
+                                      )}
+                                      onChange={() => {
+                                        setTempSelectedCategories((prev) =>
+                                          prev.includes(cat)
+                                            ? prev.filter((c) => c !== cat)
+                                            : [...prev, cat],
+                                        );
+                                      }}
+                                    />
+                                    <span className="truncate">{cat}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <div className="mt-2">
+                                <button
+                                  onClick={() => setTempSelectedCategories([])}
+                                  className="px-2 py-1 rounded bg-gray-100 text-sm text-gray-700"
+                                >
+                                  Clear
+                                </button>
+                              </div>
                             </div>
                           </div>
 
