@@ -9,7 +9,7 @@ import { fetchUser } from "../../auth/store/userSlice";
 import BadgeDisplay from "../../../shared/components/BadgeDisplay";
 import VerifiedBadge from "../../../shared/components/VerifiedBadge";
 import TrustScoreCard from "../../../shared/components/TrustScoreCard";
-import RankProgressCard from "../../../shared/components/RankProgressCard";
+// Rank progress removed per request
 
 const UserProfile = () => {
   const { user, isAuthenticated, loading, hasCheckedAuth } = useSelector(
@@ -152,87 +152,7 @@ const UserProfile = () => {
                   {/* Premium Badge - 3x size (60px) */}
                   {/* Premium badge hidden */}
                 </div>
-                <div className="flex items-center gap-4">
-                  {/* Rank Badge - 3x size (72px) */}
-                  <div className="inline-flex items-center relative group">
-                    <div className="relative">
-                      <img
-                        src={`/icons/${(
-                          user?.badgeTier || "bronze-i"
-                        ).toLowerCase()}.png`}
-                        alt={user?.badgeTier || "Bronze-I"}
-                        style={{ width: 72, height: 72 }}
-                        className="flex-shrink-0 object-contain cursor-default transition-transform duration-200 hover:scale-110 relative z-10"
-                      />
-                      {/* Circular Shiny Effect */}
-                      <div
-                        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{
-                          background: `radial-gradient(circle, ${
-                            (user?.badgeTier || "bronze-i").startsWith("Bronze")
-                              ? "rgba(217, 119, 6, 0.4)"
-                              : (user?.badgeTier || "bronze-i").startsWith(
-                                  "Silver"
-                                )
-                              ? "rgba(156, 163, 175, 0.4)"
-                              : (user?.badgeTier || "bronze-i").startsWith(
-                                  "Gold"
-                                )
-                              ? "rgba(234, 179, 8, 0.4)"
-                              : (user?.badgeTier || "bronze-i").startsWith(
-                                  "Platinum"
-                                )
-                              ? "rgba(148, 163, 184, 0.4)"
-                              : (user?.badgeTier || "bronze-i").startsWith(
-                                  "Diamond"
-                                )
-                              ? "rgba(34, 211, 238, 0.4)"
-                              : "rgba(168, 85, 247, 0.4)"
-                          } 0%, transparent 70%)`,
-                          filter: "blur(12px)",
-                        }}
-                      />
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
-                        {user?.badgeTier || "Bronze-I"}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                          <div className="border-4 border-transparent border-t-gray-900"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Verified Badge - 3x size (78px) */}
-                  {(user?.isVerifiedSeller || user?.isVerifiedBuyer) && (
-                    <div className="inline-flex items-center relative group">
-                      <div className="relative">
-                        <img
-                          src="/icons/verified.png"
-                          alt="Verified"
-                          style={{ width: 78, height: 78 }}
-                          className="flex-shrink-0 object-contain cursor-default transition-transform duration-200 hover:scale-110 relative z-10"
-                        />
-                        {/* Circular Shiny Effect */}
-                        <div
-                          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style={{
-                            background:
-                              "radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%)",
-                            filter: "blur(12px)",
-                          }}
-                        />
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
-                          {user?.isVerifiedSeller
-                            ? "Verified Seller"
-                            : "Verified Buyer"}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                            <div className="border-4 border-transparent border-t-gray-900"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Rank and verified badges hidden */}
                 {user?.trustScore !== undefined && (
                   <TrustScoreCard
                     trustScore={user.trustScore}
@@ -242,13 +162,7 @@ const UserProfile = () => {
                 )}
               </div>
 
-              {/* Rank Progress Card */}
-              <div className="w-full max-w-2xl mb-6">
-                <RankProgressCard
-                  totalTransactionVolume={user?.totalTransactionVolume || 0}
-                  currentTier={user?.badgeTier || "Bronze-I"}
-                />
-              </div>
+              {/* Rank progress removed */}
 
               <form onSubmit={handleSubmit} className="w-full">
                 <div className="mb-6 w-full">
