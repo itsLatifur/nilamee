@@ -89,7 +89,7 @@ const auctionSchema = new mongoose.Schema({
   // Delivery tracking fields
   deliveryStatus: {
     type: String,
-    enum: ["Not Shipped", "Shipped", "Delivered"],
+    enum: ["Not Shipped", "Shipped", "Delivered", "Received"],
     default: "Not Shipped",
   },
   shippedAt: {

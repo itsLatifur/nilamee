@@ -29,7 +29,7 @@ const Dashboard = () => {
       if (el) {
         setTimeout(
           () => el.scrollIntoView({ behavior: "smooth", block: "start" }),
-          0
+          0,
         );
       }
     }
@@ -93,20 +93,7 @@ const Dashboard = () => {
                   Open Users
                 </Link>
               </div>
-              <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/60 rounded-md border border-golden-400 whitestone:border-gray-300 p-4">
-                <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-1">
-                  Payment Proofs
-                </h3>
-                <p className="text-golden-300 whitestone:text-gray-700 mb-3">
-                  Inspect and verify commission proofs
-                </p>
-                <Link
-                  to="/dashboard/pending-payments"
-                  className="bg-gold-gradient text-white font-semibold py-1 px-3 rounded-md border border-golden-400 whitestone:border-gray-400"
-                >
-                  Open Pending Payments
-                </Link>
-              </div>
+              {/* Payment Proofs card removed from dashboard per request */}
               <div className="bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/60 rounded-md border border-golden-400 whitestone:border-gray-300 p-4">
                 <h3 className="text-warm-white whitestone:text-gray-900 text-xl font-semibold mb-1">
                   Manage Auctions

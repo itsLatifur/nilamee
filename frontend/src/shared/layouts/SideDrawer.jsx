@@ -364,18 +364,7 @@ const SideDrawer = () => {
                       <RiAuctionFill /> Pending Auctions
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      to="/dashboard/pending-payments"
-                      className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
-                        location.pathname === "/dashboard/pending-payments"
-                          ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
-                          : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
-                      }`}
-                    >
-                      <FaFileInvoiceDollar /> Pending Payments
-                    </Link>
-                  </li>
+                  {/* Pending Payments link removed per request */}
                 </>
               )}
           </ul>
@@ -463,56 +452,7 @@ const SideDrawer = () => {
                 )}
               </>
             )}
-            <li>
-              <button
-                onClick={() => setShowThemes(!showThemes)}
-                className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 w-full text-left bg-transparent border-0 outline-none ${
-                  showThemes
-                    ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
-                    : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
-                }`}
-              >
-                <FaPalette /> Theme
-                <span className="ml-auto">
-                  {showThemes ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
-                </span>
-              </button>
-
-              {showThemes && (
-                <div className="mt-1 flex flex-col gap-1 pl-9">
-                  <button
-                    onClick={() => setTheme(THEMES.ROYAL_BURGUNDY)}
-                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                      currentTheme === THEMES.ROYAL_BURGUNDY
-                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                    }`}
-                  >
-                    Royal Burgundy
-                  </button>
-                  <button
-                    onClick={() => setTheme(THEMES.BLACK_GOLD)}
-                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                      currentTheme === THEMES.BLACK_GOLD
-                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                    }`}
-                  >
-                    Black Gold
-                  </button>
-                  <button
-                    onClick={() => setTheme(THEMES.WHITESTONE)}
-                    className={`text-left text-base py-1 rounded hover:transition-all hover:duration-150 bg-transparent border-0 outline-none w-full ${
-                      currentTheme === THEMES.WHITESTONE
-                        ? "text-golden-300 whitestone:text-blue-600 font-semibold"
-                        : "text-warm-white whitestone:text-gray-700 hover:text-golden-300 whitestone:hover:text-gray-800"
-                    }`}
-                  >
-                    Whitestone
-                  </button>
-                </div>
-              )}
-            </li>
+            {/* Theme selector removed per request */}
             {/* Premium link removed */}
             <li>
               <Link

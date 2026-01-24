@@ -96,17 +96,17 @@ const AuctionManagement = () => {
   const getStatusBadgeClass = (label) => {
     switch (label) {
       case "Deleted":
-        return "px-2 py-1 bg-red-500 text-white rounded text-xs";
+        return "px-2 py-1 bg-gray-500 text-white rounded text-xs";
       case "Cancelled":
-        return "px-2 py-1 bg-red-600 text-white rounded text-xs";
+        return "px-2 py-1 bg-red-500 text-white rounded text-xs";
       case "On Hold":
-        return "px-2 py-1 bg-yellow-600 text-white rounded text-xs";
+        return "px-2 py-1 bg-yellow-500 text-white rounded text-xs";
       case "Sold":
         return "px-2 py-1 bg-emerald-600 text-white rounded text-xs";
       case "In Escrow":
         return "px-2 py-1 bg-purple-600 text-white rounded text-xs";
       case "Ended":
-        return "px-2 py-1 bg-gray-600 text-white rounded text-xs";
+        return "px-2 py-1 bg-gray-500 text-white rounded text-xs";
       case "Active":
       default:
         return "px-2 py-1 bg-green-500 text-white rounded text-xs";

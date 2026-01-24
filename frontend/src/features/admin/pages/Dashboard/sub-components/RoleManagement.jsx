@@ -165,7 +165,7 @@ const RoleManagement = () => {
       await axios.put(
         API_ENDPOINTS.ADMIN.UPDATE_USER_ROLE(selectedUser._id),
         { role: selectedUser.role },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast.success("User role updated successfully");
       setShowEditUserModal(false);
@@ -173,7 +173,7 @@ const RoleManagement = () => {
       fetchUsers();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to update user role"
+        error.response?.data?.message || "Failed to update user role",
       );
     } finally {
       setLoading(false);
@@ -183,7 +183,7 @@ const RoleManagement = () => {
   const handleRemoveAdmin = async (adminUser) => {
     if (
       !window.confirm(
-        `Are you sure you want to remove ${adminUser.userName}'s admin role? This will soft-delete their account.`
+        `Are you sure you want to remove ${adminUser.userName}'s admin role? This will soft-delete their account.`,
       )
     ) {
       return;
@@ -198,6 +198,29 @@ const RoleManagement = () => {
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to remove admin");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestoreAdmin = async (adminUser) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to restore ${adminUser.userName}'s account?`,
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.put(API_ENDPOINTS.ADMIN.RESTORE_USER(adminUser._id), null, {
+        withCredentials: true,
+      });
+      toast.success("User restored successfully");
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to restore user");
     } finally {
       setLoading(false);
     }
@@ -226,7 +249,7 @@ const RoleManagement = () => {
   // Get admin roles only (exclude Bidder and Auctioneer)
   // Filter roles based on current user's role
   let adminRoles = roles.filter(
-    (role) => !["Bidder", "Auctioneer"].includes(role.name)
+    (role) => !["Bidder", "Auctioneer"].includes(role.name),
   );
 
   // If user is Admin (not Super Admin), exclude Super Admin from available roles
@@ -296,8 +319,8 @@ const RoleManagement = () => {
                           currentUser.role === "Super Admin"
                             ? "bg-purple-600"
                             : currentUser.role === "Admin"
-                            ? "bg-blue-600"
-                            : "bg-indigo-600"
+                              ? "bg-blue-600"
+                              : "bg-indigo-600"
                         }`}
                         style={{ color: "#ffffff" }}
                       >
@@ -310,10 +333,10 @@ const RoleManagement = () => {
                           currentUser.status === "active"
                             ? "bg-green-500"
                             : currentUser.status === "banned"
-                            ? "bg-red-500"
-                            : currentUser.status === "suspended"
-                            ? "bg-yellow-500"
-                            : "bg-gray-500"
+                              ? "bg-red-500"
+                              : currentUser.status === "suspended"
+                                ? "bg-yellow-500"
+                                : "bg-gray-500"
                         }`}
                         style={{ color: "#ffffff" }}
                       >
@@ -335,16 +358,27 @@ const RoleManagement = () => {
                         >
                           Edit Role
                         </button>
-                        {user && user.role === "Super Admin" && (
-                          <button
-                            onClick={() => handleRemoveAdmin(currentUser)}
-                            className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs transition-all"
-                            style={{ color: "#ffffff" }}
-                            disabled={loading}
-                          >
-                            Remove
-                          </button>
-                        )}
+                        {user &&
+                          user.role === "Super Admin" &&
+                          (currentUser.status === "deleted" ? (
+                            <button
+                              onClick={() => handleRestoreAdmin(currentUser)}
+                              className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-xs transition-all"
+                              style={{ color: "#ffffff" }}
+                              disabled={loading}
+                            >
+                              Restore
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleRemoveAdmin(currentUser)}
+                              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs transition-all"
+                              style={{ color: "#ffffff" }}
+                              disabled={loading}
+                            >
+                              Remove
+                            </button>
+                          ))}
                       </div>
                     </td>
                   </tr>

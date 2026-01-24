@@ -95,7 +95,7 @@ const UserManagement = () => {
           break;
         case "permanentDelete":
           endpoint = API_ENDPOINTS.ADMIN.PERMANENT_DELETE_USER(
-            selectedUser._id
+            selectedUser._id,
           );
           method = "delete";
           body = {};
@@ -116,7 +116,7 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || `Failed to ${actionType} user`
+        error.response?.data?.message || `Failed to ${actionType} user`,
       );
     } finally {
       setLoading(false);
@@ -142,11 +142,11 @@ const UserManagement = () => {
 
   const getRoleBadge = (role) => {
     const badges = {
-      "Super Admin": "bg-purple-600",
-      Admin: "bg-blue-600",
       Auctioneer: "bg-indigo-600",
       Bidder: "bg-teal-600",
     };
+    // Hide Admin and Super Admin roles from display while keeping role data intact
+    if (!badges[role]) return null;
     return (
       <span
         className={`px-2 py-1 rounded text-xs text-white ${badges[role]}`}
@@ -156,6 +156,11 @@ const UserManagement = () => {
       </span>
     );
   };
+
+  // Hide Admin and Super Admin from the displayed rows
+  const visibleUsers = (users || []).filter(
+    (u) => u.role !== "Admin" && u.role !== "Super Admin",
+  );
 
   return (
     <div className="w-full">
@@ -176,8 +181,6 @@ const UserManagement = () => {
           className="px-4 py-2 border rounded-lg bg-white whitestone:bg-white whitestone:text-gray-900 whitestone:border-gray-400"
         >
           <option value="all">All Roles</option>
-          <option value="Super Admin">Super Admin</option>
-          <option value="Admin">Admin</option>
           <option value="Auctioneer">Auctioneer</option>
           <option value="Bidder">Bidder</option>
         </select>
@@ -226,7 +229,7 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {visibleUsers.map((user) => (
                   <tr
                     key={user._id}
                     className="hover:bg-gray-50 whitestone:bg-white whitestone:hover:bg-gray-100"

@@ -181,6 +181,25 @@ export const deleteAuctionItem = catchAsyncErrors(async (req, res, next) => {
   auctionItem.deletionReason = reason || "Deleted by admin";
   await auctionItem.save();
 
+  // Log activity for auction soft-delete
+  try {
+    await logActivity({
+      action: "DELETE_AUCTION",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "Auction",
+        resourceId: auctionItem._id,
+        resourceName: auctionItem.title,
+      },
+      reason: reason || null,
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for auction delete:", err);
+  }
+
   res.status(200).json({
     success: true,
     message: "Auction item soft-deleted successfully.",
@@ -216,6 +235,7 @@ export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
   if (!proof) {
     return next(new ErrorHandler("Payment proof not found.", 404));
   }
+  const previous = { status: proof.status, amount: proof.amount };
   proof = await PaymentProof.findByIdAndUpdate(
     id,
     { status, amount },
@@ -225,6 +245,30 @@ export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
       useFindAndModify: false,
     },
   );
+
+  // Log activity for payment proof update
+  try {
+    await logActivity({
+      action: "UPDATE_PAYMENT_PROOF",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "PaymentProof",
+        resourceId: proof._id,
+        resourceName: proof._id.toString(),
+      },
+      changes: {
+        previousStatus: previous.status,
+        newStatus: status,
+        previousAmount: previous.amount,
+        newAmount: amount,
+      },
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for payment proof update:", err);
+  }
   res.status(200).json({
     success: true,
     message: "Payment proof amount and status updated.",
@@ -249,6 +293,25 @@ export const deletePaymentProof = catchAsyncErrors(async (req, res, next) => {
   proof.deletedBy = req.user._id;
   proof.deletionReason = reason || "Deleted by admin";
   await proof.save();
+
+  // Log activity for payment proof soft-delete
+  try {
+    await logActivity({
+      action: "DELETE_PAYMENT_PROOF",
+      performedBy: req.user._id,
+      performedByName: req.user.userName,
+      performedByRole: req.user.role,
+      targetResource: {
+        resourceType: "PaymentProof",
+        resourceId: proof._id,
+        resourceName: proof._id.toString(),
+      },
+      reason: proof.deletionReason || null,
+      ipAddress: req.ip,
+    });
+  } catch (err) {
+    console.error("Failed to log activity for payment proof delete:", err);
+  }
 
   res.status(200).json({
     success: true,
@@ -1372,6 +1435,19 @@ export const restoreUser = catchAsyncErrors(async (req, res, next) => {
     type: "success",
   });
 
+  // Log activity for restore
+  await logActivity({
+    action: "RESTORE_USER",
+    performedBy: req.user?._id || null,
+    performedByName: req.user?.userName || "System",
+    performedByRole: req.user?.role || "System",
+    targetUser: user._id,
+    targetUserName: user.userName,
+    changes: { previousStatus: "deleted", newStatus: "active" },
+    reason: "Account restored by admin",
+    ipAddress: req.ip,
+  });
+
   res.status(200).json({
     success: true,
     message: "User restored successfully.",
@@ -1505,6 +1581,27 @@ export const permanentDeleteAuction = catchAsyncErrors(
 
     await auction.deleteOne();
 
+    // Log permanent delete for auction
+    try {
+      await logActivity({
+        action: "PERMANENT_DELETE_AUCTION",
+        performedBy: req.user._id,
+        performedByName: req.user.userName,
+        performedByRole: req.user.role,
+        targetResource: {
+          resourceType: "Auction",
+          resourceId: auction._id,
+          resourceName: auction.title,
+        },
+        ipAddress: req.ip,
+      });
+    } catch (err) {
+      console.error(
+        "Failed to log activity for permanent auction delete:",
+        err,
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: "Auction permanently deleted from database.",
@@ -1535,6 +1632,27 @@ export const permanentDeletePaymentProof = catchAsyncErrors(
     }
 
     await proof.deleteOne();
+
+    // Log permanent delete for payment proof
+    try {
+      await logActivity({
+        action: "PERMANENT_DELETE_PAYMENT_PROOF",
+        performedBy: req.user._id,
+        performedByName: req.user.userName,
+        performedByRole: req.user.role,
+        targetResource: {
+          resourceType: "PaymentProof",
+          resourceId: proof._id,
+          resourceName: proof._id.toString(),
+        },
+        ipAddress: req.ip,
+      });
+    } catch (err) {
+      console.error(
+        "Failed to log activity for permanent payment proof delete:",
+        err,
+      );
+    }
 
     res.status(200).json({
       success: true,

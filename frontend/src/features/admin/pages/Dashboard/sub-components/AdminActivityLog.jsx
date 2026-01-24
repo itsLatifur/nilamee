@@ -39,7 +39,7 @@ const AdminActivityLog = () => {
       setPagination(data.pagination);
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to fetch activity logs"
+        error.response?.data?.message || "Failed to fetch activity logs",
       );
     } finally {
       setLoading(false);
@@ -193,7 +193,7 @@ const AdminActivityLog = () => {
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 backdrop-blur-sm border-2 border-golden-400 whitestone:border-white/30 rounded-lg">
+            <table className="min-w-[900px] w-full bg-gradient-to-br from-burgundy-950/20 to-golden-950/10 dark:from-black/20 dark:to-gray-950/10 whitestone:bg-white/30 backdrop-blur-sm border-2 border-golden-400 whitestone:border-white/30 rounded-lg">
               <thead className="whitestone:bg-gray-200 text-white whitestone:text-black">
                 <tr>
                   <th className="py-2 px-4 text-left">Date & Time</th>
@@ -215,8 +215,8 @@ const AdminActivityLog = () => {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2 py-1 rounded text-xs ${getActionBadgeColor(
-                            log.action
+                          className={`px-2 py-1 rounded text-xs inline-block whitespace-nowrap ${getActionBadgeColor(
+                            log.action,
                           )}`}
                           style={{ color: "#ffffff" }}
                         >
