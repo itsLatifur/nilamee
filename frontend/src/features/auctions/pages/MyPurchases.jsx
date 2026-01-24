@@ -499,7 +499,7 @@ const MyPurchases = () => {
                         auction.overallStatus !== "Completed" && (
                           <button
                             onClick={() => setRaisingDispute(auction._id)}
-                            className="px-6 py-2 rounded-lg bg-orange-600 text-white font-semibold hover:bg-orange-700 transition"
+                            className="px-6 py-2 rounded-lg bg-orange-600 text-white font-semibold hover:bg-orange-700 transition whitestone:bg-white whitestone:text-gray-900 whitestone:hover:bg-gray-100"
                           >
                             Report Issue
                           </button>
