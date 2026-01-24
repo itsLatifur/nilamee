@@ -213,48 +213,48 @@ const MyPurchases = () => {
   const getStatusBadge = (auction) => {
     if (auction.overallStatus === "Completed") {
       return (
-        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold dark:bg-green-600 dark:text-white whitestone:bg-green-600 whitestone:text-white">
           Completed
         </span>
       );
     }
     if (auction.overallStatus === "Cancelled") {
       return (
-        <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold dark:bg-red-600 dark:text-white whitestone:bg-red-600 whitestone:text-white">
           Cancelled
         </span>
       );
     }
     if (auction.overallStatus === "Disputed") {
       return (
-        <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold dark:bg-orange-600 dark:text-white whitestone:bg-orange-600 whitestone:text-white">
           Disputed
         </span>
       );
     }
     if (auction.paymentStatus === "Unpaid") {
       return (
-        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold dark:bg-yellow-600 dark:text-gray-900 whitestone:bg-yellow-600 whitestone:text-gray-900">
           Payment Pending
         </span>
       );
     }
     if (auction.deliveryStatus === "Shipped") {
       return (
-        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold dark:bg-blue-600 dark:text-white whitestone:bg-blue-600 whitestone:text-white">
           In Transit
         </span>
       );
     }
     if (auction.paymentStatus === "Paid") {
       return (
-        <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold dark:bg-purple-600 dark:text-white whitestone:bg-purple-600 whitestone:text-white">
           Awaiting Shipment
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-semibold">
+      <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-semibold dark:bg-gray-700 dark:text-white whitestone:bg-gray-700 whitestone:text-white">
         {auction.overallStatus}
       </span>
     );
