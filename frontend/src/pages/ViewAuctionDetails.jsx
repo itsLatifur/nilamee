@@ -9,7 +9,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import BadgeDisplay from "@/shared/components/BadgeDisplay";
 import TrustScoreCard from "@/shared/components/TrustScoreCard";
-import PremiumBadge from "@/shared/components/PremiumBadge";
 import VerifiedBadge from "@/shared/components/VerifiedBadge";
 
 const ViewAuctionDetails = () => {
@@ -149,10 +148,7 @@ const ViewAuctionDetails = () => {
                         <span className="text-lg font-semibold text-warm-white whitestone:text-gray-900">
                           {auctionDetail.createdBy.userName}
                         </span>
-                        <PremiumBadge
-                          isPremium={auctionDetail.createdBy.isPremium}
-                          size="sm"
-                        />
+                        {/* Premium badge removed */}
                       </div>
 
                       <div className="flex items-center gap-3 flex-wrap">
