@@ -411,7 +411,10 @@ const Auctions = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-6">
+            <div
+              className="grid gap-6"
+              style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", alignItems: "start" }}
+            >
               {filtered.map((element) => (
                 <Card
                   title={element.title}
