@@ -27,7 +27,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
       const { data } = await axios.post(
         "http://localhost:5000/api/v1/payment/premium/init",
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (data.success && data.gatewayUrl) {
@@ -36,7 +36,7 @@ const PremiumModal = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("Premium purchase error:", error);
       toast.error(
-        error.response?.data?.message || "Failed to initiate payment"
+        error.response?.data?.message || "Failed to initiate payment",
       );
       setLoading(false);
     }
@@ -113,8 +113,8 @@ const PremiumModal = ({ isOpen, onClose }) => {
               {loading
                 ? "Processing..."
                 : user?.isPremium
-                ? "Already Premium"
-                : "Get Premium Now"}
+                  ? "Already Premium"
+                  : "Get Premium Now"}
             </button>
             <button
               onClick={onClose}

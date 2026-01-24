@@ -30,7 +30,7 @@ const Premium = () => {
       const { data } = await axios.post(
         "http://localhost:5000/api/v1/payment/premium/init",
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       console.log("Payment response:", data);
@@ -49,7 +49,7 @@ const Premium = () => {
       console.error("Error message:", error.response?.data?.message);
       console.error("Full error data:", error.response?.data);
       toast.error(
-        error.response?.data?.message || "Failed to initiate payment"
+        error.response?.data?.message || "Failed to initiate payment",
       );
       setLoading(false);
     }
@@ -68,7 +68,7 @@ const Premium = () => {
       const { data } = await axios.post(
         "http://localhost:5000/api/v1/payment/premium/cancel",
         { password: cancelPassword },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (data.success) {
@@ -80,7 +80,7 @@ const Premium = () => {
     } catch (error) {
       console.error("Cancel subscription error:", error);
       toast.error(
-        error.response?.data?.message || "Failed to cancel subscription"
+        error.response?.data?.message || "Failed to cancel subscription",
       );
       setCancelling(false);
     }

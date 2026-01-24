@@ -35,8 +35,8 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
     return next(
       new ErrorHandler(
         `Bid must be greater than current highest bid of ${minimumBid} BDT.`,
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -47,7 +47,7 @@ export const placeBid = catchAsyncErrors(async (req, res, next) => {
       auctionItem: auctionItem._id,
     });
     const existingBidInAuction = auctionItem.bids.find(
-      (bid) => bid.userId.toString() == req.user._id.toString()
+      (bid) => bid.userId.toString() == req.user._id.toString(),
     );
     if (existingBid && existingBidInAuction) {
       existingBidInAuction.amount = numericAmount;
