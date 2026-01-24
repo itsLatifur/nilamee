@@ -165,7 +165,10 @@ export const getAuctionDetails = catchAsyncErrors(async (req, res, next) => {
 
 export const getMyAuctionItems = catchAsyncErrors(async (req, res, next) => {
   // Show user's auctions excluding soft-deleted ones
-  const items = await Auction.find({ createdBy: req.user._id, isDeleted: false });
+  const items = await Auction.find({
+    createdBy: req.user._id,
+    isDeleted: false,
+  });
   res.status(200).json({
     success: true,
     items,
