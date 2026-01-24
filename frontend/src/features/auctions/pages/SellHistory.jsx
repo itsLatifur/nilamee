@@ -73,7 +73,6 @@ const SellHistory = () => {
       <h1 className="text-golden-500 whitestone:text-gray-900 text-3xl font-bold mb-4">
         Sell History
       </h1>
-      
 
       <div className="overflow-x-auto bg-white/5 rounded-md p-4">
         <table className="min-w-full text-left">
