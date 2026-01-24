@@ -73,41 +73,7 @@ const SellHistory = () => {
       <h1 className="text-golden-500 whitestone:text-gray-900 text-3xl font-bold mb-4">
         Sell History
       </h1>
-      <div className="mb-6 flex items-center gap-6">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-700 p-5 rounded-md">
-          <p className="text-sm text-white" style={{ color: "#FFFFFF" }}>
-            Total Earned
-          </p>
-          <p
-            className="text-2xl text-white font-bold"
-            style={{ color: "#FFFFFF" }}
-          >
-            {formatBDT(totalEarned)}
-          </p>
-        </div>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-700 p-5 rounded-md">
-          <p className="text-sm text-white" style={{ color: "#FFFFFF" }}>
-            Completed Auctions
-          </p>
-          <p
-            className="text-2xl text-white font-bold"
-            style={{ color: "#FFFFFF" }}
-          >
-            {completedCount}
-          </p>
-        </div>
-        <div className="bg-gradient-to-br from-gray-800 to-gray-700 p-5 rounded-md">
-          <p className="text-sm text-white" style={{ color: "#FFFFFF" }}>
-            Receivable{receivable > 0 ? " (On hold)" : ""}
-          </p>
-          <p
-            className="text-2xl text-white font-bold"
-            style={{ color: "#FFFFFF" }}
-          >
-            {formatBDT(receivable || 0)}
-          </p>
-        </div>
-      </div>
+      
 
       <div className="overflow-x-auto bg-white/5 rounded-md p-4">
         <table className="min-w-full text-left">
