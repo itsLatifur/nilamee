@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { formatBDT } from "@/shared/utils/currency";
-import FeedbackForm from "@/shared/components/FeedbackForm";
 
 const MyPurchases = () => {
   const { isAuthenticated, user, hasCheckedAuth } = useSelector(
@@ -18,7 +17,6 @@ const MyPurchases = () => {
   const [confirmingReceiveEscrow, setConfirmingReceiveEscrow] = useState(null);
   const [paymentProcessing, setPaymentProcessing] = useState(null);
   const [raisingDispute, setRaisingDispute] = useState(null);
-  const [leavingFeedback, setLeavingFeedback] = useState(null);
   const [disputeForm, setDisputeForm] = useState({
     type: "Not Received",
     description: "",
@@ -515,42 +513,12 @@ const MyPurchases = () => {
                         View Details
                       </button>
 
-                      {/* Leave Feedback Button (for completed auctions only) */}
-                      {auction.overallStatus === "Completed" && (
-                        <button
-                          onClick={() => setLeavingFeedback(auction._id)}
-                          className="px-6 py-2 rounded-lg bg-golden-600 text-white font-semibold hover:bg-golden-700 transition"
-                        >
-                          Leave Feedback
-                        </button>
-                      )}
+                      {/* Leave Feedback button removed per request */}
                     </div>
                   </div>
                 </div>
 
-                {/* Feedback Form */}
-                {leavingFeedback === auction._id && (
-                  <div className="mt-6 p-4 bg-golden-50 rounded-lg border-2 border-golden-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-gray-900">
-                        Leave Feedback for Seller
-                      </h4>
-                      <button
-                        onClick={() => setLeavingFeedback(null)}
-                        className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <FeedbackForm
-                      auctionId={auction._id}
-                      onSuccess={() => {
-                        setLeavingFeedback(null);
-                        toast.success("Thank you for your feedback!");
-                      }}
-                    />
-                  </div>
-                )}
+                {/* Feedback section removed */}
 
                 {/* Dispute Form Modal */}
                 {raisingDispute === auction._id && (
