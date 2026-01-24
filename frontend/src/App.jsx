@@ -6,7 +6,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SignUp from "./features/auth/pages/SignUp";
 import Login from "./features/auth/pages/Login";
-import SubmitCommission from "./features/commissions/pages/SubmitCommission";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLeaderboard, fetchUser } from "./features/auth/store/userSlice";
 import HowItWorks from "./shared/components/HowItWorks";
@@ -74,7 +73,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/submit-commission" element={<SubmitCommission />} />
+        {/* Submit Commission route removed */}
         <Route path="/how-it-works-info" element={<HowItWorks />} />
         <Route path="/about" element={<About />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
