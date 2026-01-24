@@ -223,18 +223,7 @@ const SideDrawer = () => {
             )}
             {isAuthenticated && user && user.role === "Auctioneer" && (
               <>
-                <li>
-                  <Link
-                    to="/submit-commission"
-                    className={`flex text-xl font-semibold gap-2 items-center hover:transition-all hover:duration-150 ${
-                      location.pathname === "/submit-commission"
-                        ? "text-white bg-burgundy-600 dark:bg-gray-800 whitestone:bg-blue-600 py-2 px-3 rounded"
-                        : "text-warm-white whitestone:text-gray-900 hover:text-golden-300 whitestone:hover:text-gray-800"
-                    }`}
-                  >
-                    <FaFileInvoiceDollar /> Submit Commission
-                  </Link>
-                </li>
+                {/* Submit Commission link hidden per request */}
                 <li>
                   <Link
                     to="/create-auction"
