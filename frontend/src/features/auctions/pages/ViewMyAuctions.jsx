@@ -36,9 +36,8 @@ const ViewMyAuctions = () => {
           <Spinner />
         ) : (
           <div
-            className={`${
-              myAuctions.length > 2 && "flex-grow"
-            } flex flex-wrap gap-6`}
+            className="grid gap-6"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", alignItems: "start" }}
           >
             {myAuctions.length > 0 ? (
               myAuctions.map((element) => {
