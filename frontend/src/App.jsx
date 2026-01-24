@@ -44,15 +44,14 @@ import EscrowDetail from "./features/auctions/pages/EscrowDetail";
 import ManageDisputes from "./features/admin/pages/ManageDisputes";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
-import Premium from "./pages/Premium";
-import PremiumModal from "./shared/components/PremiumModal";
+// Premium page and modal removed per request
 import { useTheme, THEMES } from "./contexts/ThemeContext";
 
 const App = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { currentTheme } = useTheme();
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  // premium modal disabled
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -60,28 +59,7 @@ const App = () => {
     dispatch(fetchLeaderboard());
   }, []);
 
-  // Show premium modal for non-premium users periodically
-  useEffect(() => {
-    if (
-      isAuthenticated &&
-      user &&
-      !user.isPremium &&
-      !(user.role === "Super Admin" || user.role === "Admin")
-    ) {
-      // Show modal after 2 minutes, then every 10 minutes
-      const initialTimer = setTimeout(() => {
-        setShowPremiumModal(true);
-
-        const intervalTimer = setInterval(() => {
-          setShowPremiumModal(true);
-        }, 600000); // 10 minutes
-
-        return () => clearInterval(intervalTimer);
-      }, 120000); // 2 minutes
-
-      return () => clearTimeout(initialTimer);
-    }
-  }, [isAuthenticated, user]);
+  // premium modal suppressed
 
   // Custom toast styles based on theme
   const toastClassName =
@@ -149,17 +127,14 @@ const App = () => {
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/premium" element={<Premium />} />
+        {/* Premium page removed */}
       </Routes>
       <ToastContainer
         position="top-right"
         toastClassName={toastClassName}
         bodyClassName="!text-gray-900"
       />
-      <PremiumModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-      />
+      {/* Premium modal disabled */}
     </Router>
   );
 };
