@@ -13,7 +13,7 @@ import TrustScoreCard from "../../../shared/components/TrustScoreCard";
 
 const UserProfile = () => {
   const { user, isAuthenticated, loading, hasCheckedAuth } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
@@ -87,7 +87,7 @@ const UserProfile = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       toast.success(response.data.message);
       dispatch(fetchUser());
@@ -131,14 +131,14 @@ const UserProfile = () => {
                   className="w-36 h-36 rounded-full object-cover border-4 border-golden-400 whitestone:border-white/50"
                 />
                 {isEditing && (
-                  <label className="absolute bottom-0 right-0 bg-golden-500 whitestone:bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-golden-600 whitestone:hover:bg-blue-700 transition text-sm font-bold">
+                  <label className="absolute bottom-0 right-0 bg-white text-blue-600 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-100 transition text-2xl font-bold border border-gray-200">
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
                       className="hidden"
                     />
-                    Upload
+                    +
                   </label>
                 )}
               </div>
